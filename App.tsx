@@ -25,7 +25,9 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
-import { Navigator } from './Navigator';
+import { Navigator } from './components/Navigator';
+
+import "./global.css"
 
 type SectionProps = PropsWithChildren<{
   title: string;

@@ -1,13 +1,13 @@
 import { ScrollView, Text } from 'react-native';
 
-const SearchScreen = () => {
+const CalendarScreen = () => {
   return (
     <ScrollView
 			// contentInsetAdjustmentBehavior="automatic"
 		>
-      <Text>Search Screen</Text>
+      <Text>Calendar Screen</Text>
     </ScrollView>
   );
 };
 
-export default SearchScreen;
+export default CalendarScreen;

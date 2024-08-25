@@ -5,7 +5,7 @@ const HomeScreen = () => {
     <ScrollView
 			// contentInsetAdjustmentBehavior="automatic"
 		>
-      <Text>Home Screen</Text>
+      <Text>Inicio</Text>
     </ScrollView>
   );
 };
