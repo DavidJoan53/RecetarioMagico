@@ -33,7 +33,8 @@ module.exports = {
 				},
 				light: '#E5E5E5',
 				background: {
-					DEFAULT: '#F1F1F1'
+					DEFAULT: '#F1F1F1',
+					foreground: '#D9D9D9'
 				}
 			}
 		},

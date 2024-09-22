@@ -6,20 +6,21 @@ import CalendarScreen from '@/screens/Calendar'
 import CreateScreen from '@/screens/Create'
 import SettingsScreen from '@/screens/Settings'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
-import { faHome, faCalendarDay, faCirclePlus, faMagnifyingGlass, faCogs } from '@fortawesome/free-solid-svg-icons'
+import { faHome, faCalendarDay, faCirclePlus, faCogs } from '@fortawesome/free-solid-svg-icons'
+import { tailwindColors } from '@/utils/colors'
+
 
 const Tab = createBottomTabNavigator();
-
-const TabScreenOptions = {
-	headerShown: false
-}
 
 export const Navigator = () => {
   return (
     <Tab.Navigator
 			initialRouteName="Home"
 			screenOptions={{
-				header: () => <SearchBar/>,
+				headerStyle: {
+          backgroundColor: tailwindColors.primary,
+        },
+				headerTitle: (props) => <SearchBar/>,
 			}}
 		>
       <Tab.Screen

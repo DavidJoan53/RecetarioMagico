@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
 const SearchBar = () => {
   return (
     <View
-			className='max-h-16 h-full px-4 bg-primary flex flex-row items-center'
+			className='max-h-16 h-full bg-primary flex flex-row items-center'
 		>
 			<View className="h-12 w-full my-auto px-3 bg-background flex flex-row items-center justify-between rounded-2xl">
 				<FontAwesomeIcon
