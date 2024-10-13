@@ -1,14 +1,15 @@
-import { useState } from 'react';
-
-import { FlatList, ScrollView, Text, View } from 'react-native';
+import { FlatList, View } from 'react-native';
+// @Components
 import { faBowlRice, faCirclePlus, faCookieBite, faDrumstickBite, faEgg, faStar } from '@fortawesome/free-solid-svg-icons';
 import GroupCard from '@/components/Groups/GroupCard';
 import NewGroupModal from '@/components/Groups/NewGroupModal';
+// @Redux
+import { useDispatch } from 'react-redux';
+import { setIsNewGroupOpen } from '@/redux/slices/navigation';
 // import FoodCardsCarrousel from '@/components/FoodCardsCarrousel/FoodCardsCarrousel';
 
-const HomeScreen = () => {
-	const [isOpen, setIsOpen] = useState(false)
-
+const HomeScreen = ({ navigation }) => {
+	const dispatch = useDispatch()
 	// const desayunoPlaceholder = [
 	// 	{
 	// 		id: 1,
@@ -41,12 +42,12 @@ const HomeScreen = () => {
 	// ]
 
 	const defaultGroups = [
-		{ name: 'Favoritos', icon: faStar },
-		{ name: 'Desayuno', icon: faEgg },
-		{ name: 'Almuerzo', icon: faBowlRice },
-		{ name: 'Cena', icon: faDrumstickBite },
-		{ name: 'Refrigerio', icon: faCookieBite },
-		{ name: 'Nuevo grupo', icon: faCirclePlus },
+		{ id: 'favorites', name: 'Favoritos', icon: faStar },
+		{ id: 'breakfast', name: 'Desayuno', icon: faEgg },
+		{ id: 'lunch', name: 'Almuerzo', icon: faBowlRice },
+		{ id: 'dinner', name: 'Cena', icon: faDrumstickBite },
+		{ id: 'snacks', name: 'Refrigerio', icon: faCookieBite },
+		{ id: 'newGroup', name: 'Nuevo grupo', icon: faCirclePlus },
 	]
 
   return (
@@ -73,12 +74,15 @@ const HomeScreen = () => {
 				data={defaultGroups}
 				columnWrapperStyle={{ gap: 10 }}
 				keyExtractor={item => item.name}
-				renderItem={({item}) => (
-					<GroupCard {...item} />
-				)}
+				renderItem={({item}) => {
+					const handleTouch = item.id === 'newGroup' ? () => dispatch(setIsNewGroupOpen(true)) : () => navigation.navigate(`/groups/${item.id}`)
+					return (
+						<GroupCard {...item} handleTouch={handleTouch} />
+					)
+				}}
 			/>
 
-			<NewGroupModal open={isOpen} setIsOpen={setIsOpen} />
+			<NewGroupModal />
 
 			{/* {defaultGroups.map(group =>
 				<GroupCard {...group} style={{ flex: 1 }} />

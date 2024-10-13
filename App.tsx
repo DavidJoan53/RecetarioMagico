@@ -7,27 +7,20 @@
 
 import React from 'react';
 import type {PropsWithChildren} from 'react';
-import {NavigationContainer} from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
+import "./global.css"
+// @Redux
+import { Provider } from "react-redux"
+import store from "@/redux/store"
+// @Components
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   useColorScheme,
   View,
 } from 'react-native';
-
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 import { Navigator } from './components/Navigator';
-
-import "./global.css"
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -67,40 +60,11 @@ function App(): React.JSX.Element {
   };
 
   return (
-    <NavigationContainer>
-			<Navigator/>
-      {/* <SafeAreaView style={backgroundStyle}>
-        <StatusBar
-          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-          backgroundColor={backgroundStyle.backgroundColor}
-        />
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={backgroundStyle}>
-          <Text>Mondongo</Text>
-          <Header />
-          <View
-            style={{
-              backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            }}>
-            <Section title="Step One">
-              Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-              screen and then come back to see your edits.
-            </Section>
-            <Section title="See Your Changes">
-              <ReloadInstructions />
-            </Section>
-            <Section title="Debug">
-              <DebugInstructions />
-            </Section>
-            <Section title="Learn More">
-              Read the docs to discover what to do next:
-            </Section>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView> */}
-    </NavigationContainer>
+		<Provider store={store}>
+			<NavigationContainer>
+				<Navigator/>
+			</NavigationContainer>
+		</Provider>
   );
 }
 

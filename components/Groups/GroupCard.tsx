@@ -5,15 +5,18 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome"
 interface GroupCardInterface {
 	name: string,
 	icon: any,
+	handleTouch: () => void
 }
 
 const GroupCard = ({
 	name,
 	icon = faCirclePlus,
+	handleTouch = () => {},
 }: GroupCardInterface) => {
+
 	return (
 		<TouchableOpacity
-			onPress={() => console.log('Group:', name)}
+			onPress={handleTouch}
 			style={styles.container}
 		>
 				<FontAwesomeIcon

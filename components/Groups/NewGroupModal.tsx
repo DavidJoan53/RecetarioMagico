@@ -1,16 +1,20 @@
 import { useState } from "react"
-
 import { Text, TextInput, View, StyleSheet, Pressable } from "react-native"
+// @Componets
 import Modal from "@/components/Shared/Modal"
-
+// @Redux
+import { useDispatch, useSelector } from "react-redux"
+import { selectIsNewGroupOpen, setIsNewGroupOpen } from "@/redux/slices/navigation"
+// @Utils
 import { tailwindColors } from '@/utils/colors'
 
-interface NewGroupModalInterface {
-	isOpen: boolean,
-	setIsOpen: (open: boolean) => void
-}
+interface NewGroupModalInterface {}
 
-const NewGroupModal = ({ isOpen, setIsOpen }: NewGroupModalInterface) => {
+const NewGroupModal = ({}: NewGroupModalInterface) => {
+	const dispatch = useDispatch()
+
+	const isOpen = useSelector(selectIsNewGroupOpen)
+
 	const [newGroup, setNewGroup] = useState('')
 
 	return (
@@ -32,7 +36,7 @@ const NewGroupModal = ({ isOpen, setIsOpen }: NewGroupModalInterface) => {
 				/>
 				<View className="flex flex-row gap-4">
 	 				<Pressable
-						onPress={() => setIsOpen(false)}
+						onPress={() => dispatch(setIsNewGroupOpen(false))}
 						style={styles.button}
 						className="w-full mt-4 p-1.5 rounded-lg"
 					>
