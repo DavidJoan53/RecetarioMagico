@@ -1,0 +1,34 @@
+{
+  "search": {
+    "placeholder": "Search..."
+  },
+  "tabs": {
+    "home": "Home",
+    "calendar": "Calendar",
+    "create": "Create",
+    "settings": "Settings"
+  },
+  "groups": {
+    "favorites": "Favorites",
+    "breakfast": "Breakfast",
+    "lunch": "Lunch",
+    "dinner": "Dinner",
+    "snacks": "Snacks",
+    "newGroup": "New group"
+  },
+  "sections": {
+    "breakfast": "Breakfast",
+    "lunch": "Lunch",
+    "dinner": "Dinner"
+  },
+  "newGroupModal": {
+    "title": "Create new group",
+    "namePlaceholder": "New group name",
+    "confirm": "Accept"
+  },
+  "screens": {
+    "calendar": "Calendar screen",
+    "create": "Create screen",
+    "settings": "Settings screen"
+  }
+}

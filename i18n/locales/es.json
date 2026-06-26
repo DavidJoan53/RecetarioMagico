@@ -1,0 +1,34 @@
+{
+  "search": {
+    "placeholder": "Buscar..."
+  },
+  "tabs": {
+    "home": "Inicio",
+    "calendar": "Calendario",
+    "create": "Crear",
+    "settings": "Ajustes"
+  },
+  "groups": {
+    "favorites": "Favoritos",
+    "breakfast": "Desayuno",
+    "lunch": "Almuerzo",
+    "dinner": "Cena",
+    "snacks": "Refrigerio",
+    "newGroup": "Nuevo grupo"
+  },
+  "sections": {
+    "breakfast": "Desayuno",
+    "lunch": "Almuerzo",
+    "dinner": "Cena"
+  },
+  "newGroupModal": {
+    "title": "Crear nuevo grupo",
+    "namePlaceholder": "Nombre del nuevo grupo",
+    "confirm": "Aceptar"
+  },
+  "screens": {
+    "calendar": "Pantalla de calendario",
+    "create": "Pantalla de creación",
+    "settings": "Pantalla de ajustes"
+  }
+}

@@ -1,66 +1,74 @@
-import { useState } from "react"
-import { Text, TextInput, View, StyleSheet, Pressable } from "react-native"
+import {useState} from 'react'
+import {Text, TextInput, View, StyleSheet, Pressable} from 'react-native'
 // @Componets
-import Modal from "@/components/Shared/Modal"
+import Modal from '@/components/Shared/Modal'
 // @Redux
-import { useDispatch, useSelector } from "react-redux"
-import { selectIsNewGroupOpen, setIsNewGroupOpen } from "@/redux/slices/navigation"
+import {useDispatch, useSelector} from 'react-redux'
+import {
+  selectIsNewGroupOpen,
+  setIsNewGroupOpen,
+} from '@/redux/slices/navigation'
+// @i18n
+import {useTranslation} from 'react-i18next'
 // @Utils
-import { tailwindColors } from '@/utils/colors'
+import {tailwindColors} from '@/utils/colors'
 
 interface NewGroupModalInterface {}
 
 const NewGroupModal = ({}: NewGroupModalInterface) => {
-	const dispatch = useDispatch()
+  const dispatch = useDispatch()
+  const {t} = useTranslation()
 
-	const isOpen = useSelector(selectIsNewGroupOpen)
+  const isOpen = useSelector(selectIsNewGroupOpen)
 
-	const [newGroup, setNewGroup] = useState('')
+  const [newGroup, setNewGroup] = useState('')
 
-	return (
-		<Modal
-			open={isOpen}
-			onClose={() => console.log('Mondongo #1')}
-			onFinish={() => console.log('Mondongo #2')}
-		>
-			<View className="w-[85%] p-5 bg-white rounded-lg" style={styles.container}>
-				<Text style={styles.title} className="text-2xl font-bold text-center">
-					Crear nuevo grupo
-				</Text>
-				<TextInput
-					value={newGroup}
-					onChangeText={setNewGroup}
-					placeholder="Nombre del nuevo grupo"
-					style={styles.input}
-					className="mt-6 rounded-lg"
-				/>
-				<View className="flex flex-row gap-4">
-	 				<Pressable
-						onPress={() => dispatch(setIsNewGroupOpen(false))}
-						style={styles.button}
-						className="w-full mt-4 p-1.5 rounded-lg"
-					>
-						<Text className="text-white text-xl font-bold text-center">Aceptar</Text>
-					</Pressable>
-	 			</View>
-			</View>
-		</Modal>
-	)
+  return (
+    <Modal
+      open={isOpen}
+      onClose={() => console.log('Mondongo #1')}
+      onFinish={() => console.log('Mondongo #2')}>
+      <View
+        className="w-[85%] p-5 bg-white rounded-lg"
+        style={styles.container}>
+        <Text style={styles.title} className="text-2xl font-bold text-center">
+          {t('newGroupModal.title')}
+        </Text>
+        <TextInput
+          value={newGroup}
+          onChangeText={setNewGroup}
+          placeholder={t('newGroupModal.namePlaceholder')}
+          style={styles.input}
+          className="mt-6 rounded-lg"
+        />
+        <View className="flex flex-row gap-4">
+          <Pressable
+            onPress={() => dispatch(setIsNewGroupOpen(false))}
+            style={styles.button}
+            className="w-full mt-4 p-1.5 rounded-lg">
+            <Text className="text-white text-xl font-bold text-center">
+              {t('newGroupModal.confirm')}
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+    </Modal>
+  )
 }
 
 const styles = StyleSheet.create({
-	container: {
-		backgroundColor: tailwindColors.background.foreground,
-	},
-	title: {
-		color: tailwindColors.secondary.DEFAULT,
-	},
-	input: {
-		backgroundColor: tailwindColors.background.DEFAULT,
-	},
-	button: {
-		backgroundColor: tailwindColors.secondary.DEFAULT,
-	},
+  container: {
+    backgroundColor: tailwindColors.background.foreground,
+  },
+  title: {
+    color: tailwindColors.secondary.DEFAULT,
+  },
+  input: {
+    backgroundColor: tailwindColors.background.DEFAULT,
+  },
+  button: {
+    backgroundColor: tailwindColors.secondary.DEFAULT,
+  },
 })
 
 export default NewGroupModal

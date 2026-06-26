@@ -5,29 +5,26 @@
  * @format
  */
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
-import "./global.css"
+import React from 'react'
+import type {PropsWithChildren} from 'react'
+import {NavigationContainer} from '@react-navigation/native'
+import {Colors} from 'react-native/Libraries/NewAppScreen'
+import './global.css'
+// @i18n (initializes i18next as a side effect; must run before any useTranslation)
+import '@/i18n'
 // @Redux
-import { Provider } from "react-redux"
-import store from "@/redux/store"
+import {Provider} from 'react-redux'
+import store from '@/redux/store'
 // @Components
-import {
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
-import { Navigator } from './components/Navigator';
+import {StyleSheet, Text, useColorScheme, View} from 'react-native'
+import {Navigator} from './components/Navigator'
 
 type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+  title: string
+}>
 
 function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  const isDarkMode = useColorScheme() === 'dark'
   return (
     <View style={styles.sectionContainer}>
       <Text
@@ -49,23 +46,23 @@ function Section({children, title}: SectionProps): React.JSX.Element {
         {children}
       </Text>
     </View>
-  );
+  )
 }
 
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  const isDarkMode = useColorScheme() === 'dark'
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  }
 
   return (
-		<Provider store={store}>
-			<NavigationContainer>
-				<Navigator/>
-			</NavigationContainer>
-		</Provider>
-  );
+    <Provider store={store}>
+      <NavigationContainer>
+        <Navigator />
+      </NavigationContainer>
+    </Provider>
+  )
 }
 
 const styles = StyleSheet.create({
@@ -85,6 +82,6 @@ const styles = StyleSheet.create({
   highlight: {
     fontWeight: '700',
   },
-});
+})
 
-export default App;
+export default App
