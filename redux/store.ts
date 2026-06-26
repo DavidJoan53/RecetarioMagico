@@ -1,12 +1,11 @@
-import { configureStore } from "@reduxjs/toolkit";
+import {configureStore} from '@reduxjs/toolkit'
 // @import Reducers
-import navigationReducer from "@/redux/slices/navigation"
-
+import navigationReducer from '@/redux/slices/navigation'
 
 export const store = configureStore({
   reducer: {
-		navigation: navigationReducer
-	}
+    navigation: navigationReducer,
+  },
 })
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
