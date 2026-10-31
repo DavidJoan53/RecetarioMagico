@@ -109,6 +109,7 @@ Build it in from the first render — retrofitting accessibility costs several t
 - New component and helper files ship with tests. Target **80%+ coverage on new files**, enforced in CI.
 - Test behaviour through the accessible interface — query by role and name, not by test id or class. This catches accessibility regressions for free.
 - At least one Playwright end-to-end flow covers the core path: create a recipe → label it → find it by label.
+- **Playwright always builds; it never reuses a running server.** A leftover one serves an older build, so the suite passes against code that is not under test. If `npm run test:e2e` reports the port in use, stop whatever is on 3000 — that error is the protection working.
 
 ## Data model
 
