@@ -28,11 +28,11 @@ variable the app expects and where to get each one.
 
 ### Scripts
 
-| Command | What it does |
-|---|---|
-| `npm run dev` | Dev server on port 3000 |
-| `npm run build` | Production build |
-| `npm run start` | Serve the production build |
+| Command             | What it does                        |
+| ------------------- | ----------------------------------- |
+| `npm run dev`       | Dev server on port 3000             |
+| `npm run build`     | Production build                    |
+| `npm run start`     | Serve the production build          |
 | `npm run typecheck` | `tsc --noEmit` — run before pushing |
 
 ## Stack

@@ -16,50 +16,59 @@ RecetarioMagico is a personal recipe manager: store recipes, label them, find th
 
 ## Target stack
 
-| Concern | Choice |
-|---|---|
-| Framework | Next.js 15, App Router, TypeScript **strict** |
-| Styling | Tailwind + shadcn/ui |
-| i18n | next-intl — Spanish default, English second |
-| Server state | TanStack Query |
-| Server code | Next.js route handlers (no separate service) |
-| Database | Neon Postgres |
-| ORM | Drizzle |
-| Validation | Zod |
-| Auth | Auth.js v5, single OAuth provider |
-| AI | Anthropic SDK (`claude-sonnet-5`) in route handlers |
-| Hosting | Vercel — preview deployment per pull request |
-| Tests | Vitest + Testing Library; Playwright for end-to-end |
+| Concern      | Choice                                               |
+| ------------ | ---------------------------------------------------- |
+| Framework    | Next.js 16, App Router, TypeScript 5.9 **strict**    |
+| Styling      | Tailwind 4 + shadcn/ui                               |
+| i18n         | next-intl — Spanish default, English second          |
+| Server state | TanStack Query                                       |
+| Server code  | Next.js route handlers (no separate service)         |
+| Database     | Neon Postgres                                        |
+| ORM          | Drizzle                                              |
+| Validation   | Zod                                                  |
+| Auth         | Auth.js v5, single OAuth provider                    |
+| AI           | Anthropic SDK (`claude-haiku-4-5`) in route handlers |
+| Hosting      | Vercel — preview deployment per pull request         |
+| Tests        | Vitest + Testing Library; Playwright for end-to-end  |
 
 ## Commands
+
+Working today:
 
 ```bash
 npm run dev          # Next dev server
 npm run build        # Production build
-npm run lint         # ESLint
-npm test             # Vitest
+npm run typecheck    # tsc --noEmit
+npm run lint         # Biome — formatter + linter in one pass
+npm run lint:fix     # Biome, writing fixes
+```
+
+Arriving with the slices that introduce them — do not assume these exist yet:
+
+```bash
+npm test                   # Vitest
 npm run test:coverage
-npx playwright test  # End-to-end
+npx playwright test        # End-to-end
 npx drizzle-kit generate   # Create a migration from schema changes
 npx drizzle-kit migrate    # Apply migrations
 ```
 
-*(React Native commands — `npm start`, `npm run ios`, `npm run android` — remain valid on `main` until the port completes.)*
+_(React Native commands — `npm start`, `npm run ios`, `npm run android` — remain valid on `main` until the port completes.)_
 
 ## How work lands
 
-Standards are kept by *when* work happens, not only by what the work is. Two rules carry most of the weight:
+Standards are kept by _when_ work happens, not only by what the work is. Two rules carry most of the weight:
 
 - **There is no "make it accessible" commit.** Semantic markup, accessible names, focus handling and AA contrast arrive in the **same commit** as the component they belong to. A commit that adds an interactive element without them is incomplete, not a draft to be finished later.
 - **There is no "add the tests" commit.** A new component or helper ships with its test in the same commit.
 
 A standalone `fix: :bug:` for accessibility is fine when it corrects something already shipped. It is not fine as the first time accessibility was considered.
 
-Check as you go rather than batching the checking either. *(The axe tooling arrives with the Next.js scaffold — once `npm run test:a11y` exists, run it against a route before committing a change to it.)*
+Check as you go rather than batching the checking either. _(The axe tooling arrives with the Next.js scaffold — once `npm run test:a11y` exists, run it against a route before committing a change to it.)_
 
 Why this is a rule and not a preference: one large "fix accessibility" change at the end is effectively **unreviewable**. The diff touches every file, so no individual decision can be judged in the context that motivated it, and the violation count has by then grown into a project of its own. Doing it inline keeps each diff small enough to actually review and holds the count at zero.
 
-The same logic drives the commit-scope rule below: the history is meant to be readable as a record of decisions, which only works if each commit *is* one decision.
+The same logic drives the commit-scope rule below: the history is meant to be readable as a record of decisions, which only works if each commit _is_ one decision.
 
 ## Non-negotiables
 
@@ -134,9 +143,10 @@ Conventions:
 ## Conventions
 
 - **Path aliases:** `@/*` maps to the repo root. Declared in `tsconfig.json`.
-- **Styling:** Tailwind utilities via `className`. Theme tokens (`primary`, `secondary`, `background`, …) live in the Tailwind config — **never hardcode a hex value or a magic spacing number**.
+- **Styling:** Tailwind utilities via `className`. Theme tokens (`primary`, `secondary`, `background`, …) live in the `@theme` block in `app/globals.css` — **never hardcode a hex value or a magic spacing number**. Biome's `noTailwindRawColors` and `noTailwindArbitraryValue` enforce this, so a stray `text-[#FF3F4D]` fails lint rather than relying on review to catch it.
+- **The brand red is not a text colour.** `--color-primary` (#FF3F4D) measures 3.06:1 on the background — fine for accents, borders, icons and large text, below the 4.5:1 bar for body text. Use `--color-primary-strong` (#DB3642, 4.53:1 behind white) for buttons, badges, and anything carrying normal-size text.
 - **User-facing text:** never hardcode strings. Add the key to **both** `messages/es.json` and `messages/en.json` (keep them in sync) and render through next-intl. Recipe content itself is data, not translation keys.
-- **Formatting:** Prettier owns style — 2-space indent, no semicolons, single quotes, trailing commas, `arrowParens: avoid`. ESLint extends `prettier` last so the two never fight.
+- **Formatting and linting:** **Biome** owns both, in one pass — 2-space indent, no semicolons, single quotes, trailing commas, no bracket spacing, 80 columns. There is no Prettier and no ESLint; one tool means there is nothing to keep in sync. Matches GoM-Frontend and plp-platform-frontend, which both run Biome. `lint-staged` runs it on staged files via the husky `pre-commit` hook, so formatting never reaches a commit.
 - Components type their props with a local `interface` and export `default`.
 
 ## Commit convention
@@ -145,19 +155,19 @@ Commit titles **must** follow `<type>: :gitmoji: <Subject>` — e.g. `feat: :spa
 
 `<type>` must be a conventional type and the subject must start with a gitmoji shortcode. Subject case is intentionally **not** enforced.
 
-| type | gitmoji | for |
-|------|---------|-----|
-| `feat` | `:sparkles:` | a new feature |
-| `fix` | `:bug:` | a bug fix |
-| `docs` | `:memo:` | documentation only |
-| `style` | `:art:` | formatting / code style (no logic change) |
-| `refactor` | `:recycle:` | code change that isn't a feature or fix |
-| `perf` | `:zap:` | performance |
-| `test` | `:white_check_mark:` | tests |
-| `build` | `:package:` | build system / dependencies |
-| `ci` | `:construction_worker:` | CI config |
-| `chore` | `:wrench:` | tooling / misc maintenance |
-| `revert` | `:rewind:` | reverting a previous commit |
+| type       | gitmoji                 | for                                       |
+| ---------- | ----------------------- | ----------------------------------------- |
+| `feat`     | `:sparkles:`            | a new feature                             |
+| `fix`      | `:bug:`                 | a bug fix                                 |
+| `docs`     | `:memo:`                | documentation only                        |
+| `style`    | `:art:`                 | formatting / code style (no logic change) |
+| `refactor` | `:recycle:`             | code change that isn't a feature or fix   |
+| `perf`     | `:zap:`                 | performance                               |
+| `test`     | `:white_check_mark:`    | tests                                     |
+| `build`    | `:package:`             | build system / dependencies               |
+| `ci`       | `:construction_worker:` | CI config                                 |
+| `chore`    | `:wrench:`              | tooling / misc maintenance                |
+| `revert`   | `:rewind:`              | reverting a previous commit               |
 
 ### Commit scope and message body
 

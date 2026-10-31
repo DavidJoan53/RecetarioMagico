@@ -80,17 +80,17 @@ need anyway.
 
 ## What changes
 
-| Before | After |
-|---|---|
-| React Native 0.74.5, bare CLI | Next.js 15, App Router |
-| React Navigation + a Redux `navigation` slice | App Router — routing state lives in the URL |
-| Redux Toolkit for server state | TanStack Query |
-| NativeWind | Tailwind + shadcn/ui |
-| i18next | next-intl (Spanish default, unchanged) |
-| Mock data in `*.mocks.ts` | Neon Postgres via Drizzle |
-| `RecetarioMagicoBackend` (separate repo) | Route handlers in `app/api/` |
-| No deployment | Vercel, preview deploy per pull request |
-| Jest | Vitest + Testing Library, Playwright for end-to-end |
+| Before                                        | After                                               |
+| --------------------------------------------- | --------------------------------------------------- |
+| React Native 0.74.5, bare CLI                 | Next.js 15, App Router                              |
+| React Navigation + a Redux `navigation` slice | App Router — routing state lives in the URL         |
+| Redux Toolkit for server state                | TanStack Query                                      |
+| NativeWind                                    | Tailwind + shadcn/ui                                |
+| i18next                                       | next-intl (Spanish default, unchanged)              |
+| Mock data in `*.mocks.ts`                     | Neon Postgres via Drizzle                           |
+| `RecetarioMagicoBackend` (separate repo)      | Route handlers in `app/api/`                        |
+| No deployment                                 | Vercel, preview deploy per pull request             |
+| Jest                                          | Vitest + Testing Library, Playwright for end-to-end |
 
 ## How the migration is being done
 
@@ -113,8 +113,8 @@ and every deleted file is one commit away via `git show`. A reader following the
 history sees the app it was, the decision, and the app it became.
 
 Accessibility and tests are written **as each piece is ported**, not collected
-into a cleanup pass at the end. The reasoning is in `CLAUDE.md` under *How work
-lands*; the short version is that a single large "make it accessible" commit is
+into a cleanup pass at the end. The reasoning is in `CLAUDE.md` under _How work
+lands_; the short version is that a single large "make it accessible" commit is
 unreviewable, and by the time you write it the problem has grown.
 
 ## On `RecetarioMagicoBackend`

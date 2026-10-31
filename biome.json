@@ -1,0 +1,67 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.6.4/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": true
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 80
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "semicolons": "asNeeded",
+      "trailingCommas": "all",
+      "arrowParentheses": "asNeeded",
+      "bracketSpacing": false
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
+  "tailwind": {
+    "stylesheet": "./app/globals.css"
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "a11y": {
+        "preset": "recommended"
+      },
+      "correctness": {
+        "preset": "recommended",
+        "noUnusedVariables": "error"
+      },
+      "suspicious": {
+        "preset": "recommended",
+        "noExplicitAny": "error"
+      },
+      "style": {
+        "preset": "recommended"
+      },
+      "complexity": {
+        "preset": "recommended"
+      },
+      "performance": {
+        "preset": "recommended"
+      },
+      "security": {
+        "preset": "recommended"
+      },
+      "nursery": {
+        "noTailwindRawColors": "error",
+        "noTailwindLegacyUtilities": "error",
+        "noTailwindArbitraryValue": "warn"
+      }
+    }
+  }
+}
