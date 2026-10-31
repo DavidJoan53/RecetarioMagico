@@ -15,7 +15,24 @@ const envSchema = z.object({
   AUTH_SECRET: z.string().min(32),
   AUTH_GITHUB_ID: z.string().min(1),
   AUTH_GITHUB_SECRET: z.string().min(1),
-  ALLOWED_EMAIL: z.email(),
+  // Parsed into an array here rather than at each call site, so a handler
+  // cannot accidentally compare against the raw comma-separated string and
+  // let everyone through. Lowercased because an allowlist that is case
+  // sensitive fails for the one person it is supposed to admit.
+  ALLOWED_EMAILS: z
+    .string()
+    .min(1)
+    .transform(s =>
+      s
+        .split(',')
+        .map(e => e.trim().toLowerCase())
+        .filter(Boolean),
+    )
+    .pipe(z.array(z.email()).min(1)),
+
+  // How many past messages travel to the model. See db/schema for why the
+  // rest are kept rather than deleted.
+  CLAUDE_CONTEXT_MESSAGES: z.coerce.number().int().min(2).default(20),
 })
 
 const parsed = envSchema.safeParse(process.env)
