@@ -1,4 +1,5 @@
 import type {NextConfig} from 'next'
+import createNextIntlPlugin from 'next-intl/plugin'
 
 const nextConfig: NextConfig = {
   // Recipe thumbnails are derived from YouTube links rather than stored, so the
@@ -10,4 +11,4 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default nextConfig
+export default createNextIntlPlugin('./i18n/request.ts')(nextConfig)
