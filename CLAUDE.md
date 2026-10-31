@@ -126,7 +126,9 @@ pantry             ingredientId → ingredients · quantity · unit    (PK ingre
 
 Conventions:
 
-- **IDs are uuid v7** — time-sortable, so `ORDER BY id` is chronological and no extra sequence column is needed.
+- **IDs are uuid v7** — time-sortable, so `ORDER BY id` is chronological and no extra sequence column is needed. It is also what makes keyset pagination work without `OFFSET`.
+- **`unit` enum:** `g · ml · unidad · cucharada · cucharadita · taza · pizca`. Adding a value later is a migration, so the list is deliberately a little generous.
+- **`labels.color` is a free hex**, chosen by the user. Chip text colour is **computed from the colour's luminance**, never stored — black above the threshold, white below. A stored text colour can be wrong for its background; a computed one cannot. This is what keeps a free picker from being able to create a contrast failure at runtime, which would otherwise be the one place a user can break the zero-violations rule.
 - `prepTimeMinutes` is an integer, never a formatted string — the app sorts and filters on it.
 - `quantity` is nullable: "salt, to taste" has no number.
 - Many-to-many is always a join table, never an array column — arrays can't be joined or indexed.
