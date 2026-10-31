@@ -77,3 +77,9 @@ yarn-error.log
 .env
 .env.*
 !.env.example
+
+# next.js
+.next/
+next-env.d.ts
+.vercel
+tsconfig.tsbuildinfo
