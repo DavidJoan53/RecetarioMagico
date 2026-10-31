@@ -1,0 +1,40 @@
+{
+  "app": {
+    "name": "Recetario Mágico",
+    "tagline": "Tus recetas, etiquetadas y fáciles de encontrar."
+  },
+  "auth": {
+    "signIn": "Entrar con GitHub",
+    "restricted": "Acceso restringido.",
+    "signOut": "Cerrar sesión",
+    "signedInAs": "Sesión iniciada como {email}",
+    "unauthorized": "No autorizado"
+  },
+  "nav": {
+    "home": "Inicio",
+    "recipes": "Recetas",
+    "dinners": "Cenas",
+    "settings": "Ajustes"
+  },
+  "search": {
+    "placeholder": "Buscar..."
+  },
+  "groups": {
+    "favorites": "Favoritos",
+    "breakfast": "Desayuno",
+    "lunch": "Almuerzo",
+    "dinner": "Cena",
+    "snacks": "Refrigerio",
+    "newGroup": "Nuevo grupo"
+  },
+  "sections": {
+    "breakfast": "Desayuno",
+    "lunch": "Almuerzo",
+    "dinner": "Cena"
+  },
+  "newGroupModal": {
+    "title": "Crear nuevo grupo",
+    "namePlaceholder": "Nombre del nuevo grupo",
+    "confirm": "Aceptar"
+  }
+}

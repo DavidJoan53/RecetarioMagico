@@ -4,60 +4,209 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-RecetarioMagico is a React Native (0.74.5, bare CLI — not Expo) + TypeScript app for managing recipes (CRUD) and tracking which recipe was cooked on which day (calendar). UI text is in **Spanish**.
+RecetarioMagico is a personal recipe manager: store recipes, label them, find them fast, and track which recipe was cooked on which day. UI text is in **Spanish** (English as a second locale).
 
-The backend is a **separate repo, `RecetarioMagicoBackend`, and its API is not yet defined**. For now the app runs entirely on **mock data**. When adding features, mock the data locally rather than blocking on a backend contract: put screen-specific mocks in a colocated `<Name>.mocks.ts` (see `screens/Home/Home.mocks.ts`), type them against the relevant component interface (e.g. `FoodCardInterface`), and mark them with a `TODO` so they're easy to swap for real API calls later.
+> ⚠️ **Migration in progress — this branch (`migrate/nextjs`) converts the app from React Native to Next.js.**
+>
+> `main` is still the React Native app (0.74.5, bare CLI). On this branch the React Native implementation has been **removed in one commit** and the Next.js app is being built in its place. Keeping both stacks in the tree was tried and abandoned: React Native pins React 18 while Next needs React 19, and a leftover `babel.config.js` silently switched Next off SWC. The two toolchains fight over the same config files, so there is no useful half-state to live in.
+>
+> Nothing is lost by that — the React Native source is in the history, one commit back. `git show HEAD~1:path/to/file` recovers any of it.
+>
+> The separate `RecetarioMagicoBackend` repo is **abandoned, not migrated**. All server code lives here as Next.js route handlers.
+
+## Target stack
+
+| Concern      | Choice                                               |
+| ------------ | ---------------------------------------------------- |
+| Framework    | Next.js 16, App Router, TypeScript 5.9 **strict**    |
+| Styling      | Tailwind 4 + shadcn/ui                               |
+| i18n         | next-intl — Spanish default, English second          |
+| Server state | TanStack Query                                       |
+| Server code  | Next.js route handlers (no separate service)         |
+| Database     | Neon Postgres                                        |
+| ORM          | Drizzle                                              |
+| Validation   | Zod                                                  |
+| Auth         | Auth.js v5, single OAuth provider                    |
+| AI           | Anthropic SDK (`claude-haiku-4-5`) in route handlers |
+| Hosting      | Vercel — preview deployment per pull request         |
+| Tests        | Vitest + Testing Library; Playwright for end-to-end  |
 
 ## Commands
 
+Working today:
+
 ```bash
-npm start            # Start Metro bundler (keep running in its own terminal)
-npm run ios          # Build & run on iOS simulator
-npm run android      # Build & run on Android emulator
-npm run lint         # ESLint (@react-native config)
-npm test             # Jest (preset: react-native)
-npx jest path/to/file.test.tsx          # Run a single test file
-npx jest -t "test name"                  # Run tests matching a name
+npm run dev          # Next dev server
+npm run build        # Production build
+npm run typecheck    # tsc --noEmit
+npm run lint         # Biome — formatter + linter in one pass
+npm run lint:fix     # Biome, writing fixes
 ```
 
-Native dependency changes also need `cd ios && pod install`.
+Arriving with the slices that introduce them — do not assume these exist yet:
 
-## Commit convention
+```bash
+npm test                   # Vitest
+npm run test:coverage
+npx playwright test        # End-to-end
+npx drizzle-kit generate   # Create a migration from schema changes
+npx drizzle-kit migrate    # Apply migrations
+```
 
-Commit message titles **must** follow `<type>: :gitmoji: <Subject>` — e.g. `feat: :sparkles: Add recipe calendar view`. This is enforced by a husky `commit-msg` hook running commitlint (`commitlint.config.js`, extends `@commitlint/config-conventional`); non-conforming commits are rejected. The hook installs automatically via the `prepare` npm script on `npm install`.
+_(React Native commands — `npm start`, `npm run ios`, `npm run android` — remain valid on `main` until the port completes.)_
 
-Rules: `<type>` must be a conventional type, and the subject must start with a gitmoji shortcode (`:word:`). Subject case is intentionally **not** enforced, so a capitalized first word (e.g. `Redux setup`) is fine.
+## How work lands
 
-Recommended type → gitmoji map:
+Standards are kept by _when_ work happens, not only by what the work is. Two rules carry most of the weight:
 
-| type | gitmoji | for |
-|------|---------|-----|
-| `feat` | `:sparkles:` | a new feature |
-| `fix` | `:bug:` | a bug fix |
-| `docs` | `:memo:` | documentation only |
-| `style` | `:art:` | formatting / code style (no logic change) |
-| `refactor` | `:recycle:` | code change that isn't a feature or fix |
-| `perf` | `:zap:` | performance |
-| `test` | `:white_check_mark:` | tests |
-| `build` | `:package:` | build system / dependencies |
-| `ci` | `:construction_worker:` | CI config |
-| `chore` | `:wrench:` | tooling / misc maintenance |
-| `revert` | `:rewind:` | reverting a previous commit |
+- **There is no "make it accessible" commit.** Semantic markup, accessible names, focus handling and AA contrast arrive in the **same commit** as the component they belong to. A commit that adds an interactive element without them is incomplete, not a draft to be finished later.
+- **There is no "add the tests" commit.** A new component or helper ships with its test in the same commit.
+
+A standalone `fix: :bug:` for accessibility is fine when it corrects something already shipped. It is not fine as the first time accessibility was considered.
+
+Check as you go rather than batching the checking either. _(The axe tooling arrives with the Next.js scaffold — once `npm run test:a11y` exists, run it against a route before committing a change to it.)_
+
+Why this is a rule and not a preference: one large "fix accessibility" change at the end is effectively **unreviewable**. The diff touches every file, so no individual decision can be judged in the context that motivated it, and the violation count has by then grown into a project of its own. Doing it inline keeps each diff small enough to actually review and holds the count at zero.
+
+The same logic drives the commit-scope rule below: the history is meant to be readable as a record of decisions, which only works if each commit _is_ one decision.
+
+## Non-negotiables
+
+These are the standards the project is held to. Treat a change that breaks one as incomplete, not as a follow-up.
+
+### Accessibility
+
+Build it in from the first render — retrofitting accessibility costs several times what doing it inline does, and the target is **zero** axe violations, not few.
+
+- **Semantic HTML before ARIA.** A `<button>` that does button things needs no `role`. Reach for ARIA only when no element expresses the intent.
+- Every interactive control has an **accessible name** — visible text, `aria-label`, or a bound `<label>`. Icon-only buttons always need one.
+- **Keyboard reachable and operable**: logical tab order, visible focus ring (never `outline: none` without a replacement), `Esc` closes dialogs, focus is trapped inside an open modal and restored to the trigger on close.
+- **WCAG AA contrast** — 4.5:1 for body text, 3:1 for large text and UI boundaries. Check theme tokens, don't assume them.
+- Images carry meaningful `alt`, or `alt=""` when purely decorative.
+- Form errors are associated with their input (`aria-describedby`) and announced, not just coloured red.
+
+### Type safety
+
+- **TypeScript strict. No `any`, no non-null `!` to silence the checker.** If a type is genuinely unknown, use `unknown` and narrow it.
+- Types flow **end to end**: Drizzle schema → inferred row types → route handler → typed client → component props. No hand-maintained duplicate interfaces that can drift from the schema.
+- **Zod at every trust boundary** — request bodies, search params, environment variables, and every AI response. Parse, don't assert. `z.infer` the result rather than declaring the shape twice.
+
+### Data access
+
+- All queries go through Drizzle. No raw SQL string interpolation.
+- Schema changes are made in the schema file and applied via a generated migration — never by hand-editing the database.
+- Nothing environment-specific is hardcoded. Secrets and URLs come from env vars, validated by a Zod schema at startup, with every key listed in `.env.example`.
+
+### Performance
+
+- **Never put a video iframe in a list.** Render a static thumbnail; load the player only on interaction (a "facade" — a real `<button>` showing the thumbnail that swaps in the embed on click). One YouTube iframe pulls roughly a megabyte of JavaScript; a list of them ruins LCP and INP.
+- YouTube thumbnails come from `https://i.ytimg.com/vi/<ID>/mqdefault.jpg` (320×180, no API key, no storage cost). `maxresdefault.jpg` 404s on older videos — don't depend on it.
+- Always use `next/image` with explicit `width`/`height` (or `fill` inside a sized box) so images cannot shift layout.
+- **The app stores no image files.** `imageUrl` holds a link; there is no upload pipeline.
+
+### Testing
+
+- New component and helper files ship with tests. Target **80%+ coverage on new files**, enforced in CI.
+- Test behaviour through the accessible interface — query by role and name, not by test id or class. This catches accessibility regressions for free.
+- At least one Playwright end-to-end flow covers the core path: create a recipe → label it → find it by label.
+
+## Data model
+
+```
+recipes            id · name · prepTimeMinutes · instructions text[] · links text[] · imageUrl? · createdAt
+labelGroups        id · name
+labels             id · name · color · labelGroupId → labelGroups
+recipeLabels       recipeId → recipes · labelId → labels           (composite PK)
+ingredients        id · name · photoUrl?
+recipeIngredients  id · recipeId · ingredientId · unit ENUM · quantity?
+dinners            id · eatenAt timestamptz · notes?
+dinnerRecipes      dinnerId → dinners · recipeId → recipes         (composite PK)
+pantry             ingredientId → ingredients · quantity · unit    (PK ingredientId)
+```
+
+Conventions:
+
+- **IDs are uuid v7** — time-sortable, so `ORDER BY id` is chronological and no extra sequence column is needed. It is also what makes keyset pagination work without `OFFSET`.
+- **`unit` enum:** `g · ml · unidad · cucharada · cucharadita · taza · pizca`. Adding a value later is a migration, so the list is deliberately a little generous.
+- **`labels.color` is a free hex**, chosen by the user. Chip text colour is **computed from the colour's luminance**, never stored — black above the threshold, white below. A stored text colour can be wrong for its background; a computed one cannot. This is what keeps a free picker from being able to create a contrast failure at runtime, which would otherwise be the one place a user can break the zero-violations rule.
+- `prepTimeMinutes` is an integer, never a formatted string — the app sorts and filters on it.
+- `quantity` is nullable: "salt, to taste" has no number.
+- Many-to-many is always a join table, never an array column — arrays can't be joined or indexed.
+- `recipes.imageUrl` is derived from a YouTube link when one exists and none was set; otherwise pasted manually. There is no general link-scraping.
 
 ## Architecture
 
-- **Entry:** `index.js` → `App.tsx`. `App.tsx` wraps everything in Redux `<Provider>` → `<NavigationContainer>` → `<Navigator>`. (Note: `App.tsx` still contains unused boilerplate `Section`/styles from the RN template — ignore it.)
-- **Navigation:** `components/Navigator.tsx` defines a bottom-tab navigator with four screens — `Home`, `Calendar`, `Create`, `Settings`. The shared `SearchBar` is injected as the tab `headerTitle`.
-- **Screens:** one folder per screen under `screens/<Name>/`, each with the component (`<Name>.tsx`) and a barrel `index.ts` (`export { default } from './<Name>'`) so imports stay `@/screens/<Name>`. Screen-specific mock data is colocated as `<Name>.mocks.ts` in the same folder (see `screens/Home/`).
-- **State:** Redux Toolkit. Store in `redux/store.ts`; slices in `redux/slices/`. The `navigation` slice currently holds **UI state** (e.g. `isNewGroupOpen` modal flag), not route state. Each slice exports its actions and its `select*` selectors from the same file. `RootState`/`AppDispatch` types come from `redux/store.ts`.
-- **Components:** `components/` holds reusable UI grouped by feature folder (`Groups/`, `FoodCardsCarrousel/`, `Shared/`). Modals follow the pattern in `components/Shared/Modal.tsx` (generic) wrapped by a feature modal like `Groups/NewGroupModal.tsx`, which reads/writes its open state via the Redux `navigation` slice.
-- **i18n:** i18next + react-i18next. Config and translations live in `i18n/` (`index.ts` initializes i18next; `locales/es.json` + `locales/en.json`). It's initialized as a side-effect import (`import '@/i18n'`) at the top of `App.tsx` — keep that import before anything that calls `useTranslation`. Default and fallback language is **Spanish** (`es`); there is no device-locale detection (static default).
+- **Routing:** App Router. One folder per route segment under `app/`. Routing state lives in the URL — there is no navigation slice (the React Native app had one; it dies with the port).
+- **Server code:** route handlers under `app/api/`. Each one validates its input with Zod, calls a Drizzle query, and returns typed JSON.
+- **Components:** `components/` grouped by feature. Shared primitives come from shadcn/ui and are extended rather than re-implemented.
+- **Auth:** public `GET`; `POST`/`PATCH`/`DELETE` require a session, enforced in middleware. Single-user — access is an email allowlist, not a role system.
+- **AI routes:** two shapes. A **streaming** route returns tokens as they arrive for open-ended suggestions; a **structured** route asks for a schema-constrained response, parses it with Zod, and returns typed objects. Never render an unparsed model response as data.
+
+## Comments
+
+Short, plain, and about the code — not about how it came to be.
+
+- **One line wherever one line will do.** A block comment needs a reason to be a block.
+- **Say what is true, not what was decided.** `// uuid v7: time-ordered` — not `// chose uuid v7 over serial because...`.
+- **No history.** No "previously", "changed from", "we tried X". The commit message holds that; a comment repeating it goes stale the moment the code moves.
+- **Comment the surprise, not the obvious.** A constraint the code cannot show, a non-obvious consequence, an ordering requirement. Never a restatement of the line below.
+- **Delete rather than update** a comment that no longer earns its place.
+
+```ts
+// Good
+/** Time-ordered, so ORDER BY id is chronological. */
+// Nullable: "sal, al gusto" has no number.
+
+// Bad
+/**
+ * Primary keys are uuid v7 rather than a serial, because v7 embeds a
+ * timestamp in its high bits, which is what lets every "newest first" query
+ * use keyset pagination instead of OFFSET, which drifts when rows arrive...
+ */
+```
+
+## Language
+
+**Code is English. Only what a user reads is Spanish.**
+
+- File names, folder names, routes, identifiers, types, comments, commit messages: English. `app/home/`, not `app/inicio/`.
+- **User-facing text never appears in a `.tsx` file.** It goes in `messages/es.json` and renders through next-intl, so adding English later is a translation file rather than a search for hardcoded strings.
+- This applies to API error messages too — anything that can reach a screen.
 
 ## Conventions
 
-- **Path aliases:** `@/*` maps to the repo root (e.g. `@/redux/store`, `@/screens/Home`, `@/utils/colors`). Aliases are declared in **both** `tsconfig.json` (for the type checker) and `babel.config.js` via `babel-plugin-module-resolver` (for the bundler) — **keep them in sync** or imports break at runtime.
-- **Styling:** NativeWind (Tailwind for RN). Use `className="..."` for utility styling. Theme tokens (`primary`, `secondary`, `background`, etc.) are defined in `tailwind.config.js`. When you need a color value inside a JS `StyleSheet` object instead of a class, import `tailwindColors` from `@/utils/colors` (it resolves the tailwind config) — don't hardcode hex values.
-- **Icons:** FontAwesome via `@fortawesome/react-native-fontawesome`; import icons from `@fortawesome/free-solid-svg-icons`.
-- **User-facing text:** never hardcode strings. Add a key to **both** `i18n/locales/es.json` and `en.json` (keep them in sync) and render via `const {t} = useTranslation()` → `t('namespace.key')`. Category/section labels are keyed by a stable id (e.g. group mocks carry an `id` and render `t(\`groups.${id}\`)`); recipe/content data stays as plain strings in mocks, not i18n keys.
-- **Formatting (Prettier):** 2-space indentation, no semicolons, single quotes, trailing commas, `arrowParens: avoid` (see `.prettierrc.js`). ESLint extends `@react-native` then `prettier` (eslint-config-prettier) last, so Prettier owns all style rules — run `npm run lint` / `npx prettier --write` to conform.
-- Components are typed with a local `interface` for props and exported as `default`.
+- **Path aliases:** `@/*` maps to the repo root. Declared in `tsconfig.json`.
+- **Tests live in `__tests__/`** beside the code they cover — `lib/__tests__/color.test.ts`, not `lib/color.test.ts`.
+- **Styling:** Tailwind utilities via `className`. Theme tokens (`primary`, `secondary`, `background`, …) live in the `@theme` block in `app/globals.css` — **never hardcode a hex value or a magic spacing number**. Biome's `noTailwindRawColors` and `noTailwindArbitraryValue` enforce this, so a stray `text-[#FF3F4D]` fails lint rather than relying on review to catch it.
+- **The brand red is not a text colour.** `--color-primary` (#FF3F4D) measures 3.06:1 on the background — fine for accents, borders, icons and large text, below the 4.5:1 bar for body text. Use `--color-primary-strong` (#DB3642, 4.53:1 behind white) for buttons, badges, and anything carrying normal-size text.
+- **User-facing text:** never hardcode strings. Add the key to **both** `messages/es.json` and `messages/en.json` (keep them in sync) and render through next-intl. Recipe content itself is data, not translation keys.
+- **Formatting and linting:** **Biome** owns both, in one pass — 2-space indent, no semicolons, single quotes, trailing commas, no bracket spacing, 80 columns. There is no Prettier and no ESLint; one tool means there is nothing to keep in sync. Matches GoM-Frontend and plp-platform-frontend, which both run Biome. `lint-staged` runs it on staged files via the husky `pre-commit` hook, so formatting never reaches a commit.
+- Components type their props with a local `interface` and export `default`.
+
+## Commit convention
+
+Commit titles **must** follow `<type>: :gitmoji: <Subject>` — e.g. `feat: :sparkles: Add recipe calendar view`. Enforced by a husky `commit-msg` hook running commitlint (`commitlint.config.js`); non-conforming commits are rejected. The hook installs via the `prepare` npm script.
+
+`<type>` must be a conventional type and the subject must start with a gitmoji shortcode. Subject case is intentionally **not** enforced.
+
+| type       | gitmoji                 | for                                       |
+| ---------- | ----------------------- | ----------------------------------------- |
+| `feat`     | `:sparkles:`            | a new feature                             |
+| `fix`      | `:bug:`                 | a bug fix                                 |
+| `docs`     | `:memo:`                | documentation only                        |
+| `style`    | `:art:`                 | formatting / code style (no logic change) |
+| `refactor` | `:recycle:`             | code change that isn't a feature or fix   |
+| `perf`     | `:zap:`                 | performance                               |
+| `test`     | `:white_check_mark:`    | tests                                     |
+| `build`    | `:package:`             | build system / dependencies               |
+| `ci`       | `:construction_worker:` | CI config                                 |
+| `chore`    | `:wrench:`              | tooling / misc maintenance                |
+| `revert`   | `:rewind:`              | reverting a previous commit               |
+
+### Commit scope and message body
+
+Commits are the project's running documentation — favour **many small, self-contained commits** over large mixed ones.
+
+- **One concern per commit.** A dependency bump, a component port and a styling tweak are three commits, not one. If the subject needs an "and", split it.
+- A commit should leave the tree in a working state.
+- **The body explains _why_, not _what_** — the diff already shows what changed. Record the reason, the alternative rejected, and anything a reader six months out would find surprising. Prefer a short body on most commits over a perfect one on a few.

@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+/*
+ * Palette carried over from the React Native app, with one correction.
+ *
+ * The brand red #FF3F4D does NOT meet WCAG AA for body text: 3.06:1 on the
+ * background and 3.46:1 against white, where 4.5:1 is required. It is fine as
+ * an accent, a border, an icon, or large text, where the bar is 3:1.
+ *
+ * --color-primary-strong is the same hue darkened to 86% so white text on it
+ * reaches 4.53:1. Use it for buttons, badges, and anything carrying
+ * normal-size text. Reach for --color-primary only when nothing sits on top.
+ */
+@theme {
+  --color-primary: #ff3f4d;
+  --color-primary-strong: #db3642;
+  --color-secondary: #1c0708;
+  --color-secondary-foreground: #4f4f4f;
+  --color-light: #e5e5e5;
+  --color-background: #f1f1f1;
+  --color-background-foreground: #d9d9d9;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-secondary;
+    font-family: system-ui, sans-serif;
+  }
+
+  /* Never remove a focus ring without replacing it. */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-secondary;
+  }
+}
