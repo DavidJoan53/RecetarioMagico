@@ -14,7 +14,9 @@
     "home": "Inicio",
     "recipes": "Recetas",
     "dinners": "Cenas",
-    "settings": "Ajustes"
+    "settings": "Ajustes",
+    "labels": "Etiquetas",
+    "ingredients": "Ingredientes"
   },
   "search": {
     "placeholder": "Buscar..."
@@ -36,5 +38,20 @@
     "title": "Crear nuevo grupo",
     "namePlaceholder": "Nombre del nuevo grupo",
     "confirm": "Aceptar"
+  },
+  "home": {
+    "latestDinners": "Últimas cenas",
+    "newRecipes": "Recetas nuevas",
+    "seeAll": "Ver todas",
+    "noDinners": "Todavía no has registrado ninguna cena.",
+    "noRecipes": "Todavía no tienes recetas. Crea la primera."
+  },
+  "recipe": {
+    "minutes": "{count} min",
+    "noTime": "Sin tiempo"
+  },
+  "common": {
+    "loading": "Cargando…",
+    "empty": "Nada por aquí todavía."
   }
 }

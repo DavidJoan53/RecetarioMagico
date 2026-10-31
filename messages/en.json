@@ -14,7 +14,9 @@
     "home": "Home",
     "recipes": "Recipes",
     "dinners": "Dinners",
-    "settings": "Settings"
+    "settings": "Settings",
+    "labels": "Labels",
+    "ingredients": "Ingredients"
   },
   "search": {
     "placeholder": "Search..."
@@ -36,5 +38,20 @@
     "title": "Create new group",
     "namePlaceholder": "New group name",
     "confirm": "Accept"
+  },
+  "home": {
+    "latestDinners": "Latest dinners",
+    "newRecipes": "New recipes",
+    "seeAll": "See all",
+    "noDinners": "No dinners logged yet.",
+    "noRecipes": "No recipes yet. Create the first one."
+  },
+  "recipe": {
+    "minutes": "{count} min",
+    "noTime": "No time set"
+  },
+  "common": {
+    "loading": "Loading…",
+    "empty": "Nothing here yet."
   }
 }
