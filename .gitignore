@@ -72,3 +72,8 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# local env — secrets never enter the repo, only .env.example does
+.env
+.env.*
+!.env.example
