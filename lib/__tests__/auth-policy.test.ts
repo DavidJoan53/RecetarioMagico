@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest'
-import {isAllowedEmail} from './auth-policy'
+import {isAllowedEmail} from '../auth-policy'
 
 const ALLOWED = ['davidjoan53@gmail.com', 'nicolas@cloudnonic.com']
 
@@ -20,9 +20,7 @@ describe('isAllowedEmail', () => {
     expect(isAllowedEmail('someone@else.com', ALLOWED)).toBe(false)
   })
 
-  // GitHub omits the email when an account has no verified address. That has
-  // to deny, not throw — a crash in the sign-in callback is a broken login
-  // rather than a refused one.
+  /** GitHub omits the email when no address is verified. */
   it.each([null, undefined, '', '   '])(
     'refuses %j without throwing',
     value => {
@@ -34,8 +32,6 @@ describe('isAllowedEmail', () => {
     expect(isAllowedEmail('davidjoan53@gmail.com', [])).toBe(false)
   })
 
-  // The check is equality, not inclusion. A substring match would admit
-  // anyone who can register an address containing an allowed one.
   it('does not match on a substring', () => {
     expect(isAllowedEmail('davidjoan53@gmail.com.attacker.test', ALLOWED)).toBe(
       false,

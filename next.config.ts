@@ -2,8 +2,7 @@ import type {NextConfig} from 'next'
 import createNextIntlPlugin from 'next-intl/plugin'
 
 const nextConfig: NextConfig = {
-  // Recipe thumbnails are derived from YouTube links rather than stored, so the
-  // only remote host we ever load images from is YouTube's thumbnail CDN.
+  /** Thumbnails are derived from YouTube links; nothing else is remote. */
   images: {
     remotePatterns: [
       {protocol: 'https', hostname: 'i.ytimg.com', pathname: '/vi/**'},

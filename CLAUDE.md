@@ -142,9 +142,41 @@ Conventions:
 - **Auth:** public `GET`; `POST`/`PATCH`/`DELETE` require a session, enforced in middleware. Single-user — access is an email allowlist, not a role system.
 - **AI routes:** two shapes. A **streaming** route returns tokens as they arrive for open-ended suggestions; a **structured** route asks for a schema-constrained response, parses it with Zod, and returns typed objects. Never render an unparsed model response as data.
 
+## Comments
+
+Short, plain, and about the code — not about how it came to be.
+
+- **One line wherever one line will do.** A block comment needs a reason to be a block.
+- **Say what is true, not what was decided.** `// uuid v7: time-ordered` — not `// chose uuid v7 over serial because...`.
+- **No history.** No "previously", "changed from", "we tried X". The commit message holds that; a comment repeating it goes stale the moment the code moves.
+- **Comment the surprise, not the obvious.** A constraint the code cannot show, a non-obvious consequence, an ordering requirement. Never a restatement of the line below.
+- **Delete rather than update** a comment that no longer earns its place.
+
+```ts
+// Good
+/** Time-ordered, so ORDER BY id is chronological. */
+// Nullable: "sal, al gusto" has no number.
+
+// Bad
+/**
+ * Primary keys are uuid v7 rather than a serial, because v7 embeds a
+ * timestamp in its high bits, which is what lets every "newest first" query
+ * use keyset pagination instead of OFFSET, which drifts when rows arrive...
+ */
+```
+
+## Language
+
+**Code is English. Only what a user reads is Spanish.**
+
+- File names, folder names, routes, identifiers, types, comments, commit messages: English. `app/home/`, not `app/inicio/`.
+- **User-facing text never appears in a `.tsx` file.** It goes in `messages/es.json` and renders through next-intl, so adding English later is a translation file rather than a search for hardcoded strings.
+- This applies to API error messages too — anything that can reach a screen.
+
 ## Conventions
 
 - **Path aliases:** `@/*` maps to the repo root. Declared in `tsconfig.json`.
+- **Tests live in `__tests__/`** beside the code they cover — `lib/__tests__/color.test.ts`, not `lib/color.test.ts`.
 - **Styling:** Tailwind utilities via `className`. Theme tokens (`primary`, `secondary`, `background`, …) live in the `@theme` block in `app/globals.css` — **never hardcode a hex value or a magic spacing number**. Biome's `noTailwindRawColors` and `noTailwindArbitraryValue` enforce this, so a stray `text-[#FF3F4D]` fails lint rather than relying on review to catch it.
 - **The brand red is not a text colour.** `--color-primary` (#FF3F4D) measures 3.06:1 on the background — fine for accents, borders, icons and large text, below the 4.5:1 bar for body text. Use `--color-primary-strong` (#DB3642, 4.53:1 behind white) for buttons, badges, and anything carrying normal-size text.
 - **User-facing text:** never hardcode strings. Add the key to **both** `messages/es.json` and `messages/en.json` (keep them in sync) and render through next-intl. Recipe content itself is data, not translation keys.

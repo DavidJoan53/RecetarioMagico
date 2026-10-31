@@ -5,7 +5,7 @@ import {
   parseHex,
   relativeLuminance,
   textColorFor,
-} from './color'
+} from '../color'
 
 describe('parseHex', () => {
   it('reads both hex lengths', () => {
@@ -33,7 +33,6 @@ describe('contrastRatio', () => {
     )
   })
   it('reproduces the brand-red finding that set the palette rule', () => {
-    // 3.46 is why buttons use #db3642 and not #ff3f4d.
     expect(contrastRatio('#ff3f4d', '#ffffff')).toBeCloseTo(3.46, 1)
     expect(contrastRatio('#db3642', '#ffffff')).toBeCloseTo(4.53, 1)
   })
@@ -45,7 +44,7 @@ describe('textColorFor', () => {
     expect(textColorFor('#f1f1f1')).toBe('#000000')
   })
 
-  // The actual guarantee: a free picker cannot produce an unreadable chip.
+  /** The guarantee: a free picker cannot produce an unreadable chip. */
   it.each([
     '#ff3f4d',
     '#db3642',

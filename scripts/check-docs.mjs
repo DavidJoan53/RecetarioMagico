@@ -1,26 +1,12 @@
 /**
- * Asserts the README describes the app that exists.
+ * Fails when the README disagrees with package.json.
  *
- * Written after the README claimed seven packages that were not installed.
- * Documentation drifts silently; this makes it fail loudly instead.
+ * Catches: a package claimed but not installed, an installed package never
+ * mentioned, a documented script that does not exist, a broken file link, a
+ * renamed section this depends on.
  *
- * What it catches, verified by probing each case:
- *   - a package claimed in the README that is not installed
- *   - an installed package the README never mentions
- *   - a documented `npm run` script that does not exist
- *   - a link to a file that is not there
- *   - a renamed section heading this script depends on
- *
- * What it cannot catch, and why:
- *   - a package in the wrong section. "Wired up" versus "installed but not
- *     used yet" is a judgement about whether code imports it; package.json
- *     cannot distinguish the two, so neither can this.
- *   - anything that is not an npm package. shadcn/ui is a CLI that copies
- *     components in, so it never appears in the dependency list.
- *
- * It deliberately does not parse prose. An earlier version tried, and shredded
- * "Next.js 16" into "Next" and "js 16" before flagging both as unknown
- * libraries. A narrow check that is right beats a broad one that cries wolf.
+ * Cannot catch: a package in the wrong section (installed vs wired up is a
+ * fact about imports), or anything that is not an npm package.
  */
 import {existsSync, readFileSync} from 'node:fs'
 
@@ -29,10 +15,7 @@ const deps = {...pkg.dependencies, ...pkg.devDependencies}
 const readme = readFileSync('README.md', 'utf8')
 const problems = []
 
-// A missing section must be an error, not an empty string. The first version
-// returned '' when a heading did not match, so every check against that
-// section silently passed. A verification that cannot find what it verifies is
-// worse than none, because it reports success.
+/** A missing marker is an error: a check that cannot find its subject passes vacuously. */
 const section = (from, to) => {
   const after = readme.split(from)[1]
   if (after === undefined) {
@@ -80,8 +63,7 @@ for (const [label, name] of Object.entries(PACKAGES)) {
       `README lists "${label}" as not installed, but ${name} IS installed`,
     )
   }
-  // Closes the gap the prose parser was trying to cover: a package that gets
-  // installed and never documented.
+  /** An installed package the README never mentions. */
   if (installed && !readme.includes(label)) {
     problems.push(
       `${name} is installed but "${label}" appears nowhere in the README`,

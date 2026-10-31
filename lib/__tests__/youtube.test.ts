@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest'
-import {deriveImageUrl, thumbnailUrlFor, youtubeIdFrom} from './youtube'
+import {deriveImageUrl, thumbnailUrlFor, youtubeIdFrom} from '../youtube'
 
 const ID = 'dQw4w9WgXcQ'
 

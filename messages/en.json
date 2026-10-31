@@ -1,12 +1,23 @@
 {
+  "app": {
+    "name": "Recetario Mágico",
+    "tagline": "Your recipes, tagged and easy to find."
+  },
+  "auth": {
+    "signIn": "Sign in with GitHub",
+    "restricted": "Restricted access.",
+    "signOut": "Sign out",
+    "signedInAs": "Signed in as {email}",
+    "unauthorized": "Unauthorized"
+  },
+  "nav": {
+    "home": "Home",
+    "recipes": "Recipes",
+    "dinners": "Dinners",
+    "settings": "Settings"
+  },
   "search": {
     "placeholder": "Search..."
-  },
-  "tabs": {
-    "home": "Home",
-    "calendar": "Calendar",
-    "create": "Create",
-    "settings": "Settings"
   },
   "groups": {
     "favorites": "Favorites",

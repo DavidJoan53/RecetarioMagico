@@ -1,24 +1,14 @@
 import 'server-only'
 import {z} from 'zod'
 
-/**
- * Every environment variable the server expects, validated once at startup.
- *
- * Parsing here rather than reading process.env at each call site means a
- * missing or malformed value fails immediately with a message naming the key,
- * instead of surfacing later as an undefined deep inside a query or an API
- * call. `.env.example` lists each of these and where to get it.
- */
+/** Parsed once at startup so a missing key fails by name, not as undefined. */
 const envSchema = z.object({
   DATABASE_URL: z.url({protocol: /^postgresql$/}),
   ANTHROPIC_API_KEY: z.string().startsWith('sk-ant-'),
   AUTH_SECRET: z.string().min(32),
   AUTH_GITHUB_ID: z.string().min(1),
   AUTH_GITHUB_SECRET: z.string().min(1),
-  // Parsed into an array here rather than at each call site, so a handler
-  // cannot accidentally compare against the raw comma-separated string and
-  // let everyone through. Lowercased because an allowlist that is case
-  // sensitive fails for the one person it is supposed to admit.
+  /** An array, so a handler cannot compare against the raw string. */
   ALLOWED_EMAILS: z
     .string()
     .min(1)
@@ -30,8 +20,7 @@ const envSchema = z.object({
     )
     .pipe(z.array(z.email()).min(1)),
 
-  // How many past messages travel to the model. See db/schema for why the
-  // rest are kept rather than deleted.
+  /** How many past messages are sent; the rest are kept but not sent. */
   CLAUDE_CONTEXT_MESSAGES: z.coerce.number().int().min(2).default(20),
 })
 

@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest'
 import {contrastRatio, meetsAA, parseHex, textColorFor} from '@/lib/color'
-import {DEFAULT_LABEL_GROUPS} from './seed-data'
+import {DEFAULT_LABEL_GROUPS} from '../seed-data'
 
 const labels = DEFAULT_LABEL_GROUPS.flatMap(g =>
   g.labels.map(l => ({...l, group: g.name})),

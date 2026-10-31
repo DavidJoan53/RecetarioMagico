@@ -1,11 +1,11 @@
 import type {Metadata} from 'next'
 import {NextIntlClientProvider} from 'next-intl'
-import {getLocale} from 'next-intl/server'
+import {getLocale, getTranslations} from 'next-intl/server'
 import './globals.css'
 
-export const metadata: Metadata = {
-  title: 'Recetario Mágico',
-  description: 'Mis recetas, etiquetadas y fáciles de encontrar.',
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('app')
+  return {title: t('name'), description: t('tagline')}
 }
 
 export default async function RootLayout({
@@ -13,9 +13,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  // lang comes from the active locale rather than a hardcoded string: screen
-  // readers pick pronunciation from it, so a wrong value degrades exactly the
-  // experience the attribute exists to serve.
+  /** Screen readers take pronunciation from lang, so it tracks the locale. */
   const locale = await getLocale()
   return (
     <html lang={locale}>

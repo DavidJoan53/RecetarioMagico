@@ -1,21 +1,15 @@
-/**
- * Idempotent seed for the default label groups.
- *
- * Reads .env.local directly rather than going through lib/env, which imports
- * server-only and would throw outside Next. Safe to re-run: both inserts are
- * ON CONFLICT DO NOTHING against a unique constraint, so a second run adds
- * nothing and removes nothing.
- */
 import {neon} from '@neondatabase/serverless'
 import {eq} from 'drizzle-orm'
 import {drizzle} from 'drizzle-orm/neon-http'
 import {labelGroups, labels} from './schema'
 import {DEFAULT_LABEL_GROUPS} from './seed-data'
 
+/** Reads .env.local directly: lib/env imports server-only and throws here. */
 process.loadEnvFile?.('.env.local')
 
 const db = drizzle(neon(process.env.DATABASE_URL as string))
 
+/** Idempotent — every insert conflicts on a unique name. */
 async function seed(): Promise<void> {
   let newGroups = 0
   let newLabels = 0
@@ -29,9 +23,7 @@ async function seed(): Promise<void> {
 
     if (inserted[0]) newGroups++
 
-    // Select unconditionally rather than branching on whether the insert
-    // returned a row: on a re-run it returns nothing, and the id is needed
-    // either way.
+    /** Selected unconditionally: a re-run inserts nothing but needs the id. */
     const [row] = await db
       .select({id: labelGroups.id})
       .from(labelGroups)

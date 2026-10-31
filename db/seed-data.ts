@@ -1,11 +1,4 @@
-/**
- * The label groups the app starts with, carried over from the React Native
- * app's `defaultGroups` plus "Herramienta" — which is where the old `tool`
- * field (oven, blender) went rather than becoming a column on recipes.
- *
- * Kept separate from the seed runner so a test can assert every colour here
- * is readable. See seed-data.test.ts.
- */
+/** Colours are asserted readable in __tests__/seed-data. */
 export const DEFAULT_LABEL_GROUPS = [
   {
     name: 'Momento',
