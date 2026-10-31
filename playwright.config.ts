@@ -9,7 +9,13 @@ export default defineConfig({
   webServer: {
     command: 'npm run build && npm run start',
     url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
+    /**
+     * Never reuse. A leftover server serves an older build, so the suite
+     * passes against code that is not the code under test — and the
+     * accessibility gate reports clean on violations it never saw. With this
+     * off, an occupied port is a loud error instead of a quiet wrong answer.
+     */
+    reuseExistingServer: false,
     timeout: 180_000,
   },
 })
