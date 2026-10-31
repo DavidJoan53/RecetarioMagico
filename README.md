@@ -42,11 +42,11 @@ any missing keys. The example file lists every variable and where to get it.
 
 **Wired up now:** Next.js 16 (App Router) · React 19 · TypeScript 5.9 strict ·
 Tailwind 4 · next-intl (Spanish default) · Drizzle over Neon Postgres with a
-Zod-validated environment · Biome for lint and format · Vitest + Testing
-Library · Playwright + axe.
+Zod-validated environment · Auth.js (v5 — still beta; there is no stable v5
+and v4 predates the App Router) · Biome for lint and format · Vitest +
+Testing Library · Playwright + axe.
 
-**Installed, not yet used:** Auth.js (v5 — still beta; there is no stable v5
-and v4 does not fit the App Router) · Anthropic SDK · TanStack Query.
+**Installed, not yet used:** Anthropic SDK · TanStack Query.
 
 **Not yet installed:** shadcn/ui.
 
