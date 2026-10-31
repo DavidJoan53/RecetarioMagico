@@ -93,6 +93,17 @@ Build it in from the first render — retrofitting accessibility costs several t
 
 ### Data access
 
+**Nothing outside `db/` imports the database client.** Pages, components and route handlers call a named function from `db/queries/` or `db/mutations/` — never `db` itself, and never a Drizzle builder inline.
+
+```
+db/queries/<entity>.ts     reads   — latestRecipes, recipeById
+db/mutations/<entity>.ts   writes  — createRecipe, logDinner
+lib/<entity>.ts            pure    — shaping, deriving, validating. No db import.
+app/api/<entity>/route.ts  HTTP    — withAuth, parse with Zod, call the above
+```
+
+Three reasons it is a rule and not a preference: a query used by two screens stays one query, so a fix lands once. A pure function in `lib/` is testable without a connection string, which a query module is not. And an inline builder in a component is invisible to anyone auditing what touches the database.
+
 - All queries go through Drizzle. No raw SQL string interpolation.
 - Schema changes are made in the schema file and applied via a generated migration — never by hand-editing the database.
 - Nothing environment-specific is hardcoded. Secrets and URLs come from env vars, validated by a Zod schema at startup, with every key listed in `.env.example`.
