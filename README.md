@@ -21,29 +21,34 @@ npm install
 npm run dev          # http://localhost:3000
 ```
 
-That is the whole setup today. **You do not need a database or any API key to
-run the app right now** — nothing reads `process.env` yet. When that changes,
-copy `.env.example` to `.env.local` and fill it in; the example file lists every
-variable the app expects and where to get each one.
+That is the whole setup today. The app now reads a validated environment, so copy `.env.example` to
+`.env.local` and fill it in first — `lib/env.ts` fails fast with the names of
+any missing keys. The example file lists every variable and where to get it.
 
 ### Scripts
 
-| Command             | What it does                        |
-| ------------------- | ----------------------------------- |
-| `npm run dev`       | Dev server on port 3000             |
-| `npm run build`     | Production build                    |
-| `npm run start`     | Serve the production build          |
-| `npm run typecheck` | `tsc --noEmit` — run before pushing |
+| Command                 | What it does                                    |
+| ----------------------- | ----------------------------------------------- |
+| `npm run dev`           | Dev server on port 3000                         |
+| `npm run build`         | Production build                                |
+| `npm run typecheck`     | `tsc --noEmit`                                  |
+| `npm run lint`          | Biome — format + lint in one pass               |
+| `npm run test`          | Vitest unit tests                               |
+| `npm run test:coverage` | Vitest with per-file 80% thresholds             |
+| `npm run test:a11y`     | Playwright + axe — asserts zero violations      |
+| `npm run check:docs`    | Fails if this README drifts from `package.json` |
 
 ## Stack
 
-**Wired up now:** Next.js 16 (App Router) · React 19 · TypeScript 5.9 in strict
-mode.
+**Wired up now:** Next.js 16 (App Router) · React 19 · TypeScript 5.9 strict ·
+Tailwind 4 · next-intl (Spanish default) · Drizzle over Neon Postgres with a
+Zod-validated environment · Biome for lint and format · Vitest + Testing
+Library · Playwright + axe.
 
-**Planned, not yet installed:** Tailwind · next-intl (the Spanish and English
-translations are already in `messages/`) · Neon Postgres via Drizzle · Zod at
-every boundary · Auth.js · the Anthropic SDK for recipe suggestions · Vercel
-preview deployments per pull request.
+**Installed, not yet used:** Auth.js (v5 — still beta; there is no stable v5
+and v4 does not fit the App Router) · Anthropic SDK · TanStack Query.
+
+**Not yet installed:** shadcn/ui.
 
 The target data model is documented in [CLAUDE.md](./CLAUDE.md#data-model).
 
