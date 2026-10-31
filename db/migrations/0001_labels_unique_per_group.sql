@@ -1,0 +1,1 @@
+ALTER TABLE "labels" ADD CONSTRAINT "labels_group_name_unique" UNIQUE("label_group_id","name");
