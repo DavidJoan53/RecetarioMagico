@@ -1,15 +1,36 @@
+/*
+ * Palette carried over from the React Native app, with one correction.
+ *
+ * The brand red #FF3F4D does NOT meet WCAG AA for body text: 3.06:1 on the
+ * background and 3.46:1 against white, where 4.5:1 is required. It is fine as
+ * an accent, a border, an icon, or large text (the bar there is 3:1).
+ *
+ * --color-primary-strong is the same hue darkened to 86% so white text on it
+ * reaches 4.53:1. Use it for buttons, badges, and anything that carries
+ * normal-size text. Reach for --color-primary only when nothing sits on top.
+ */
 :root {
+  --color-primary: #ff3f4d; /* accent / border / large text only */
+  --color-primary-strong: #db3642; /* safe behind white body text (4.53:1) */
+  --color-secondary: #1c0708; /* body text — 17.16:1 on background */
+  --color-secondary-foreground: #4f4f4f; /* muted text — 7.25:1 on background */
+  --color-light: #e5e5e5;
+  --color-background: #f1f1f1;
+  --color-background-foreground: #d9d9d9;
+
   color-scheme: light dark;
 }
 
 body {
   margin: 0;
+  background: var(--color-background);
+  color: var(--color-secondary);
   font-family: system-ui, sans-serif;
   line-height: 1.5;
 }
 
 /* Never remove a focus ring without replacing it. */
 :focus-visible {
-  outline: 2px solid currentColor;
+  outline: 2px solid var(--color-secondary);
   outline-offset: 2px;
 }

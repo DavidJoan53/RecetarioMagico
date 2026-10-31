@@ -25,10 +25,5 @@
     "title": "Crear nuevo grupo",
     "namePlaceholder": "Nombre del nuevo grupo",
     "confirm": "Aceptar"
-  },
-  "screens": {
-    "calendar": "Pantalla de calendario",
-    "create": "Pantalla de creación",
-    "settings": "Pantalla de ajustes"
   }
 }

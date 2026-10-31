@@ -98,9 +98,19 @@ need anyway.
 history here is the record of how the app got to where it is, and starting over
 would throw that away for no benefit.
 
-Both stacks live in the tree while the port runs. Screens are converted one at a
-time and the React Native configuration is deleted **last**, so the history reads
-as a migration rather than a deletion followed by an unrelated new app.
+The original plan was to keep both stacks in the tree and convert screen by
+screen, deleting the React Native configuration last. **That didn't survive
+contact with the toolchains.** React Native 0.74 pins React 18 and Next.js 16
+needs React 19, so one `node_modules` can't hold both; and a leftover
+`babel.config.js` made Next silently switch off SWC and then fail looking for a
+preset that was no longer installed. The two stacks compete for the same config
+filenames, so the gradual path was buying nothing and costing a lot.
+
+So the React Native implementation was removed in a single commit and the
+Next.js app built in its place. That is still a migration rather than a fresh
+start — the repository, its history, and its commit conventions are unchanged,
+and every deleted file is one commit away via `git show`. A reader following the
+history sees the app it was, the decision, and the app it became.
 
 Accessibility and tests are written **as each piece is ported**, not collected
 into a cleanup pass at the end. The reasoning is in `CLAUDE.md` under *How work

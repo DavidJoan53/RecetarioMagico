@@ -25,10 +25,5 @@
     "title": "Create new group",
     "namePlaceholder": "New group name",
     "confirm": "Accept"
-  },
-  "screens": {
-    "calendar": "Calendar screen",
-    "create": "Create screen",
-    "settings": "Settings screen"
   }
 }

@@ -8,7 +8,9 @@ RecetarioMagico is a personal recipe manager: store recipes, label them, find th
 
 > ⚠️ **Migration in progress — this branch (`migrate/nextjs`) converts the app from React Native to Next.js.**
 >
-> `main` is still the React Native app (0.74.5, bare CLI). While the port is underway both stacks are present in the tree: port screen by screen and **delete the React Native config last**, so the diff reads as a migration rather than a wipe. If a file you're editing is still RN-only, say so rather than half-converting it.
+> `main` is still the React Native app (0.74.5, bare CLI). On this branch the React Native implementation has been **removed in one commit** and the Next.js app is being built in its place. Keeping both stacks in the tree was tried and abandoned: React Native pins React 18 while Next needs React 19, and a leftover `babel.config.js` silently switched Next off SWC. The two toolchains fight over the same config files, so there is no useful half-state to live in.
+>
+> Nothing is lost by that — the React Native source is in the history, one commit back. `git show HEAD~1:path/to/file` recovers any of it.
 >
 > The separate `RecetarioMagicoBackend` repo is **abandoned, not migrated**. All server code lives here as Next.js route handlers.
 
