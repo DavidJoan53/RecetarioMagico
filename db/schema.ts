@@ -8,7 +8,6 @@ import {
   primaryKey,
   text,
   timestamp,
-  unique,
   uuid,
 } from 'drizzle-orm/pg-core'
 
@@ -76,7 +75,11 @@ export const labels = pgTable(
   'labels',
   {
     id: primaryId(),
-    name: text('name').notNull(),
+    // Unique across the whole table, not per group. Two labels sharing a name
+    // are indistinguishable once they are chips on a recipe — the group they
+    // belong to is not rendered there — so a duplicate name is a data-entry
+    // mistake rather than a use case, whichever group it lands in.
+    name: text('name').notNull().unique(),
     // Free hex, chosen by the user. No text colour is stored alongside it —
     // chip text is computed from this value's luminance at render time, so a
     // picked colour cannot end up unreadable. See lib/color.ts.
@@ -85,15 +88,7 @@ export const labels = pgTable(
       .notNull()
       .references(() => labelGroups.id, {onDelete: 'cascade'}),
   },
-  t => [
-    index('labels_group_idx').on(t.labelGroupId),
-    // Unique per group, not globally: "Cena" is a sensible label under
-    // Momento and could reasonably exist under another group too. Two labels
-    // with the same name in the same group is a bug, not a use case — and
-    // without this there is nothing for the seed's ON CONFLICT to target, so
-    // re-running it would duplicate every label.
-    unique('labels_group_name_unique').on(t.labelGroupId, t.name),
-  ],
+  t => [index('labels_group_idx').on(t.labelGroupId)],
 )
 
 export const recipeLabels = pgTable(

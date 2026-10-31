@@ -15,6 +15,13 @@
       "when": 1793481328373,
       "tag": "0001_labels_unique_per_group",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793482164422,
+      "tag": "0002_labels_name_globally_unique",
+      "breakpoints": true
     }
   ]
 }
