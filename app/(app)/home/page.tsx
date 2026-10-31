@@ -1,11 +1,11 @@
 import Link from 'next/link'
 import {redirect} from 'next/navigation'
 import {getTranslations} from 'next-intl/server'
-import {RecipeCard} from '@/components/recipe-card'
-import {Section} from '@/components/section'
-import {latestDinners} from '@/db/queries/dinners'
-import {latestRecipes} from '@/db/queries/recipes'
+import {Suspense} from 'react'
+import {SectionSkeleton} from '@/components/section-skeleton'
 import {getSession} from '@/lib/session'
+import {LatestDinners} from './_components/latest-dinners'
+import {NewRecipes} from './_components/new-recipes'
 
 /** Five per section, each with one way through to the full list. */
 const PREVIEW_COUNT = 5
@@ -15,66 +15,37 @@ export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
   // Checked here rather than trusted from the proxy. See lib/session.
-  const [t, session, dinners, recipes] = await Promise.all([
-    getTranslations(),
-    getSession(),
-    latestDinners(PREVIEW_COUNT),
-    latestRecipes(PREVIEW_COUNT),
-  ])
-
+  const session = await getSession()
   if (!session) redirect('/')
+
+  const t = await getTranslations('nav')
 
   return (
     <main className="flex flex-col gap-6">
-      <h1 className="font-bold text-2xl tracking-tight">{t('nav.home')}</h1>
+      <h1 className="font-bold text-2xl tracking-tight">{t('home')}</h1>
 
-      <Section
-        title={t('home.latestDinners')}
-        seeAllHref="/dinners"
-        isEmpty={dinners.length === 0}
-        emptyText={t('home.noDinners')}
-      >
-        {dinners.flatMap(dinner =>
-          dinner.recipes.map(recipe => (
-            <RecipeCard
-              key={`${dinner.id}-${recipe.id}`}
-              id={recipe.id}
-              name={recipe.name}
-              imageUrl={recipe.imageUrl}
-            />
-          )),
-        )}
-      </Section>
+      {/* Each section fetches its own data, so neither waits on the other
+          and a slow query streams in rather than blocking the page. */}
+      <Suspense fallback={<SectionSkeleton />}>
+        <LatestDinners limit={PREVIEW_COUNT} />
+      </Suspense>
 
-      <Section
-        title={t('home.newRecipes')}
-        seeAllHref="/recipes"
-        isEmpty={recipes.length === 0}
-        emptyText={t('home.noRecipes')}
-      >
-        {recipes.map(recipe => (
-          <RecipeCard
-            key={recipe.id}
-            id={recipe.id}
-            name={recipe.name}
-            imageUrl={recipe.imageUrl}
-            prepTimeMinutes={recipe.prepTimeMinutes}
-          />
-        ))}
-      </Section>
+      <Suspense fallback={<SectionSkeleton />}>
+        <NewRecipes limit={PREVIEW_COUNT} />
+      </Suspense>
 
       <div className="grid grid-cols-2 gap-2">
         <Link
           href="/labels"
           className="rounded-lg border border-light bg-background-foreground p-3 font-semibold text-sm"
         >
-          {t('nav.labels')}
+          {t('labels')}
         </Link>
         <Link
           href="/ingredients"
           className="rounded-lg border border-light bg-background-foreground p-3 font-semibold text-sm"
         >
-          {t('nav.ingredients')}
+          {t('ingredients')}
         </Link>
       </div>
     </main>
