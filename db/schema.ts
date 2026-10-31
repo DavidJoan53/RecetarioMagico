@@ -53,7 +53,10 @@ export const messageRoleEnum = pgEnum('message_role', [
 
 export const recipes = pgTable('recipes', {
   id: primaryId(),
-  name: text('name').notNull(),
+  // Unique, like every other name in this schema. Two recipes with the same
+  // name are a double-save rather than two dishes — if they really are
+  // different, they need different names to be told apart in a list anyway.
+  name: text('name').notNull().unique(),
   // Minutes, not a formatted string: the list sorts and filters on it.
   prepTimeMinutes: integer('prep_time_minutes'),
   // Ordered steps and reference links. Arrays rather than tables because
