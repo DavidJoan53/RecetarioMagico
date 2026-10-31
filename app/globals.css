@@ -31,4 +31,15 @@
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-secondary;
   }
+
+  /* Browsers default buttons to `default`; only links get `pointer`. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
 }
