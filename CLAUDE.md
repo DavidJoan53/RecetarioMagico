@@ -154,6 +154,21 @@ Conventions:
 - **Auth:** public `GET`; `POST`/`PATCH`/`DELETE` require a session, enforced in middleware. Single-user — access is an email allowlist, not a role system.
 - **AI routes:** two shapes. A **streaming** route returns tokens as they arrive for open-ended suggestions; a **structured** route asks for a schema-constrained response, parses it with Zod, and returns typed objects. Never render an unparsed model response as data.
 
+## Branches
+
+```
+feature/fix  →  dev  →  main
+                 ↑        ↑
+            everything   production
+            lands here   only
+```
+
+- **`dev` is the default branch.** New work branches from it and pull requests target it, which is what GitHub does automatically.
+- **`main` is production**, and the only thing Vercel deploys to the live site. It moves when a batch of work is ready, not on every merge.
+- Every push and every pull request runs CI. Each branch also gets its own preview URL, so a change can be seen before it reaches anyone.
+
+The point is that half-finished work can sit in `dev` without the live site changing under someone who is using it.
+
 ## Comments
 
 Short, plain, and about the code — not about how it came to be.
