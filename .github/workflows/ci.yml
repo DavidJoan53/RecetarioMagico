@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Placeholders. lib/env validates at import, so a build fails without them.
+  # Shapes only — nothing here reaches a real service. Real values live in
+  # Vercel's environment settings.
+  DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?sslmode=require
+  ANTHROPIC_API_KEY: sk-ant-ci-placeholder
+  AUTH_SECRET: ci-placeholder-secret-at-least-32-chars-long
+  AUTH_GITHUB_ID: ci-placeholder
+  AUTH_GITHUB_SECRET: ci-placeholder
+  ALLOWED_EMAILS: ci@example.com
+  AUTH_TRUST_HOST: "true"
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint and format
+        run: npm run lint
+
+      - name: Types
+        run: npm run typecheck
+
+      - name: Docs match the code
+        run: npm run check:docs
+
+      - name: Unit tests
+        run: npm run test:coverage
+
+      - name: Build
+        run: npm run build
+
+      - name: Browser for the accessibility gate
+        run: npx playwright install --with-deps chromium
+
+      # Runs against a production build and asserts zero axe violations.
+      - name: End-to-end and accessibility
+        run: npm run test:e2e
+
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
