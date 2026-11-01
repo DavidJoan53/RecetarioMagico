@@ -1,7 +1,7 @@
 'use server'
 
 import {redirect} from 'next/navigation'
-import {createRecipe} from '@/db/mutations/recipes'
+import {createRecipe} from '@/db/mutations/create-recipe'
 import {getSession} from '@/lib/session'
 import {recipeInputFromForm} from '@/lib/validation/recipe'
 

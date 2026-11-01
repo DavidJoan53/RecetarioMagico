@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import {redirect} from 'next/navigation'
 import {getTranslations} from 'next-intl/server'
-import {RecipeCard} from '@/components/recipe-card'
-import {latestRecipes} from '@/db/queries/recipes'
+import {Suspense} from 'react'
+import {SectionSkeleton} from '@/components/section-skeleton'
 import {getSession} from '@/lib/session'
+import {RecipeList} from './_components/recipe-list'
 
 /** Keyset pages of ten; uuid v7 ordering means no OFFSET drift. */
 const PAGE_SIZE = 10
@@ -14,10 +15,7 @@ export default async function RecipesPage() {
   const session = await getSession()
   if (!session) redirect('/')
 
-  const [t, recipes] = await Promise.all([
-    getTranslations(),
-    latestRecipes(PAGE_SIZE),
-  ])
+  const t = await getTranslations()
 
   return (
     <main className="flex flex-col gap-4">
@@ -33,23 +31,9 @@ export default async function RecipesPage() {
         </Link>
       </div>
 
-      {recipes.length === 0 ? (
-        <p className="rounded-lg border border-light border-dashed p-6 text-center text-secondary-foreground text-sm">
-          {t('recipes.empty')}
-        </p>
-      ) : (
-        <ul className="flex flex-col gap-2">
-          {recipes.map(recipe => (
-            <RecipeCard
-              key={recipe.id}
-              id={recipe.id}
-              name={recipe.name}
-              imageUrl={recipe.imageUrl}
-              prepTimeMinutes={recipe.prepTimeMinutes}
-            />
-          ))}
-        </ul>
-      )}
+      <Suspense fallback={<SectionSkeleton />}>
+        <RecipeList limit={PAGE_SIZE} />
+      </Suspense>
     </main>
   )
 }
