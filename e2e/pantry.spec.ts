@@ -35,7 +35,10 @@ test('the ingredient list arrives ten at a time', async ({page}) => {
   const input = page.getByRole('combobox', {name: m.ingredient})
   await input.fill(prefix)
 
+  /* Wait for the filtered results: the search is debounced, so counting
+     straight after typing counts whatever was on screen before. */
   const options = page.getByRole('option')
+  await expect(options.first()).toContainText(prefix)
   await expect(options).toHaveCount(PAGE_SIZE)
 
   /* Scrolling the last one into view is what asks for the next page. */
@@ -54,6 +57,7 @@ test('a search narrows to what matches', async ({page}) => {
   await page.goto('/pantry/add')
   await page.getByRole('combobox', {name: m.ingredient}).fill(`${prefix}-alpha`)
 
-  await expect(page.getByRole('option')).toHaveCount(1)
-  await expect(page.getByRole('option')).toContainText('alpha')
+  const options = page.getByRole('option')
+  await expect(options.first()).toContainText('alpha')
+  await expect(options).toHaveCount(1)
 })

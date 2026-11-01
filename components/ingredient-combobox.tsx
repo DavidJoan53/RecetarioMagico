@@ -61,9 +61,15 @@ export function IngredientCombobox({value, onChange}: Props) {
   useEffect(() => {
     const target = sentinel.current
     if (!target || !hasNextPage) return
-    const observer = new IntersectionObserver(entries => {
-      if (entries[0]?.isIntersecting) fetchNextPage()
-    })
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0]?.isIntersecting) fetchNextPage()
+      },
+      /* Rooted to the list, not the viewport. Without this the sentinel
+         counts as visible the moment the box opens and every page loads at
+         once, which is a long list arriving rather than paging. */
+      {root: listRef.current},
+    )
     observer.observe(target)
     return () => observer.disconnect()
   }, [hasNextPage, fetchNextPage])
