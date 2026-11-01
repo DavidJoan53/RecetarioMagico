@@ -37,10 +37,15 @@ const GATED = [
 for (const path of GATED) {
   signedIn(`${path} has no detectable violations`, async ({page}) => {
     const response = await page.goto(path)
-    /* Next's error document has no lang attribute, so a page that threw
-       fails as an accessibility violation and reads like one. Say what it
-       actually is: the page never rendered. */
+    /* Next's error document has no lang attribute, so a page that threw fails
+       as an accessibility violation and reads like one. These two say what it
+       actually is. The status alone is not enough — a failure inside Suspense
+       arrives after the shell has streamed, so the response is still 200. */
     expect(response?.status(), `${path} did not render`).toBe(200)
+    await expect(
+      page.locator('html'),
+      `${path} served the error document, not the layout`,
+    ).toHaveAttribute('lang', /\w/)
     expect(page.url()).toContain(path)
     expect(await violations(page)).toEqual([])
   })

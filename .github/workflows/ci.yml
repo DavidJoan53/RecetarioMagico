@@ -19,6 +19,8 @@ env:
   # has no lang attribute and fails as a violation. A placeholder here meant
   # scanning the crash page. CI_DATABASE_URL is a throwaway Neon branch.
   DATABASE_URL: ${{ secrets.CI_DATABASE_URL }}
+  # The same branch here: on a runner there is no other database to protect.
+  E2E_DATABASE_URL: ${{ secrets.CI_DATABASE_URL }}
   ANTHROPIC_API_KEY: sk-ant-ci-placeholder
   AUTH_SECRET: ci-placeholder-secret-at-least-32-chars-long
   AUTH_GITHUB_ID: ci-placeholder
