@@ -41,6 +41,14 @@ export async function addIngredient(name: string): Promise<string> {
   return row.id
 }
 
+export async function addRecipe(name: string): Promise<string> {
+  const [row] = await resilient(() =>
+    db.insert(recipes).values({name}).returning({id: recipes.id}),
+  )
+  if (!row) throw new Error(`could not add ${name}`)
+  return row.id
+}
+
 /** Puts an ingredient behind the ON DELETE RESTRICT the UI has to report. */
 export async function useInNewRecipe(
   ingredientId: string,
