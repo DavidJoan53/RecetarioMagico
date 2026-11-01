@@ -1,10 +1,8 @@
 import Link from 'next/link'
 import {redirect} from 'next/navigation'
 import {getTranslations} from 'next-intl/server'
-import {Suspense} from 'react'
-import {SectionSkeleton} from '@/components/section-skeleton'
 import {getSession} from '@/lib/session'
-import {PantryPickerList} from './_components/pantry-picker-list'
+import {AddToPantryForm} from './_components/add-to-pantry-form'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,9 +19,7 @@ export default async function AddToPantryPage() {
         <p className="text-secondary-foreground text-sm">{t('addHint')}</p>
       </div>
 
-      <Suspense fallback={<SectionSkeleton />}>
-        <PantryPickerList />
-      </Suspense>
+      <AddToPantryForm />
 
       <Link
         href="/pantry"

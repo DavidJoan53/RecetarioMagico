@@ -47,25 +47,31 @@ export async function removeFromPantryAction(
   return {done: true}
 }
 
-export type PantryState = {error?: 'gone'}
+export type AddState = {
+  error?: 'invalid' | 'alreadyThere'
+  /** Named back, so the page can say what it added without holding state. */
+  added?: string
+}
 
 /**
- * The next state is sent rather than read, so two rapid presses cannot both
- * decide to add. Idempotent either way.
+ * One at a time, with its amount. The unique index decides whether it is
+ * already there rather than a read beforehand, which two tabs would both
+ * pass.
  */
-export async function togglePantryAction(
-  _previous: PantryState,
+export async function addToPantryAction(
+  _previous: AddState,
   form: FormData,
-): Promise<PantryState> {
+): Promise<AddState> {
   await requireSession()
 
-  const id = String(form.get('id') ?? '')
-  if (!id) return {error: 'gone'}
+  const id = String(form.get('ingredientId') ?? '')
+  const name = String(form.get('ingredientName') ?? '')
+  const parsed = pantryEntryFromForm(form)
+  if (!id || !parsed.success) return {error: 'invalid'}
 
-  if (form.get('inPantry') === 'true') await removeFromPantry(id)
-  else await addToPantry(id)
+  const result = await addToPantry(id, parsed.data)
+  if (!result.ok) return {error: 'alreadyThere'}
 
   revalidatePath('/pantry')
-  revalidatePath('/pantry/add')
-  return {}
+  return {added: name}
 }

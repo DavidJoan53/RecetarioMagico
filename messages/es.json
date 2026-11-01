@@ -142,8 +142,6 @@
   },
   "pantry": {
     "title": "Despensa",
-    "have": "La tengo",
-    "haveNot": "No la tengo",
     "removeLabel": "Quitar {name} de la despensa",
     "quantity": "Cantidad",
     "unit": "Unidad",
@@ -159,11 +157,17 @@
     "empty": "Tu despensa está vacía.",
     "goToIngredients": "Ir a Ingredientes",
     "addTitle": "Añadir a la despensa",
-    "addHint": "Marca lo que tienes en casa.",
+    "addHint": "Busca un ingrediente, dile cuánto tienes y añádelo.",
     "addMore": "Añadir a la despensa",
     "backToPantry": "Volver a la despensa",
-    "noIngredients": "Todavía no tienes ingredientes que marcar.",
-    "haveNamed": "La tengo {name}",
-    "haveNotNamed": "No la tengo {name}"
+    "ingredient": "Ingrediente",
+    "searchPlaceholder": "Busca por nombre…",
+    "alreadyIn": "ya está",
+    "loadingMore": "Cargando más…",
+    "noMatches": "Ningún ingrediente con ese nombre.",
+    "resultCount": "{count, plural, =0 {Sin resultados} one {# resultado} other {# resultados}}",
+    "addOne": "Añadir a la despensa",
+    "alreadyThere": "Ese ingrediente ya está en tu despensa.",
+    "addedCount": "{name} añadido. {count, plural, one {# en esta sesión} other {# en esta sesión}}."
   }
 }
