@@ -6,13 +6,19 @@ export type IngredientWithPantry = typeof ingredients.$inferSelect & {
   inPantry: boolean
 }
 
+/** Alphabetical, not newest first: this list is scanned to find a name. */
+export async function allIngredients() {
+  return db.select().from(ingredients).orderBy(asc(ingredients.name))
+}
+
 /**
- * Alphabetical, not newest first: this list is scanned to find a name.
- *
- * The pantry flag is joined rather than fetched per row — the toggle needs it
- * on every line, and asking separately would be a query per ingredient.
+ * The same list, for choosing what you have. The flag is joined rather than
+ * asked per row — every line needs it, and separately would be one request
+ * per ingredient for a boolean.
  */
-export async function allIngredients(): Promise<IngredientWithPantry[]> {
+export async function allIngredientsWithPantry(): Promise<
+  IngredientWithPantry[]
+> {
   return db
     .select({
       ...getTableColumns(ingredients),

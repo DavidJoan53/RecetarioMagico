@@ -2,14 +2,14 @@
 
 import {useTranslations} from 'next-intl'
 import {useCallback, useEffect, useRef, useState} from 'react'
-import type {IngredientWithPantry} from '@/db/ingredients/queries'
+import type {Ingredient} from '@/db/schema'
 import {DeleteConfirm} from './delete-confirm'
 import {IngredientEditForm} from './ingredient-edit-form'
 
 type Mode = 'view' | 'edit' | 'confirm-delete'
 
 type Props = {
-  ingredient: IngredientWithPantry
+  ingredient: Ingredient
   /** Trailing slot — the pantry control lands here. */
   children?: React.ReactNode
 }

@@ -2,7 +2,6 @@ import {getTranslations} from 'next-intl/server'
 import {DeletionAnnouncer} from '@/components/deletion-announcer'
 import {allIngredients} from '@/db/ingredients/queries'
 import {IngredientRow} from './ingredient-row'
-import {PantryToggle} from './pantry-toggle'
 
 export async function IngredientList() {
   const t = await getTranslations('ingredients')
@@ -20,13 +19,7 @@ export async function IngredientList() {
     <DeletionAnnouncer>
       <ul aria-label={t('listLabel')} className="flex flex-col gap-2">
         {list.map(ingredient => (
-          <IngredientRow key={ingredient.id} ingredient={ingredient}>
-            <PantryToggle
-              ingredientId={ingredient.id}
-              name={ingredient.name}
-              inPantry={ingredient.inPantry}
-            />
-          </IngredientRow>
+          <IngredientRow key={ingredient.id} ingredient={ingredient} />
         ))}
       </ul>
     </DeletionAnnouncer>

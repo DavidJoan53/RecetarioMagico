@@ -6,7 +6,7 @@ import messages from '@/messages/es.json'
 import {PantryToggle} from '../pantry-toggle'
 
 const toggle = vi.fn()
-vi.mock('../../actions', () => ({
+vi.mock('../../../actions', () => ({
   togglePantryAction: (...a: unknown[]) => toggle(...a),
 }))
 
@@ -59,5 +59,27 @@ describe('PantryToggle', () => {
     const form = toggle.mock.calls[0]?.[1] as FormData
     expect(form.get('id')).toBe('i1')
     expect(form.get('inPantry')).toBe('true')
+  })
+
+  /**
+   * Colour alone does not carry the state: it is invisible to anyone who
+   * cannot separate the two fills, and hard to scan for everyone else.
+   */
+  it('draws the state as well as colouring it', () => {
+    setup(true)
+    expect(screen.getByRole('button')).toHaveTextContent('✓')
+  })
+
+  it('shows an empty box when it is not had', () => {
+    setup(false)
+    expect(screen.getByRole('button')).not.toHaveTextContent('✓')
+  })
+
+  /** The tick is decoration; the button's name is what is announced. */
+  it('keeps the drawn state out of the accessible name', () => {
+    setup(true)
+    expect(screen.getByRole('button').getAttribute('aria-label')).not.toContain(
+      '✓',
+    )
   })
 })

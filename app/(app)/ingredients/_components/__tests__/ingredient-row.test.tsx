@@ -2,7 +2,7 @@ import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {NextIntlClientProvider} from 'next-intl'
 import {beforeEach, describe, expect, it, vi} from 'vitest'
-import type {IngredientWithPantry} from '@/db/ingredients/queries'
+import type {Ingredient} from '@/db/schema'
 import messages from '@/messages/es.json'
 import {IngredientRow} from '../ingredient-row'
 
@@ -15,11 +15,10 @@ vi.mock('../../actions', () => ({
 
 const m = messages.ingredients
 
-const TOMATE: IngredientWithPantry = {
+const TOMATE: Ingredient = {
   id: 'i1',
   name: 'Tomate',
   photoUrl: null,
-  inPantry: false,
 }
 
 const setup = () =>

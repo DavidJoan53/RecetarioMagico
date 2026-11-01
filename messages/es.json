@@ -158,6 +158,11 @@
     "gone": "Eso ya no está en la despensa.",
     "invalid": "Revisa la cantidad.",
     "empty": "Tu despensa está vacía.",
-    "goToIngredients": "Marca lo que tienes en Ingredientes"
+    "goToIngredients": "Ir a Ingredientes",
+    "addTitle": "Añadir a la despensa",
+    "addHint": "Marca lo que tienes en casa.",
+    "addMore": "Añadir a la despensa",
+    "backToPantry": "Volver a la despensa",
+    "noIngredients": "Todavía no tienes ingredientes que marcar."
   }
 }

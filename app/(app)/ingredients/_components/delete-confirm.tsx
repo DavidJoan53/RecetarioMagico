@@ -3,11 +3,11 @@
 import {useTranslations} from 'next-intl'
 import {useActionState, useEffect, useRef} from 'react'
 import {useAnnounceDeletion} from '@/components/deletion-announcer'
-import type {IngredientWithPantry} from '@/db/ingredients/queries'
+import type {Ingredient} from '@/db/schema'
 import {type DeleteState, deleteIngredientAction} from '../actions'
 
 type Props = {
-  ingredient: IngredientWithPantry
+  ingredient: Ingredient
   onCancel: () => void
 }
 

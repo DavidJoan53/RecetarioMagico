@@ -12,12 +12,12 @@ export async function PantryList() {
     return (
       <div className="flex flex-col items-center gap-3 rounded-lg border border-light border-dashed p-6 text-center">
         <p className="text-secondary-foreground text-sm">{t('empty')}</p>
-        {/* The pantry is filled from the ingredient list, so say where. */}
+        {/* Filled from the picker, so point there rather than describing it. */}
         <Link
-          href="/ingredients"
+          href="/pantry/add"
           className="font-semibold text-primary-strong text-sm"
         >
-          {t('goToIngredients')} →
+          {t('addMore')} →
         </Link>
       </div>
     )
