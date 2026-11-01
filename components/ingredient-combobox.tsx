@@ -74,13 +74,18 @@ export function IngredientCombobox({value, onChange}: Props) {
     return () => observer.disconnect()
   }, [hasNextPage, fetchNextPage])
 
-  /** Keeps the active option in view when it is reached with the keyboard. */
+  /**
+   * Keeps the active option in view when it is reached with the keyboard.
+   * Only when the active one moves: on every render this also fired as a page
+   * arrived, scrolling back to whichever option was active — usually the
+   * first — so reaching the bottom threw you to the top.
+   */
   useEffect(() => {
     if (!open) return
     listRef.current
-      ?.querySelector(`#${CSS.escape(optionId(active))}`)
+      ?.querySelector(`#${CSS.escape(`${listId}-${active}`)}`)
       ?.scrollIntoView({block: 'nearest'})
-  })
+  }, [active, open, listId])
 
   function choose(ingredient: IngredientWithPantry) {
     onChange(ingredient)

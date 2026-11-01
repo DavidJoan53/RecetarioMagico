@@ -180,6 +180,27 @@ describe('IngredientCombobox', () => {
     await waitFor(() => expect(calls.some(c => c.startsWith('ceb'))).toBe(true))
   })
 
+  /**
+   * jsdom has no scroll, so the proof is that nothing asked for one: the only
+   * thing that moves the list is reaching a new active option.
+   */
+  it('stays where it is when another page arrives', async () => {
+    mockSearch({'': [ingredient('Ajo')], Ajo: [ingredient('Cebolla')]})
+    const scrolled = vi.spyOn(Element.prototype, 'scrollIntoView')
+    const {input} = setup()
+    await userEvent.click(input)
+    await screen.findByRole('option', {name: /Ajo/})
+
+    scrolled.mockClear()
+    observed?.()
+    await screen.findByRole('option', {name: /Cebolla/})
+    expect(scrolled).not.toHaveBeenCalled()
+
+    await userEvent.keyboard('{ArrowDown}')
+    expect(scrolled).toHaveBeenCalled()
+    scrolled.mockRestore()
+  })
+
   it('asks for the next page when the end of the list is reached', async () => {
     const calls = mockSearch({
       '': [ingredient('Ajo')],
