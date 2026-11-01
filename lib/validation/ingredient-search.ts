@@ -1,7 +1,7 @@
 import {z} from 'zod'
 
-/** Twenty fills a scroll viewport without making the first paint wait. */
-export const PAGE_SIZE = 20
+/** Ten fills the list box without making the first open wait on the rest. */
+export const PAGE_SIZE = 10
 
 export const ingredientSearch = z.object({
   /** Blank means unfiltered, so an empty box is a valid search. */
