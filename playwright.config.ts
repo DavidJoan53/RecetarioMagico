@@ -4,6 +4,32 @@ import {defineConfig, devices} from '@playwright/test'
 /** The runner is not Next, so .env.local needs loading to mint a session. */
 loadEnvConfig(process.cwd())
 
+/**
+ * These tests write, and they inherited DATABASE_URL from .env.local — which
+ * is the real database. They left rows in the live app before anyone noticed.
+ *
+ * The suite now needs a database of its own and refuses to start without one,
+ * because the failure is silent: everything passes, and the damage is only
+ * visible to whoever opens the app later.
+ */
+const testDatabase = process.env.E2E_DATABASE_URL
+if (!testDatabase) {
+  throw new Error(
+    'E2E_DATABASE_URL is not set. These tests create and delete rows, so they\n' +
+      'need their own database — use the `ci` Neon branch, never the one in\n' +
+      'DATABASE_URL. Add it to .env.local.',
+  )
+}
+if (testDatabase === process.env.DATABASE_URL) {
+  throw new Error(
+    'E2E_DATABASE_URL is the same database the app uses. Point it at the `ci`\n' +
+      'branch instead.',
+  )
+}
+
+/** Everything downstream reads DATABASE_URL, so there is one value to get right. */
+process.env.DATABASE_URL = testDatabase
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,

@@ -133,6 +133,8 @@ Three reasons it is a rule and not a preference: a query used by two screens sta
 - Test behaviour through the accessible interface — query by role and name, not by test id or class. This catches accessibility regressions for free.
 - At least one Playwright end-to-end flow covers the core path: create a recipe → label it → find it by label.
 - **Playwright always builds; it never reuses a running server.** A leftover one serves an older build, so the suite passes against code that is not under test. If `npm run test:e2e` reports the port in use, stop whatever is on 3000 — that error is the protection working.
+- **End-to-end tests get their own database, `E2E_DATABASE_URL`.** They create and delete rows. Pointed at the app's own database they edit the live app, and nothing says so — every test still passes, and the mess is found later by whoever opens the page. The suite refuses to start without it, and refuses if it matches `DATABASE_URL`.
+- **A write is only proven against a real database.** Component tests mock the server action, so they prove the message renders, never that the query ran or that the schema answered the way the code assumes. The catch in `delete-ingredient` looked for the wrong SQLSTATE and its unit test passed, because the test asserted the same wrong belief.
 
 ## Data model
 
