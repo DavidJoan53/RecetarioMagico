@@ -96,19 +96,22 @@ Build it in from the first render — retrofitting accessibility costs several t
 **Nothing outside `db/` imports the database client.** Pages, components and route handlers call a named function from `db/queries/` or `db/mutations/` — never `db` itself, and never a Drizzle builder inline.
 
 ```
-db/queries/<table>/<operation>.ts     one read   — recipes/latest-recipes.ts
-db/mutations/<table>/<operation>.ts  one write  — recipes/create-recipe.ts
-lib/<entity>.ts             pure    — shaping, deriving, validating. No db import.
-lib/validation/<entity>.ts  Zod schemas for a boundary
-app/api/<entity>/route.ts   HTTP    — withAuth, parse with Zod, call the above
+db/<table>/queries.ts          every read for that table
+db/<table>/<verb>-<noun>.ts    one write — create-recipe.ts, log-dinner.ts
+lib/<entity>.ts                pure — shaping, deriving, validating. No db import.
+lib/validation/<entity>.ts     the Zod schema for a boundary
+app/api/<entity>/route.ts      HTTP — withAuth, parse with Zod, call the above
 ```
 
-**One file per database operation, grouped in a folder by table.** Not one file per table — a `recipes.ts` holding every read becomes the file everything touches, so it collides on every branch and stops saying what is in it. The path names the operation, so you find it without opening it and a diff reads as one operation changed.
-
-The export inside keeps the full name — `latestRecipes`, not `latest` — because the import site reads on its own:
+**A folder per table holds everything that table does.** Reads live together in
+`queries.ts` — `latestRecipes`, `recipeById`, `recipesPage` are projections of
+the same row, usually added in the same breath and read as a set. Writes get a
+file each: each one carries its own validation, conflict handling and failure
+modes, and they only ever grow.
 
 ```ts
-import {latestRecipes} from '@/db/queries/recipes/latest-recipes'
+import {latestRecipes} from '@/db/recipes/queries'
+import {createRecipe} from '@/db/recipes/create-recipe'
 ```
 
 Three reasons it is a rule and not a preference: a query used by two screens stays one query, so a fix lands once. A pure function in `lib/` is testable without a connection string, which a query module is not. And an inline builder in a component is invisible to anyone auditing what touches the database.

@@ -1,6 +1,6 @@
 import {getTranslations} from 'next-intl/server'
 import {RecipeCard} from '@/components/recipe-card'
-import {latestRecipes} from '@/db/queries/recipes/latest-recipes'
+import {latestRecipes} from '@/db/recipes/queries'
 
 export async function RecipeList({limit}: {limit: number}) {
   const t = await getTranslations('recipes')
