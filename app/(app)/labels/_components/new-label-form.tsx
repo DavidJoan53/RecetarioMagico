@@ -1,7 +1,7 @@
 'use client'
 
 import {useTranslations} from 'next-intl'
-import {useActionState, useEffect, useId, useRef, useState} from 'react'
+import {useActionState, useId, useRef, useState} from 'react'
 import {createLabelAction, type FormState} from '../actions'
 
 /** Any hex is allowed, so this only has to be a reasonable starting point. */
@@ -14,10 +14,6 @@ type Props = {
 
 export function NewLabelForm({groupId, groupName}: Props) {
   const t = useTranslations('labels')
-  const [state, formAction, pending] = useActionState<FormState, FormData>(
-    createLabelAction,
-    {},
-  )
   const [name, setName] = useState('')
   const [color, setColor] = useState(DEFAULT_COLOR)
   const nameRef = useRef<HTMLInputElement>(null)
@@ -25,13 +21,22 @@ export function NewLabelForm({groupId, groupName}: Props) {
   const colorId = useId()
   const messageId = useId()
 
-  /* Controlled: React clears an uncontrolled form after an action even when
-     it failed, which takes the rejected name with it. */
-  useEffect(() => {
-    if (!state.done) return
-    setName('')
-    nameRef.current?.focus()
-  }, [state.done])
+  /**
+   * Controlled: React clears an uncontrolled form after an action even when it
+   * failed, which takes the rejected name with it. Cleared here rather than
+   * from an effect on state.done — that stays true, so only the first label in
+   * a row was cleared. The colour is kept: the next one usually shares it.
+   */
+  const addThenClear = async (previous: FormState, form: FormData) => {
+    const result = await createLabelAction(previous, form)
+    if (result.done) {
+      setName('')
+      nameRef.current?.focus()
+    }
+    return result
+  }
+
+  const [state, formAction, pending] = useActionState(addThenClear, {})
 
   return (
     <form

@@ -1,7 +1,7 @@
 'use client'
 
 import {useTranslations} from 'next-intl'
-import {useActionState, useEffect, useId, useRef, useState} from 'react'
+import {useActionState, useId, useRef, useState} from 'react'
 import type {FormState} from '../actions'
 import {IngredientFields} from './ingredient-fields'
 
@@ -11,7 +11,6 @@ type Props = {
 
 export function IngredientForm({action}: Props) {
   const t = useTranslations('ingredients')
-  const [state, formAction, pending] = useActionState(action, {})
   const [name, setName] = useState('')
   const [photoUrl, setPhotoUrl] = useState('')
   const nameRef = useRef<HTMLInputElement>(null)
@@ -21,13 +20,22 @@ export function IngredientForm({action}: Props) {
    * Controlled on purpose. React resets an uncontrolled form after an action
    * whether it succeeded or not, so a rejected name would take what was typed
    * with it. Clearing is a thing that happens on success only.
+   *
+   * Cleared here rather than from an effect watching state.done — that is
+   * true after the first success and stays true, so the effect never fires
+   * again and the second ingredient in a row kept its text.
    */
-  useEffect(() => {
-    if (!state.done) return
-    setName('')
-    setPhotoUrl('')
-    nameRef.current?.focus()
-  }, [state.done])
+  const addThenClear = async (previous: FormState, form: FormData) => {
+    const result = await action(previous, form)
+    if (result.done) {
+      setName('')
+      setPhotoUrl('')
+      nameRef.current?.focus()
+    }
+    return result
+  }
+
+  const [state, formAction, pending] = useActionState(addThenClear, {})
 
   return (
     <form

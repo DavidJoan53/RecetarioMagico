@@ -1,25 +1,30 @@
 'use client'
 
 import {useTranslations} from 'next-intl'
-import {useActionState, useEffect, useId, useRef, useState} from 'react'
+import {useActionState, useId, useRef, useState} from 'react'
 import {createLabelGroupAction, type FormState} from '../actions'
 
 export function NewGroupForm() {
   const t = useTranslations('labels')
-  const [state, formAction, pending] = useActionState<FormState, FormData>(
-    createLabelGroupAction,
-    {},
-  )
   const [name, setName] = useState('')
   const nameRef = useRef<HTMLInputElement>(null)
   const nameId = useId()
   const messageId = useId()
 
-  useEffect(() => {
-    if (!state.done) return
-    setName('')
-    nameRef.current?.focus()
-  }, [state.done])
+  /**
+   * Cleared here, not from an effect on state.done: that is true after the
+   * first success and stays true, so the second group in a row kept its name.
+   */
+  const createThenClear = async (previous: FormState, form: FormData) => {
+    const result = await createLabelGroupAction(previous, form)
+    if (result.done) {
+      setName('')
+      nameRef.current?.focus()
+    }
+    return result
+  }
+
+  const [state, formAction, pending] = useActionState(createThenClear, {})
 
   return (
     <form

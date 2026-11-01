@@ -88,3 +88,23 @@ describe('IngredientForm', () => {
     })
   })
 })
+
+/**
+ * The bug this guards: state.done goes true and stays true, so an effect
+ * keyed on it fires once. The second ingredient in a row kept its text.
+ */
+describe('adding several in a row', () => {
+  it('clears every time, not only the first', async () => {
+    const {name} = setup({done: true})
+    const add = screen.getByRole('button', {name: `+ ${m.add}`})
+
+    await userEvent.type(name, 'Tomate')
+    await userEvent.click(add)
+    await screen.findByRole('status')
+    expect(name).toHaveValue('')
+
+    await userEvent.type(name, 'Cebolla')
+    await userEvent.click(add)
+    expect(name).toHaveValue('')
+  })
+})
