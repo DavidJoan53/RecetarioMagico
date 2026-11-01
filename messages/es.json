@@ -77,5 +77,31 @@
     "newRecipe": "Nueva receta",
     "empty": "Todavía no tienes recetas.",
     "loadMore": "Cargar 10 más"
+  },
+  "ingredients": {
+    "addTitle": "Añadir ingrediente",
+    "name": "Nombre",
+    "namePlaceholder": "Tomate",
+    "photoUrl": "Foto (enlace, opcional)",
+    "photoPlaceholder": "https://…",
+    "add": "Añadir",
+    "added": "Ingrediente añadido",
+    "duplicate": "Ya tienes un ingrediente con ese nombre.",
+    "invalid": "Revisa el nombre y el enlace de la foto.",
+    "empty": "Todavía no tienes ingredientes.",
+    "listLabel": "Ingredientes",
+    "edit": "Editar",
+    "editLabel": "Editar {name}",
+    "editTitle": "Editar {name}",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "gone": "Ese ingrediente ya no existe.",
+    "delete": "Eliminar",
+    "deleteLabel": "Eliminar {name}",
+    "confirmDelete": "¿Eliminar {name}?",
+    "alsoLeavesPantry": "También saldrá de la despensa.",
+    "confirmDeleteAction": "Sí, eliminar",
+    "deleted": "{name} eliminado",
+    "inUse": "No puedes eliminarlo: lo usan {count, plural, one {# receta} other {# recetas}}."
   }
 }
