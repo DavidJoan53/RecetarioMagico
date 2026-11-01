@@ -1,12 +1,13 @@
 import {getTranslations} from 'next-intl/server'
-import {RecipeCard} from '@/components/recipe-card'
-import {latestRecipes} from '@/db/recipes/queries'
+import {recipesPage} from '@/db/recipes/queries'
+import {PAGE_SIZE} from '@/lib/validation/page'
+import {RecipePages} from './recipe-pages'
 
-export async function RecipeList({limit}: {limit: number}) {
+export async function RecipeList() {
   const t = await getTranslations('recipes')
-  const recipes = await latestRecipes(limit)
+  const page = await recipesPage({after: null, limit: PAGE_SIZE})
 
-  if (recipes.length === 0) {
+  if (page.items.length === 0) {
     return (
       <p className="rounded-lg border border-light border-dashed p-6 text-center text-secondary-foreground text-sm">
         {t('empty')}
@@ -14,17 +15,7 @@ export async function RecipeList({limit}: {limit: number}) {
     )
   }
 
-  return (
-    <ul className="flex flex-col gap-2">
-      {recipes.map(recipe => (
-        <RecipeCard
-          key={recipe.id}
-          id={recipe.id}
-          name={recipe.name}
-          imageUrl={recipe.imageUrl}
-          prepTimeMinutes={recipe.prepTimeMinutes}
-        />
-      ))}
-    </ul>
-  )
+  /* The first page is rendered here and handed over; the rest are fetched
+     as they are reached, so nothing waits on recipes nobody has scrolled to. */
+  return <RecipePages initialPage={page} />
 }

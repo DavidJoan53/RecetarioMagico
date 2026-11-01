@@ -4,7 +4,6 @@ import {getTranslations} from 'next-intl/server'
 import {Suspense} from 'react'
 import {SectionSkeleton} from '@/components/section-skeleton'
 import {getSession} from '@/lib/session'
-import {PAGE_SIZE} from '@/lib/validation/page'
 import {RecipeList} from './_components/recipe-list'
 
 export const dynamic = 'force-dynamic'
@@ -30,7 +29,7 @@ export default async function RecipesPage() {
       </div>
 
       <Suspense fallback={<SectionSkeleton />}>
-        <RecipeList limit={PAGE_SIZE} />
+        <RecipeList />
       </Suspense>
     </main>
   )
