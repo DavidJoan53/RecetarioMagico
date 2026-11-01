@@ -1,3 +1,4 @@
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
 import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {NextIntlClientProvider} from 'next-intl'
@@ -11,8 +12,12 @@ const m = messages.ingredients
 const setup = (state: FormState = {}) => {
   const action = vi.fn(async () => state)
   render(
+    /* These forms ask the cached list to refresh once the action is done, so
+   there has to be one to ask. */
     <NextIntlClientProvider locale="es" messages={messages}>
-      <IngredientForm action={action} />
+      <QueryClientProvider client={new QueryClient()}>
+        <IngredientForm action={action} />
+      </QueryClientProvider>
     </NextIntlClientProvider>,
   )
   const name = screen.getByRole('textbox', {name: m.name})
