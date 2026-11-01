@@ -1,9 +1,7 @@
 import {searchIngredients} from '@/db/ingredients/queries'
 import {withAuth} from '@/lib/session'
-import {
-  ingredientSearchFrom,
-  PAGE_SIZE,
-} from '@/lib/validation/ingredient-search'
+import {ingredientSearchFrom} from '@/lib/validation/ingredient-search'
+import {PAGE_SIZE} from '@/lib/validation/page'
 
 /**
  * Read-only, but still gated: the proxy only stops a browser, and this

@@ -4,10 +4,8 @@ import {getTranslations} from 'next-intl/server'
 import {Suspense} from 'react'
 import {SectionSkeleton} from '@/components/section-skeleton'
 import {getSession} from '@/lib/session'
+import {PAGE_SIZE} from '@/lib/validation/page'
 import {RecipeList} from './_components/recipe-list'
-
-/** Keyset pages of ten; uuid v7 ordering means no OFFSET drift. */
-const PAGE_SIZE = 10
 
 export const dynamic = 'force-dynamic'
 

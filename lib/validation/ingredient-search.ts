@@ -1,12 +1,10 @@
 import {z} from 'zod'
+import {cursorPage} from './page'
 
-/** Ten fills the list box without making the first open wait on the rest. */
-export const PAGE_SIZE = 10
-
-export const ingredientSearch = z.object({
+/** The same search, with a name to narrow it by. */
+export const ingredientSearch = cursorPage.extend({
   /** Blank means unfiltered, so an empty box is a valid search. */
   query: z.string().trim().max(120).default(''),
-  after: z.string().trim().min(1).nullable().default(null),
 })
 
 export type IngredientSearch = z.infer<typeof ingredientSearch>

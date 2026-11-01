@@ -1,6 +1,7 @@
 import {and, asc, eq, getTableColumns, gt, ilike, sql} from 'drizzle-orm'
 import {db} from '@/db'
 import {ingredients, pantry} from '@/db/schema'
+import {pageOf} from '@/lib/validation/page'
 
 export type IngredientWithPantry = typeof ingredients.$inferSelect & {
   inPantry: boolean
@@ -65,8 +66,5 @@ export async function searchIngredients({
     .orderBy(asc(ingredients.name))
     .limit(limit + 1)
 
-  /* One extra row answers "is there more" without a second count query. */
-  const items = rows.slice(0, limit)
-  const last = items.at(-1)
-  return {items, nextCursor: rows.length > limit && last ? last.name : null}
+  return pageOf(rows, limit, row => row.name)
 }
