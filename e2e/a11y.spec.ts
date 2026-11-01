@@ -25,7 +25,14 @@ signedIn('the session fixture reaches a gated page', async ({page}) => {
   await expect(page).toHaveURL(/\/home$/)
 })
 
-const GATED = ['/home', '/recipes', '/recipes/new', '/dinners', '/settings']
+const GATED = [
+  '/home',
+  '/recipes',
+  '/recipes/new',
+  '/dinners',
+  '/ingredients',
+  '/settings',
+]
 
 for (const path of GATED) {
   signedIn(`${path} has no detectable violations`, async ({page}) => {

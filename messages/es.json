@@ -77,5 +77,18 @@
     "newRecipe": "Nueva receta",
     "empty": "Todavía no tienes recetas.",
     "loadMore": "Cargar 10 más"
+  },
+  "ingredients": {
+    "addTitle": "Añadir ingrediente",
+    "name": "Nombre",
+    "namePlaceholder": "Tomate",
+    "photoUrl": "Foto (enlace, opcional)",
+    "photoPlaceholder": "https://…",
+    "add": "Añadir",
+    "added": "Ingrediente añadido",
+    "duplicate": "Ya tienes un ingrediente con ese nombre.",
+    "invalid": "Revisa el nombre y el enlace de la foto.",
+    "empty": "Todavía no tienes ingredientes.",
+    "listLabel": "Ingredientes"
   }
 }
