@@ -32,6 +32,7 @@ const GATED = [
   '/dinners',
   '/ingredients',
   '/labels',
+  '/pantry',
   '/settings',
 ]
 

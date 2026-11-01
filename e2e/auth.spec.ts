@@ -26,6 +26,7 @@ test.describe('signed out', () => {
     '/dinners',
     '/settings',
     '/labels',
+    '/pantry',
     '/ingredients',
     '/claude',
     '/a-route-that-does-not-exist-yet',

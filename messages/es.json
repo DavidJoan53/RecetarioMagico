@@ -145,6 +145,19 @@
     "have": "La tengo",
     "haveNot": "No la tengo",
     "addLabel": "Añadir {name} a la despensa",
-    "removeLabel": "Quitar {name} de la despensa"
+    "removeLabel": "Quitar {name} de la despensa",
+    "quantity": "Cantidad",
+    "unit": "Unidad",
+    "noUnit": "Sin unidad",
+    "noAmount": "Sin cantidad",
+    "amountFor": "Cantidad de {name}",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "remove": "Quitar",
+    "removed": "{name} fuera de la despensa",
+    "gone": "Eso ya no está en la despensa.",
+    "invalid": "Revisa la cantidad.",
+    "empty": "Tu despensa está vacía.",
+    "goToIngredients": "Marca lo que tienes en Ingredientes"
   }
 }
