@@ -35,9 +35,10 @@ test('the ingredient list arrives ten at a time', async ({page}) => {
   const input = page.getByRole('combobox', {name: m.ingredient})
   await input.fill(prefix)
 
-  /* Wait for the filtered results: the search is debounced, so counting
-     straight after typing counts whatever was on screen before. */
-  const options = page.getByRole('option')
+  /* Scoped to the list box. The unit select is a combobox too, and its
+     seven units plus the placeholder are options — counting them made a
+     capped list of ten look like eighteen. */
+  const options = page.getByRole('listbox').getByRole('option')
   await expect(options.first()).toContainText(prefix)
   await expect(options).toHaveCount(PAGE_SIZE)
 
@@ -57,7 +58,7 @@ test('a search narrows to what matches', async ({page}) => {
   await page.goto('/pantry/add')
   await page.getByRole('combobox', {name: m.ingredient}).fill(`${prefix}-alpha`)
 
-  const options = page.getByRole('option')
+  const options = page.getByRole('listbox').getByRole('option')
   await expect(options.first()).toContainText('alpha')
   await expect(options).toHaveCount(1)
 })
