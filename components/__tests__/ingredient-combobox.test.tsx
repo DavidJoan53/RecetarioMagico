@@ -8,6 +8,7 @@ import messages from '@/messages/es.json'
 import {IngredientCombobox} from '../ingredient-combobox'
 
 const m = messages.pantry
+const c = messages.common
 
 const ingredient = (name: string, inPantry = false): IngredientWithPantry => ({
   id: name,
@@ -201,7 +202,7 @@ describe('IngredientCombobox', () => {
 
     /* There is a next page, and nothing is fetching it yet. */
     const list = () => within(screen.getByRole('listbox'))
-    expect(list().queryByText(m.loadingMore)).toBeNull()
+    expect(list().queryByText(c.loadingMore)).toBeNull()
 
     const previous = globalThis.fetch
     vi.stubGlobal('fetch', (url: string) => {
@@ -213,13 +214,13 @@ describe('IngredientCombobox', () => {
 
     observed?.()
     await waitFor(() =>
-      expect(list().getByText(m.loadingMore)).toBeInTheDocument(),
+      expect(list().getByText(c.loadingMore)).toBeInTheDocument(),
     )
-    expect(screen.getByRole('status')).toHaveTextContent(m.loadingMore)
+    expect(screen.getByRole('status')).toHaveTextContent(c.loadingMore)
 
     release()
     await screen.findByRole('option', {name: /Cebolla/})
-    await waitFor(() => expect(list().queryByText(m.loadingMore)).toBeNull())
+    await waitFor(() => expect(list().queryByText(c.loadingMore)).toBeNull())
   })
 
   /**

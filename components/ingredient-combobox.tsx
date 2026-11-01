@@ -31,6 +31,7 @@ async function fetchPage(query: string, after: string | null) {
  */
 export function IngredientCombobox({value, onChange}: Props) {
   const t = useTranslations('pantry')
+  const common = useTranslations('common')
   const [text, setText] = useState('')
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
@@ -61,7 +62,7 @@ export function IngredientCombobox({value, onChange}: Props) {
      other: that more is coming, then how much there is. */
   const announcement = (() => {
     if (!open || isPending) return ''
-    if (isFetchingNextPage) return t('loadingMore')
+    if (isFetchingNextPage) return common('loadingMore')
     return t('resultCount', {count: options.length})
   })()
 
@@ -221,7 +222,7 @@ export function IngredientCombobox({value, onChange}: Props) {
             /* presentation, not option: it is a loading marker, and counting
                it would make the list one longer than it is. */
             <div role="presentation" className="px-3 py-2 text-center text-sm">
-              {t('loadingMore')}
+              {common('loadingMore')}
             </div>
           )}
 

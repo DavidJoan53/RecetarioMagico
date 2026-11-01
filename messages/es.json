@@ -53,7 +53,10 @@
   },
   "common": {
     "loading": "Cargando…",
-    "empty": "Nada por aquí todavía."
+    "empty": "Nada por aquí todavía.",
+    "loadMore": "Cargar {count} más",
+    "loadingMore": "Cargando más…",
+    "endOfList": "Ya no hay más."
   },
   "recipeForm": {
     "newTitle": "Nueva receta",
@@ -76,8 +79,7 @@
   },
   "recipes": {
     "newRecipe": "Nueva receta",
-    "empty": "Todavía no tienes recetas.",
-    "loadMore": "Cargar 10 más"
+    "empty": "Todavía no tienes recetas."
   },
   "ingredients": {
     "addTitle": "Añadir ingrediente",
@@ -162,7 +164,6 @@
     "ingredient": "Ingrediente",
     "searchPlaceholder": "Busca por nombre…",
     "alreadyIn": "ya está",
-    "loadingMore": "Cargando más…",
     "noMatches": "Ningún ingrediente con ese nombre.",
     "resultCount": "{count, plural, =0 {Sin resultados} one {# resultado} other {# resultados}}",
     "addOne": "Añadir a la despensa",

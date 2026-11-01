@@ -52,7 +52,10 @@
   },
   "common": {
     "loading": "Loading…",
-    "empty": "Nothing here yet."
+    "empty": "Nothing here yet.",
+    "loadMore": "Load {count} more",
+    "loadingMore": "Loading more…",
+    "endOfList": "That's everything."
   },
   "recipeForm": {
     "newTitle": "New recipe",
@@ -75,7 +78,6 @@
   },
   "recipes": {
     "newRecipe": "New recipe",
-    "empty": "No recipes yet.",
-    "loadMore": "Load 10 more"
+    "empty": "No recipes yet."
   }
 }
