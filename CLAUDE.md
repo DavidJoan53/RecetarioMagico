@@ -96,14 +96,20 @@ Build it in from the first render — retrofitting accessibility costs several t
 **Nothing outside `db/` imports the database client.** Pages, components and route handlers call a named function from `db/queries/` or `db/mutations/` — never `db` itself, and never a Drizzle builder inline.
 
 ```
-db/queries/<entity>.ts      reads   — latestRecipes, recipeById, recipesByLabel
-db/mutations/<verb>-<noun>.ts  writes  — create-recipe.ts, log-dinner.ts
+db/queries/<table>/<operation>.ts     one read   — recipes/latest-recipes.ts
+db/mutations/<table>/<operation>.ts  one write  — recipes/create-recipe.ts
 lib/<entity>.ts             pure    — shaping, deriving, validating. No db import.
 lib/validation/<entity>.ts  Zod schemas for a boundary
 app/api/<entity>/route.ts   HTTP    — withAuth, parse with Zod, call the above
 ```
 
-**Reads are grouped by entity; writes get a file each.** A read is a projection — several of them are one-liners that get used together, and splitting them makes you open five files to see what a screen asks for. A write is a transaction with its own validation, conflict handling and failure modes, and it only grows; `create-recipe.ts` says what is in it without being opened.
+**One file per database operation, grouped in a folder by table.** Not one file per table — a `recipes.ts` holding every read becomes the file everything touches, so it collides on every branch and stops saying what is in it. The path names the operation, so you find it without opening it and a diff reads as one operation changed.
+
+The export inside keeps the full name — `latestRecipes`, not `latest` — because the import site reads on its own:
+
+```ts
+import {latestRecipes} from '@/db/queries/recipes/latest-recipes'
+```
 
 Three reasons it is a rule and not a preference: a query used by two screens stays one query, so a fix lands once. A pure function in `lib/` is testable without a connection string, which a query module is not. And an inline builder in a component is invisible to anyone auditing what touches the database.
 
