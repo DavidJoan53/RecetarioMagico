@@ -20,7 +20,12 @@ if (!testDatabase) {
       'DATABASE_URL. Add it to .env.local.',
   )
 }
-if (testDatabase === process.env.DATABASE_URL) {
+/**
+ * Not on a runner, where both are the throwaway branch on purpose — there is
+ * no second database there to protect. This guards a laptop, where the other
+ * one is the app people are using.
+ */
+if (!process.env.CI && testDatabase === process.env.DATABASE_URL) {
   throw new Error(
     'E2E_DATABASE_URL is the same database the app uses. Point it at the `ci`\n' +
       'branch instead.',
