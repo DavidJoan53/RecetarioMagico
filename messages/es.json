@@ -103,5 +103,22 @@
     "confirmDeleteAction": "Sí, eliminar",
     "deleted": "{name} eliminado",
     "inUse": "No puedes eliminarlo: lo usan {count, plural, one {# receta} other {# recetas}}."
+  },
+  "labels": {
+    "newGroup": "Nuevo grupo",
+    "groupPlaceholder": "Momento, Herramienta…",
+    "createGroup": "Crear grupo",
+    "groupAdded": "Grupo creado",
+    "groupDuplicate": "Ya tienes un grupo con ese nombre.",
+    "groupEmpty": "Este grupo todavía no tiene etiquetas.",
+    "empty": "Todavía no tienes grupos. Crea uno para empezar.",
+    "addTo": "Añadir etiqueta a {group}",
+    "name": "Etiqueta",
+    "color": "Color",
+    "add": "Añadir",
+    "added": "Etiqueta añadida",
+    "duplicate": "Ya existe una etiqueta con ese nombre, en este grupo o en otro.",
+    "groupGone": "Ese grupo ya no existe.",
+    "invalid": "Revisa el nombre y el color."
   }
 }
