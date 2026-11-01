@@ -1,4 +1,8 @@
+import {loadEnvConfig} from '@next/env'
 import {defineConfig, devices} from '@playwright/test'
+
+/** The runner is not Next, so .env.local needs loading to mint a session. */
+loadEnvConfig(process.cwd())
 
 export default defineConfig({
   testDir: './e2e',
