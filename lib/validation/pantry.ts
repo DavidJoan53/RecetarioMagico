@@ -1,19 +1,24 @@
 import {z} from 'zod'
 import {unitEnum} from '@/db/schema'
 
-/** Both nullable: "sal, al gusto" is a pantry entry with no number. */
+/**
+ * Both required, together. "500" says nothing without a unit and "g" says
+ * nothing without a number, so neither is useful alone.
+ *
+ * The columns stay nullable: rows written before this rule still exist, and
+ * the pantry has to show them.
+ */
 export const pantryEntryInput = z.object({
-  quantity: z.number().positive().max(100_000).nullable(),
-  unit: z.enum(unitEnum.enumValues).nullable(),
+  quantity: z.number('required').positive().max(100_000),
+  unit: z.enum(unitEnum.enumValues, 'required'),
 })
 
 export type PantryEntryInput = z.infer<typeof pantryEntryInput>
 
 export function pantryEntryFromForm(form: FormData) {
   const quantity = String(form.get('quantity') ?? '').trim()
-  const unit = String(form.get('unit') ?? '').trim()
   return pantryEntryInput.safeParse({
-    quantity: quantity === '' ? null : Number(quantity),
-    unit: unit === '' ? null : unit,
+    quantity: quantity === '' ? Number.NaN : Number(quantity),
+    unit: String(form.get('unit') ?? '').trim(),
   })
 }

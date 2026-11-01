@@ -81,9 +81,18 @@ describe('PantryRow', () => {
       expect(screen.getByRole('spinbutton', {name: m.quantity})).toHaveFocus()
     })
 
-    it('offers no unit as a choice', async () => {
+    /** An amount needs both halves, so there is no way to clear one. */
+    it('offers a unit placeholder that cannot be chosen', async () => {
       await open()
-      expect(screen.getByRole('option', {name: m.noUnit})).toBeInTheDocument()
+      const placeholder = screen.getByRole('option', {name: m.chooseUnit})
+      expect(placeholder).toBeDisabled()
+    })
+
+    it('will not submit without a quantity', async () => {
+      await open()
+      await userEvent.clear(screen.getByRole('spinbutton', {name: m.quantity}))
+      await userEvent.click(screen.getByRole('button', {name: m.save}))
+      expect(update).not.toHaveBeenCalled()
     })
 
     it('sends the ingredient it belongs to', async () => {

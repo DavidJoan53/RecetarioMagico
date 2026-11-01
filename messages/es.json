@@ -145,7 +145,6 @@
     "removeLabel": "Quitar {name} de la despensa",
     "quantity": "Cantidad",
     "unit": "Unidad",
-    "noUnit": "Sin unidad",
     "noAmount": "Sin cantidad",
     "amountFor": "Cantidad de {name}",
     "save": "Guardar",
@@ -153,7 +152,7 @@
     "remove": "Quitar",
     "removed": "{name} fuera de la despensa",
     "gone": "Eso ya no está en la despensa.",
-    "invalid": "Revisa la cantidad.",
+    "invalid": "Indica cuánto tienes y en qué unidad.",
     "empty": "Tu despensa está vacía.",
     "goToIngredients": "Ir a Ingredientes",
     "addTitle": "Añadir a la despensa",
@@ -168,6 +167,7 @@
     "resultCount": "{count, plural, =0 {Sin resultados} one {# resultado} other {# resultados}}",
     "addOne": "Añadir a la despensa",
     "alreadyThere": "Ese ingrediente ya está en tu despensa.",
-    "addedCount": "{name} añadido. {count, plural, one {# en esta sesión} other {# en esta sesión}}."
+    "addedCount": "{name} añadido. {count, plural, one {# en esta sesión} other {# en esta sesión}}.",
+    "chooseUnit": "Elige una unidad"
   }
 }

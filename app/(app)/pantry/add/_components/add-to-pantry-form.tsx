@@ -56,6 +56,7 @@ export function AddToPantryForm() {
             name="quantity"
             type="number"
             inputMode="decimal"
+            required
             min="0"
             step="any"
             value={quantity}
@@ -72,12 +73,16 @@ export function AddToPantryForm() {
           <select
             id={unitId}
             name="unit"
+            required
             value={unit}
             onChange={e => setUnit(e.target.value)}
             className="rounded-lg border border-secondary-foreground bg-background px-3 py-2"
           >
-            {/* Blank is a real answer: salt is had, not measured. */}
-            <option value="">{t('noUnit')}</option>
+            {/* Empty and disabled: a placeholder, not a choosable answer —
+                an amount needs both halves to mean anything. */}
+            <option value="" disabled>
+              {t('chooseUnit')}
+            </option>
             {unitEnum.enumValues.map(value => (
               <option key={value} value={value}>
                 {value}
