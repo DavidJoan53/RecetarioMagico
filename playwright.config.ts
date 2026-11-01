@@ -7,6 +7,16 @@ loadEnvConfig(process.cwd())
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
+  /**
+   * Every page here reads Postgres over HTTP, against a Neon branch capped at
+   * 0.25 CU. Left to choose, Playwright ran six browsers and Neon began
+   * refusing connections — which surfaces as the app failing to render, so it
+   * reads like a bug in the page rather than a limit being hit. One at a time
+   * is slower and says what it means.
+   */
+  workers: 1,
+  /** One retry, for a refused connection — not for a flaky assertion. */
+  retries: 1,
   reporter: 'list',
   use: {baseURL: 'http://localhost:3000', trace: 'on-first-retry'},
   projects: [{name: 'chromium', use: {...devices['Desktop Chrome']}}],
