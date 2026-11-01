@@ -1,24 +1,13 @@
 import Link from 'next/link'
 import {useTranslations} from 'next-intl'
 import {THUMBNAIL_SIZE} from '@/lib/youtube'
+import {RecipeCardFallback} from './recipe-card-fallback'
 
 type Props = {
   id: string
   name: string
   imageUrl: string | null
   prepTimeMinutes?: number | null
-}
-
-/** Letter tile when there is no thumbnail — never an Open Graph scrape. */
-function Fallback({name}: {name: string}) {
-  return (
-    <div
-      aria-hidden="true"
-      className="flex h-12 w-20 flex-none items-center justify-center rounded bg-light font-bold text-secondary-foreground"
-    >
-      {name.slice(0, 1).toUpperCase()}
-    </div>
-  )
 }
 
 export function RecipeCard({id, name, imageUrl, prepTimeMinutes}: Props) {
@@ -42,7 +31,7 @@ export function RecipeCard({id, name, imageUrl, prepTimeMinutes}: Props) {
             className="h-12 w-20 flex-none rounded object-cover"
           />
         ) : (
-          <Fallback name={name} />
+          <RecipeCardFallback name={name} />
         )}
         <span className="min-w-0 flex-1">
           <span className="block truncate font-semibold text-sm">{name}</span>
