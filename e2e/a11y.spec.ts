@@ -36,7 +36,11 @@ const GATED = [
 
 for (const path of GATED) {
   signedIn(`${path} has no detectable violations`, async ({page}) => {
-    await page.goto(path)
+    const response = await page.goto(path)
+    /* Next's error document has no lang attribute, so a page that threw
+       fails as an accessibility violation and reads like one. Say what it
+       actually is: the page never rendered. */
+    expect(response?.status(), `${path} did not render`).toBe(200)
     expect(page.url()).toContain(path)
     expect(await violations(page)).toEqual([])
   })
