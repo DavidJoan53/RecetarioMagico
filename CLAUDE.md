@@ -163,7 +163,8 @@ feature/fix  →  dev  →  main
             lands here   only
 ```
 
-- **`dev` is the default branch.** New work branches from it and pull requests target it, which is what GitHub does automatically.
+- **Every pull request targets `dev`.** No exceptions by default — `dev` is the default branch, so this is what GitHub does on its own. A PR aimed at `main` is a deliberate act and needs saying out loud.
+- **`main` is only ever updated by an explicit request to deploy.** Not when a feature is finished, not when CI is green, not because `dev` has piled up. Someone decides the live site should change and says so.
 - **`main` is production**, and the only thing Vercel deploys to the live site. It moves when a batch of work is ready, not on every merge.
 - Every push and every pull request runs CI. Each branch also gets its own preview URL, so a change can be seen before it reaches anyone.
 
