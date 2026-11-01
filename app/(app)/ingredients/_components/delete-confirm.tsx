@@ -2,9 +2,9 @@
 
 import {useTranslations} from 'next-intl'
 import {useActionState, useEffect, useRef} from 'react'
+import {useAnnounceDeletion} from '@/components/deletion-announcer'
 import type {Ingredient} from '@/db/schema'
 import {type DeleteState, deleteIngredientAction} from '../actions'
-import {useAnnounceDeletion} from './deletion-announcer'
 
 type Props = {
   ingredient: Ingredient

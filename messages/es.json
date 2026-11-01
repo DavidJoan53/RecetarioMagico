@@ -119,6 +119,24 @@
     "added": "Etiqueta añadida",
     "duplicate": "Ya existe una etiqueta con ese nombre, en este grupo o en otro.",
     "groupGone": "Ese grupo ya no existe.",
-    "invalid": "Revisa el nombre y el color."
+    "invalid": "Revisa el nombre y el color.",
+    "edit": "Editar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "groupName": "Nombre del grupo",
+    "editLabel": "Editar {name}",
+    "editGroupLabel": "Editar grupo {name}",
+    "deleteGroupLabel": "Eliminar grupo {name}",
+    "labelGone": "Esa etiqueta ya no existe.",
+    "confirmDelete": "¿Eliminar {name}?",
+    "confirmDeleteGroup": "¿Eliminar el grupo {name}?",
+    "confirmDeleteAction": "Sí, eliminar",
+    "alsoLeavesRecipes": "Se quitará de {count, plural, one {# receta} other {# recetas}}.",
+    "usedByNothing": "No la usa ninguna receta.",
+    "groupTakesLabels": "Se irán también {labels, plural, one {# etiqueta} other {# etiquetas}}, y se quitarán de {recipes, plural, =0 {ninguna receta} one {# receta} other {# recetas}}.",
+    "groupHasNoLabels": "Este grupo no tiene etiquetas.",
+    "deleted": "{name} eliminada",
+    "groupDeleted": "Grupo {name} eliminado"
   }
 }

@@ -1,6 +1,6 @@
 import {getTranslations} from 'next-intl/server'
+import {DeletionAnnouncer} from '@/components/deletion-announcer'
 import {allIngredients} from '@/db/ingredients/queries'
-import {DeletionAnnouncer} from './deletion-announcer'
 import {IngredientRow} from './ingredient-row'
 
 export async function IngredientList() {

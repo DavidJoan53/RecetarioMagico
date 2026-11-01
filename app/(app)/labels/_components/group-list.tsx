@@ -1,6 +1,8 @@
 import {getTranslations} from 'next-intl/server'
-import {LabelChip} from '@/components/label-chip'
+import {DeletionAnnouncer} from '@/components/deletion-announcer'
 import {allGroupsWithLabels} from '@/db/label-groups/queries'
+import {GroupHeader} from './group-header'
+import {LabelItem} from './label-item'
 import {NewLabelForm} from './new-label-form'
 
 export async function GroupList() {
@@ -16,37 +18,32 @@ export async function GroupList() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      {groups.map(group => (
-        <section
-          key={group.id}
-          aria-labelledby={`group-${group.id}`}
-          className="flex flex-col gap-3 rounded-lg border border-light bg-background-foreground p-4"
-        >
-          <h2
-            id={`group-${group.id}`}
-            className="font-mono text-secondary-foreground text-xs uppercase tracking-wider"
+    <DeletionAnnouncer>
+      <div className="flex flex-col gap-4">
+        {groups.map(group => (
+          <section
+            key={group.id}
+            aria-labelledby={`group-${group.id}`}
+            className="flex flex-col gap-3 rounded-lg border border-light bg-background-foreground p-4"
           >
-            {group.name}
-          </h2>
+            <GroupHeader group={group} headingId={`group-${group.id}`} />
 
-          {group.labels.length === 0 ? (
-            <p className="text-secondary-foreground text-sm">
-              {t('groupEmpty')}
-            </p>
-          ) : (
-            <ul aria-label={group.name} className="flex flex-wrap gap-2">
-              {group.labels.map(label => (
-                <li key={label.id}>
-                  <LabelChip label={label} />
-                </li>
-              ))}
-            </ul>
-          )}
+            {group.labels.length === 0 ? (
+              <p className="text-secondary-foreground text-sm">
+                {t('groupEmpty')}
+              </p>
+            ) : (
+              <ul aria-label={group.name} className="flex flex-wrap gap-2">
+                {group.labels.map(label => (
+                  <LabelItem key={label.id} label={label} />
+                ))}
+              </ul>
+            )}
 
-          <NewLabelForm groupId={group.id} groupName={group.name} />
-        </section>
-      ))}
-    </div>
+            <NewLabelForm groupId={group.id} groupName={group.name} />
+          </section>
+        ))}
+      </div>
+    </DeletionAnnouncer>
   )
 }
