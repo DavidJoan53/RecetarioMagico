@@ -53,5 +53,29 @@
   "common": {
     "loading": "Cargando…",
     "empty": "Nada por aquí todavía."
+  },
+  "recipeForm": {
+    "newTitle": "Nueva receta",
+    "name": "Nombre",
+    "namePlaceholder": "Ej. Arepa de huevo",
+    "minutes": "Minutos",
+    "instructions": "Preparación",
+    "step": "Paso {n}",
+    "addStep": "Añadir paso",
+    "removeStep": "Quitar paso {n}",
+    "links": "Enlaces",
+    "link": "Enlace {n}",
+    "linkPlaceholder": "Pega un enlace de YouTube",
+    "addLink": "Añadir enlace",
+    "removeLink": "Quitar enlace {n}",
+    "create": "Crear",
+    "cancel": "Cancelar",
+    "duplicateName": "Ya tienes una receta con ese nombre.",
+    "invalid": "Revisa los campos marcados."
+  },
+  "recipes": {
+    "newRecipe": "Nueva receta",
+    "empty": "Todavía no tienes recetas.",
+    "loadMore": "Cargar 10 más"
   }
 }

@@ -96,10 +96,22 @@ Build it in from the first render — retrofitting accessibility costs several t
 **Nothing outside `db/` imports the database client.** Pages, components and route handlers call a named function from `db/queries/` or `db/mutations/` — never `db` itself, and never a Drizzle builder inline.
 
 ```
-db/queries/<entity>.ts     reads   — latestRecipes, recipeById
-db/mutations/<entity>.ts   writes  — createRecipe, logDinner
-lib/<entity>.ts            pure    — shaping, deriving, validating. No db import.
-app/api/<entity>/route.ts  HTTP    — withAuth, parse with Zod, call the above
+db/<table>/queries.ts          every read for that table
+db/<table>/<verb>-<noun>.ts    one write — create-recipe.ts, log-dinner.ts
+lib/<entity>.ts                pure — shaping, deriving, validating. No db import.
+lib/validation/<entity>.ts     the Zod schema for a boundary
+app/api/<entity>/route.ts      HTTP — withAuth, parse with Zod, call the above
+```
+
+**A folder per table holds everything that table does.** Reads live together in
+`queries.ts` — `latestRecipes`, `recipeById`, `recipesPage` are projections of
+the same row, usually added in the same breath and read as a set. Writes get a
+file each: each one carries its own validation, conflict handling and failure
+modes, and they only ever grow.
+
+```ts
+import {latestRecipes} from '@/db/recipes/queries'
+import {createRecipe} from '@/db/recipes/create-recipe'
 ```
 
 Three reasons it is a rule and not a preference: a query used by two screens stays one query, so a fix lands once. A pure function in `lib/` is testable without a connection string, which a query module is not. And an inline builder in a component is invisible to anyone auditing what touches the database.
@@ -163,7 +175,8 @@ feature/fix  →  dev  →  main
             lands here   only
 ```
 
-- **`dev` is the default branch.** New work branches from it and pull requests target it, which is what GitHub does automatically.
+- **Every pull request targets `dev`.** No exceptions by default — `dev` is the default branch, so this is what GitHub does on its own. A PR aimed at `main` is a deliberate act and needs saying out loud.
+- **`main` is only ever updated by an explicit request to deploy.** Not when a feature is finished, not when CI is green, not because `dev` has piled up. Someone decides the live site should change and says so.
 - **`main` is production**, and the only thing Vercel deploys to the live site. It moves when a batch of work is ready, not on every merge.
 - Every push and every pull request runs CI. Each branch also gets its own preview URL, so a change can be seen before it reaches anyone.
 

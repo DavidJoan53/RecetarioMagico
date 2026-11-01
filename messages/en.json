@@ -53,5 +53,29 @@
   "common": {
     "loading": "Loading…",
     "empty": "Nothing here yet."
+  },
+  "recipeForm": {
+    "newTitle": "New recipe",
+    "name": "Name",
+    "namePlaceholder": "e.g. Arepa de huevo",
+    "minutes": "Minutes",
+    "instructions": "Steps",
+    "step": "Step {n}",
+    "addStep": "Add step",
+    "removeStep": "Remove step {n}",
+    "links": "Links",
+    "link": "Link {n}",
+    "linkPlaceholder": "Paste a YouTube link",
+    "addLink": "Add link",
+    "removeLink": "Remove link {n}",
+    "create": "Create",
+    "cancel": "Cancel",
+    "duplicateName": "You already have a recipe with that name.",
+    "invalid": "Check the highlighted fields."
+  },
+  "recipes": {
+    "newRecipe": "New recipe",
+    "empty": "No recipes yet.",
+    "loadMore": "Load 10 more"
   }
 }
