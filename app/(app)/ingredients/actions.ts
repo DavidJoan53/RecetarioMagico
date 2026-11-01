@@ -5,6 +5,8 @@ import {redirect} from 'next/navigation'
 import {createIngredient} from '@/db/ingredients/create-ingredient'
 import {deleteIngredient} from '@/db/ingredients/delete-ingredient'
 import {updateIngredient} from '@/db/ingredients/update-ingredient'
+import {addToPantry} from '@/db/pantry/add-to-pantry'
+import {removeFromPantry} from '@/db/pantry/remove-from-pantry'
 import {getSession} from '@/lib/session'
 import {ingredientInputFromForm} from '@/lib/validation/ingredient'
 
@@ -76,5 +78,28 @@ export async function deleteIngredientAction(
   }
 
   revalidatePath('/ingredients')
+  return {}
+}
+
+export type PantryState = {error?: 'gone'}
+
+/**
+ * The next state is sent rather than read, so two rapid clicks cannot both
+ * decide to add. Idempotent either way.
+ */
+export async function togglePantryAction(
+  _previous: PantryState,
+  form: FormData,
+): Promise<PantryState> {
+  await requireSession()
+
+  const id = String(form.get('id') ?? '')
+  if (!id) return {error: 'gone'}
+
+  if (form.get('inPantry') === 'true') await removeFromPantry(id)
+  else await addToPantry(id)
+
+  revalidatePath('/ingredients')
+  revalidatePath('/pantry')
   return {}
 }

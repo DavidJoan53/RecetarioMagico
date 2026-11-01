@@ -2,12 +2,12 @@
 
 import {useTranslations} from 'next-intl'
 import {useActionState, useEffect, useId, useRef, useState} from 'react'
-import type {Ingredient} from '@/db/schema'
+import type {IngredientWithPantry} from '@/db/ingredients/queries'
 import {updateIngredientAction} from '../actions'
 import {IngredientFields} from './ingredient-fields'
 
 type Props = {
-  ingredient: Ingredient
+  ingredient: IngredientWithPantry
   onDone: () => void
   onCancel: () => void
 }

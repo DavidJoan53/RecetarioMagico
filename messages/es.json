@@ -16,7 +16,8 @@
     "dinners": "Cenas",
     "settings": "Ajustes",
     "labels": "Etiquetas",
-    "ingredients": "Ingredientes"
+    "ingredients": "Ingredientes",
+    "pantry": "Despensa"
   },
   "search": {
     "placeholder": "Buscar..."
@@ -138,5 +139,12 @@
     "groupHasNoLabels": "Este grupo no tiene etiquetas.",
     "deleted": "{name} eliminada",
     "groupDeleted": "Grupo {name} eliminado"
+  },
+  "pantry": {
+    "title": "Despensa",
+    "have": "La tengo",
+    "haveNot": "No la tengo",
+    "addLabel": "Añadir {name} a la despensa",
+    "removeLabel": "Quitar {name} de la despensa"
   }
 }

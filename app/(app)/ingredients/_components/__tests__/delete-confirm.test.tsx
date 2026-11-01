@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import {NextIntlClientProvider} from 'next-intl'
 import {beforeEach, describe, expect, it, vi} from 'vitest'
 import {DeletionAnnouncer} from '@/components/deletion-announcer'
-import type {Ingredient} from '@/db/schema'
+import type {IngredientWithPantry} from '@/db/ingredients/queries'
 import messages from '@/messages/es.json'
 import {DeleteConfirm} from '../delete-confirm'
 
@@ -14,7 +14,12 @@ vi.mock('../../actions', () => ({
 
 const m = messages.ingredients
 
-const TOMATE: Ingredient = {id: 'i1', name: 'Tomate', photoUrl: null}
+const TOMATE: IngredientWithPantry = {
+  id: 'i1',
+  name: 'Tomate',
+  photoUrl: null,
+  inPantry: false,
+}
 
 const setup = () => {
   const onCancel = vi.fn()
