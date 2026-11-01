@@ -1,10 +1,12 @@
 'use client'
 
+import {useQueryClient} from '@tanstack/react-query'
 import {useTranslations} from 'next-intl'
 import {useActionState, useEffect, useId, useRef, useState} from 'react'
 import type {PantryItem} from '@/db/pantry/queries'
 import {unitEnum} from '@/db/schema'
-import {updatePantryEntryAction} from '../actions'
+import {queryKeys} from '@/lib/query-keys'
+import {type FormState, updatePantryEntryAction} from '../actions'
 
 type Props = {
   item: PantryItem
@@ -14,10 +16,19 @@ type Props = {
 
 export function PantryAmountForm({item, onDone, onCancel}: Props) {
   const t = useTranslations('pantry')
-  const [state, formAction, pending] = useActionState(
-    updatePantryEntryAction,
-    {},
-  )
+  const queryClient = useQueryClient()
+
+  /* The list holds its own pages now, so the saved amount has to be asked
+     for again — revalidating the server's copy no longer reaches it. */
+  const saveThen = async (previous: FormState, form: FormData) => {
+    const result = await updatePantryEntryAction(previous, form)
+    if (result.done) {
+      await queryClient.invalidateQueries({queryKey: queryKeys.pantry})
+    }
+    return result
+  }
+
+  const [state, formAction, pending] = useActionState(saveThen, {})
   const [quantity, setQuantity] = useState(item.quantity?.toString() ?? '')
   const [unit, setUnit] = useState(item.unit ?? '')
   const quantityRef = useRef<HTMLInputElement>(null)

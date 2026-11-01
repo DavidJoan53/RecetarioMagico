@@ -1,3 +1,4 @@
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
 import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {NextIntlClientProvider} from 'next-intl'
@@ -26,12 +27,16 @@ const item = (
   unit,
 })
 
+/* The row's buttons ask the cached list to refresh itself once they are
+   done, so there has to be one to ask. */
 const setup = (it: PantryItem) =>
   render(
     <NextIntlClientProvider locale="es" messages={messages}>
-      <ul>
-        <PantryRow item={it} />
-      </ul>
+      <QueryClientProvider client={new QueryClient()}>
+        <ul>
+          <PantryRow item={it} />
+        </ul>
+      </QueryClientProvider>
     </NextIntlClientProvider>,
   )
 

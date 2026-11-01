@@ -1,9 +1,11 @@
 'use client'
 
+import {useQueryClient} from '@tanstack/react-query'
 import {useTranslations} from 'next-intl'
 import {useActionState} from 'react'
 import {useAnnounceDeletion} from '@/components/deletion-announcer'
 import type {PantryItem} from '@/db/pantry/queries'
+import {queryKeys} from '@/lib/query-keys'
 import {type FormState, removeFromPantryAction} from '../actions'
 
 /**
@@ -13,10 +15,19 @@ import {type FormState, removeFromPantryAction} from '../actions'
 export function RemoveFromPantryButton({item}: {item: PantryItem}) {
   const t = useTranslations('pantry')
   const announce = useAnnounceDeletion()
+  const queryClient = useQueryClient()
 
+  /**
+   * The action revalidates the server's copy, which the list no longer reads
+   * from once it is holding its own pages — without this the row stays on
+   * screen after it has gone from the database.
+   */
   const removeThen = async (previous: FormState, form: FormData) => {
     const result = await removeFromPantryAction(previous, form)
-    if (result.done) announce(t('removed', {name: item.name}))
+    if (result.done) {
+      announce(t('removed', {name: item.name}))
+      await queryClient.invalidateQueries({queryKey: queryKeys.pantry})
+    }
     return result
   }
 
