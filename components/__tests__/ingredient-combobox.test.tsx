@@ -16,18 +16,29 @@ const ingredient = (name: string, inPantry = false): IngredientWithPantry => ({
   inPantry,
 })
 
-/** Nothing observes in jsdom, so paging is driven by the test instead. */
+/**
+ * Nothing observes in jsdom, so paging is driven by the test instead. The
+ * stub tracks what it was given and refuses to fire for a node no longer on
+ * the page, which is the only way "it stopped watching" is visible here.
+ */
 let observed: (() => void) | null = null
 beforeEach(() => {
   observed = null
   vi.stubGlobal(
     'IntersectionObserver',
     class {
-      constructor(private cb: (e: {isIntersecting: boolean}[]) => void) {
-        observed = () => this.cb([{isIntersecting: true}])
+      private targets: Element[] = []
+      constructor(private cb: (e: {isIntersecting: boolean}[]) => void) {}
+      observe(target: Element) {
+        this.targets.push(target)
+        observed = () => {
+          if (!this.targets.some(node => node.isConnected)) return
+          this.cb([{isIntersecting: true}])
+        }
       }
-      observe() {}
-      disconnect() {}
+      disconnect() {
+        this.targets = []
+      }
     },
   )
 })
@@ -239,6 +250,26 @@ describe('IngredientCombobox', () => {
     })
     const {input} = setup()
     await userEvent.click(input)
+    await screen.findByRole('option', {name: /Ajo/})
+
+    observed?.()
+    await waitFor(() => expect(calls).toContain('|Ajo'))
+  })
+
+  /** Closing throws the sentinel away; reopening makes a new one to watch. */
+  it('asks for the next page again after it is closed and reopened', async () => {
+    const calls = mockSearch({
+      '': [ingredient('Ajo')],
+      Ajo: [ingredient('Cebolla')],
+    })
+    const {input} = setup()
+    await userEvent.click(input)
+    await screen.findByRole('option', {name: /Ajo/})
+
+    await userEvent.keyboard('{Escape}')
+    expect(screen.queryByRole('listbox')).toBeNull()
+
+    await userEvent.keyboard('{ArrowDown}')
     await screen.findByRole('option', {name: /Ajo/})
 
     observed?.()

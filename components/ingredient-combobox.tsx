@@ -85,7 +85,10 @@ export function IngredientCombobox({value, onChange}: Props) {
     )
     observer.observe(target)
     return () => observer.disconnect()
-  }, [hasNextPage, fetchNextPage])
+    /* open, because closing unmounts the list and the sentinel with it. A
+       reopened list is a new sentinel, and the observer still holding the
+       old one watches a node that is no longer on the page. */
+  }, [open, hasNextPage, fetchNextPage])
 
   /**
    * Keeps the active option in view when it is reached with the keyboard.
