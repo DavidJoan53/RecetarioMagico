@@ -1,11 +1,15 @@
+import {existsSync} from 'node:fs'
 import {neon} from '@neondatabase/serverless'
 import {eq} from 'drizzle-orm'
 import {drizzle} from 'drizzle-orm/neon-http'
 import {labelGroups, labels} from './schema'
 import {DEFAULT_LABEL_GROUPS} from './seed-data'
 
-/** Reads .env.local directly: lib/env imports server-only and throws here. */
-process.loadEnvFile?.('.env.local')
+/**
+ * Reads .env.local directly: lib/env imports server-only and throws here.
+ * Guarded — loadEnvFile throws on a missing file, and CI has none.
+ */
+if (existsSync('.env.local')) process.loadEnvFile('.env.local')
 
 const db = drizzle(neon(process.env.DATABASE_URL as string))
 
