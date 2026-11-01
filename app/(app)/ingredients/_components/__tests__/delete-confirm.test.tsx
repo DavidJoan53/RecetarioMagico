@@ -2,10 +2,10 @@ import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {NextIntlClientProvider} from 'next-intl'
 import {beforeEach, describe, expect, it, vi} from 'vitest'
+import {DeletionAnnouncer} from '@/components/deletion-announcer'
 import type {Ingredient} from '@/db/schema'
 import messages from '@/messages/es.json'
 import {DeleteConfirm} from '../delete-confirm'
-import {DeletionAnnouncer} from '../deletion-announcer'
 
 const remove = vi.fn()
 vi.mock('../../actions', () => ({

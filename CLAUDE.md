@@ -165,6 +165,7 @@ Conventions:
 - **Routing:** App Router. One folder per route segment under `app/`. Routing state lives in the URL — there is no navigation slice (the React Native app had one; it dies with the port).
 - **Server code:** route handlers under `app/api/`. Each one validates its input with Zod, calls a Drizzle query, and returns typed JSON.
 - **Components:** `components/` grouped by feature. Shared primitives come from shadcn/ui and are extended rather than re-implemented.
+- **One component per file**, the filename its name in kebab-case. A helper that starts out private to its parent stops being private the moment a second file wants it, and until then it is invisible to anyone grepping for the name they saw in the DOM. `_components/` and the folder it sits in already say what is private.
 - **Auth:** public `GET`; `POST`/`PATCH`/`DELETE` require a session, enforced in middleware. Single-user — access is an email allowlist, not a role system.
 - **AI routes:** two shapes. A **streaming** route returns tokens as they arrive for open-ended suggestions; a **structured** route asks for a schema-constrained response, parses it with Zod, and returns typed objects. Never render an unparsed model response as data.
 
