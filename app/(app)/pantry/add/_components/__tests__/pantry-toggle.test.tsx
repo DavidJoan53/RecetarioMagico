@@ -73,16 +73,16 @@ describe('PantryToggle', () => {
     expect(screen.getByRole('button')).toHaveTextContent('✓')
   })
 
-  it('shows an empty box when it is not had', () => {
-    setup(false)
-    expect(screen.getByRole('button')).not.toHaveTextContent('✓')
-  })
-
-  /** The tick is decoration; it must not land in what gets announced. */
-  it('keeps the drawn state out of the accessible name', () => {
+  /** Decoration must not reach what is announced. */
+  it('keeps the tick out of the name', () => {
     setup(true)
     expect(
       screen.getByRole('button', {name: 'La tengo Tomate'}),
     ).toBeInTheDocument()
+  })
+
+  it('shows an empty box when it is not had', () => {
+    setup(false)
+    expect(screen.getByRole('button')).not.toHaveTextContent('✓')
   })
 })

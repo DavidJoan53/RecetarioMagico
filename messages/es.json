@@ -162,6 +162,8 @@
     "addHint": "Marca lo que tienes en casa.",
     "addMore": "Añadir a la despensa",
     "backToPantry": "Volver a la despensa",
-    "noIngredients": "Todavía no tienes ingredientes que marcar."
+    "noIngredients": "Todavía no tienes ingredientes que marcar.",
+    "haveNamed": "La tengo {name}",
+    "haveNotNamed": "No la tengo {name}"
   }
 }

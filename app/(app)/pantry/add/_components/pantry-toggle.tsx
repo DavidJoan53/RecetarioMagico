@@ -37,22 +37,27 @@ export function PantryToggle({ingredientId, name, inPantry}: Props) {
             : 'border-secondary-foreground border-dashed text-secondary-foreground'
         }`}
       >
-        <span
-          aria-hidden
-          className={`flex size-5 items-center justify-center rounded border text-xs ${
-            inPantry
-              ? 'border-white bg-white text-primary-strong'
-              : 'border-current'
-          }`}
-        >
-          {inPantry ? '✓' : ''}
+        {/* Everything on screen is hidden from the name, and the name is one
+            phrase. Appending the ingredient to the visible words instead ran
+            them together — the space between two inline nodes is dropped, so
+            it read as "La tengoTomate". */}
+        <span aria-hidden className="flex items-center gap-2">
+          <span
+            className={`flex size-5 items-center justify-center rounded border text-xs ${
+              inPantry
+                ? 'border-white bg-white text-primary-strong'
+                : 'border-current'
+            }`}
+          >
+            {inPantry ? '✓' : ''}
+          </span>
+          {t(inPantry ? 'have' : 'haveNot')}
         </span>
-        {t(inPantry ? 'have' : 'haveNot')}
-        {/* Not an aria-label. That replaces the visible words, so someone
-            saying "la tengo" to a speech tool cannot reach a button reading
-            "La tengo" — the name has to contain what is on it. This adds the
-            ingredient instead, so the rows stay tellable apart. */}
-        <span className="sr-only">{` ${name}`}</span>
+        {/* Contains the visible words, so saying them aloud reaches it, and
+            names the ingredient, so a column of these is not all alike. */}
+        <span className="sr-only">
+          {t(inPantry ? 'haveNamed' : 'haveNotNamed', {name})}
+        </span>
       </button>
     </form>
   )
