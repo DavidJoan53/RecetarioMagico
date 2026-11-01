@@ -3,6 +3,7 @@
 import {revalidatePath} from 'next/cache'
 import {redirect} from 'next/navigation'
 import {createIngredient} from '@/db/ingredients/create-ingredient'
+import {deleteIngredient} from '@/db/ingredients/delete-ingredient'
 import {updateIngredient} from '@/db/ingredients/update-ingredient'
 import {getSession} from '@/lib/session'
 import {ingredientInputFromForm} from '@/lib/validation/ingredient'
@@ -10,6 +11,12 @@ import {ingredientInputFromForm} from '@/lib/validation/ingredient'
 export type FormState = {
   error?: 'invalid' | 'duplicateName' | 'gone'
   done?: boolean
+}
+
+export type DeleteState = {
+  error?: 'inUse' | 'gone'
+  /** Named in the message, so "used by 3 recipes" is not a guess. */
+  recipeCount?: number
 }
 
 /** Every action re-checks: each one is an endpoint of its own. */
@@ -51,4 +58,23 @@ export async function updateIngredientAction(
 
   revalidatePath('/ingredients')
   return {done: true}
+}
+
+export async function deleteIngredientAction(
+  _previous: DeleteState,
+  form: FormData,
+): Promise<DeleteState> {
+  await requireSession()
+
+  const id = String(form.get('id') ?? '')
+  if (!id) return {error: 'gone'}
+
+  const result = await deleteIngredient(id)
+  if (!result.ok) {
+    if (result.reason === 'not-found') return {error: 'gone'}
+    return {error: 'inUse', recipeCount: result.recipeCount}
+  }
+
+  revalidatePath('/ingredients')
+  return {}
 }

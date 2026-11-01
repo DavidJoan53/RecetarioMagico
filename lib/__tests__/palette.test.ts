@@ -14,36 +14,53 @@ function token(name: string): string {
 const AA_TEXT = 4.5
 const AA_LARGE = 3
 
-describe('palette', () => {
-  const background = token('background')
+/**
+ * Both surfaces, because text lands on both: the page, and the cards and rows
+ * drawn on top of it. Checking only the page is how #cc323e passed here and
+ * still failed on a row — the darker surface is the one that binds.
+ */
+const SURFACES = ['background', 'background-foreground'] as const
+
+describe.each(SURFACES)('palette on --color-%s', surface => {
+  const ground = token(surface)
 
   /**
    * The failure this guards against: #db3642 was picked for 4.53:1 against
-   * white, but the page is #f1f1f1, where it only reached 4.02:1.
+   * white, but nothing in the app is white.
    */
-  it('reads body text against the background it actually sits on', () => {
-    expect(
-      contrastRatio(token('secondary'), background),
-    ).toBeGreaterThanOrEqual(AA_TEXT)
-    expect(
-      contrastRatio(token('secondary-foreground'), background),
-    ).toBeGreaterThanOrEqual(AA_TEXT)
+  it.each(['secondary', 'secondary-foreground'])('reads %s as body text', t => {
+    expect(contrastRatio(token(t), ground)).toBeGreaterThanOrEqual(AA_TEXT)
   })
 
-  /** It is a link colour as often as a button fill, so both directions count. */
-  it('keeps primary-strong legible as text and as a fill', () => {
+  it('keeps primary-strong legible as text', () => {
     expect(
-      contrastRatio(token('primary-strong'), background),
+      contrastRatio(token('primary-strong'), ground),
     ).toBeGreaterThanOrEqual(AA_TEXT)
+  })
+})
+
+/**
+ * The brand red carries over from the React Native app and is not ours to
+ * darken. It clears the 3:1 accent bar on the page and misses it on a card,
+ * so the rule is about where it goes: page only, and never under text.
+ */
+describe('primary', () => {
+  it('works as an accent on the page', () => {
     expect(
-      contrastRatio(token('primary-strong'), '#ffffff'),
-    ).toBeGreaterThanOrEqual(AA_TEXT)
+      contrastRatio(token('primary'), token('background')),
+    ).toBeGreaterThanOrEqual(AA_LARGE)
   })
 
-  /** Accents carry no text, so 3:1 is the bar — but it is still a bar. */
-  it('keeps primary usable as an accent', () => {
-    expect(contrastRatio(token('primary'), background)).toBeGreaterThanOrEqual(
-      AA_LARGE,
-    )
+  it('does not reach the bar on a card, so it does not belong there', () => {
+    expect(
+      contrastRatio(token('primary'), token('background-foreground')),
+    ).toBeLessThan(AA_LARGE)
   })
+})
+
+/** The other direction: primary-strong is a button fill as often as a link. */
+it('keeps white text legible on primary-strong', () => {
+  expect(
+    contrastRatio(token('primary-strong'), '#ffffff'),
+  ).toBeGreaterThanOrEqual(AA_TEXT)
 })

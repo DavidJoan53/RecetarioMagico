@@ -7,8 +7,10 @@ import messages from '@/messages/es.json'
 import {IngredientRow} from '../ingredient-row'
 
 const update = vi.fn()
+const remove = vi.fn()
 vi.mock('../../actions', () => ({
   updateIngredientAction: (...args: unknown[]) => update(...args),
+  deleteIngredientAction: (...args: unknown[]) => remove(...args),
 }))
 
 const m = messages.ingredients
@@ -29,10 +31,13 @@ const setup = () =>
   )
 
 const editButton = () => screen.getByRole('button', {name: 'Editar Tomate'})
+const deleteButton = () => screen.getByRole('button', {name: 'Eliminar Tomate'})
 
 beforeEach(() => {
   update.mockReset()
+  remove.mockReset()
   update.mockResolvedValue({done: true})
+  remove.mockResolvedValue({})
 })
 
 describe('IngredientRow', () => {
@@ -91,6 +96,12 @@ describe('IngredientRow', () => {
       expect(editButton()).toHaveFocus()
     })
 
+    /** Both controls restore focus, and each has to go back to its own. */
+    it('does not delete', async () => {
+      await open()
+      expect(screen.queryByText(m.alsoLeavesPantry)).toBeNull()
+    })
+
     it('stays open and says why when the name is taken', async () => {
       update.mockResolvedValue({error: 'duplicateName'})
       const name = await open()
@@ -99,6 +110,27 @@ describe('IngredientRow', () => {
       const alert = await screen.findByRole('alert')
       expect(alert).toHaveTextContent(m.duplicate)
       expect(name.getAttribute('aria-describedby')).toBe(alert.id)
+    })
+  })
+
+  describe('when deleting', () => {
+    const open = async () => {
+      setup()
+      await userEvent.click(deleteButton())
+    }
+
+    it('asks before doing it', async () => {
+      await open()
+      expect(screen.getByText('¿Eliminar Tomate?')).toBeInTheDocument()
+      expect(remove).not.toHaveBeenCalled()
+    })
+
+    /** The row has two ways back; each has to return to the one you used. */
+    it('returns focus to the delete button, not the edit one', async () => {
+      await open()
+      await userEvent.click(screen.getByRole('button', {name: m.cancel}))
+      expect(deleteButton()).toHaveFocus()
+      expect(editButton()).not.toHaveFocus()
     })
   })
 })

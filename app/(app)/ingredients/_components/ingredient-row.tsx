@@ -3,7 +3,10 @@
 import {useTranslations} from 'next-intl'
 import {useCallback, useEffect, useRef, useState} from 'react'
 import type {Ingredient} from '@/db/schema'
+import {DeleteConfirm} from './delete-confirm'
 import {IngredientEditForm} from './ingredient-edit-form'
+
+type Mode = 'view' | 'edit' | 'confirm-delete'
 
 type Props = {
   ingredient: Ingredient
@@ -13,34 +16,46 @@ type Props = {
 
 export function IngredientRow({ingredient, children}: Props) {
   const t = useTranslations('ingredients')
-  const [editing, setEditing] = useState(false)
+  const [mode, setMode] = useState<Mode>('view')
   const editButton = useRef<HTMLButtonElement>(null)
-  const restoreFocus = useRef(false)
+  const deleteButton = useRef<HTMLButtonElement>(null)
+  const restoreTo = useRef<React.RefObject<HTMLButtonElement | null>>(null)
 
   /**
-   * Focus waits for the render. The button does not exist while the form is
-   * open, so asking for it in the same tick finds nothing and the page
+   * Focus waits for the render. The buttons do not exist while a form is
+   * open, so asking for one in the same tick finds nothing and the page
    * quietly loses its place.
    */
   useEffect(() => {
-    if (editing || !restoreFocus.current) return
-    restoreFocus.current = false
-    editButton.current?.focus()
-  }, [editing])
+    if (mode !== 'view' || !restoreTo.current) return
+    const target = restoreTo.current
+    restoreTo.current = null
+    target.current?.focus()
+  }, [mode])
 
-  const close = useCallback(() => {
-    restoreFocus.current = true
-    setEditing(false)
-  }, [])
+  const close = useCallback(
+    (to: React.RefObject<HTMLButtonElement | null>) => () => {
+      restoreTo.current = to
+      setMode('view')
+    },
+    [],
+  )
 
-  if (editing) {
+  if (mode !== 'view') {
     return (
       <li className="rounded-lg border border-light bg-background-foreground p-4">
-        <IngredientEditForm
-          ingredient={ingredient}
-          onDone={close}
-          onCancel={close}
-        />
+        {mode === 'edit' ? (
+          <IngredientEditForm
+            ingredient={ingredient}
+            onDone={close(editButton)}
+            onCancel={close(editButton)}
+          />
+        ) : (
+          <DeleteConfirm
+            ingredient={ingredient}
+            onCancel={close(deleteButton)}
+          />
+        )}
       </li>
     )
   }
@@ -73,11 +88,21 @@ export function IngredientRow({ingredient, children}: Props) {
       <button
         ref={editButton}
         type="button"
-        onClick={() => setEditing(true)}
+        onClick={() => setMode('edit')}
         aria-label={t('editLabel', {name: ingredient.name})}
         className="rounded-lg border border-secondary-foreground px-3 py-1 font-semibold text-sm"
       >
         {t('edit')}
+      </button>
+
+      <button
+        ref={deleteButton}
+        type="button"
+        onClick={() => setMode('confirm-delete')}
+        aria-label={t('deleteLabel', {name: ingredient.name})}
+        className="rounded-lg border border-primary-strong px-3 py-1 font-semibold text-primary-strong text-sm"
+      >
+        {t('delete')}
       </button>
     </li>
   )

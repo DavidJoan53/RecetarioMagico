@@ -95,6 +95,13 @@
     "editTitle": "Editar {name}",
     "save": "Guardar",
     "cancel": "Cancelar",
-    "gone": "Ese ingrediente ya no existe."
+    "gone": "Ese ingrediente ya no existe.",
+    "delete": "Eliminar",
+    "deleteLabel": "Eliminar {name}",
+    "confirmDelete": "¿Eliminar {name}?",
+    "alsoLeavesPantry": "También saldrá de la despensa.",
+    "confirmDeleteAction": "Sí, eliminar",
+    "deleted": "{name} eliminado",
+    "inUse": "No puedes eliminarlo: lo usan {count, plural, one {# receta} other {# recetas}}."
   }
 }
