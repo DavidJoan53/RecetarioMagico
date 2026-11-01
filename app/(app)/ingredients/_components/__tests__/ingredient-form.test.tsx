@@ -61,6 +61,8 @@ describe('IngredientForm', () => {
 
     it('clears the form and returns focus, ready for the next one', async () => {
       const name = await submit({done: true})
+      /* The clear happens on the action settling, so wait for the sign it has. */
+      await screen.findByRole('status')
       expect(name).toHaveValue('')
       expect(name).toHaveFocus()
     })

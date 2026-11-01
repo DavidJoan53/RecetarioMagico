@@ -89,6 +89,12 @@
     "duplicate": "Ya tienes un ingrediente con ese nombre.",
     "invalid": "Revisa el nombre y el enlace de la foto.",
     "empty": "Todavía no tienes ingredientes.",
-    "listLabel": "Ingredientes"
+    "listLabel": "Ingredientes",
+    "edit": "Editar",
+    "editLabel": "Editar {name}",
+    "editTitle": "Editar {name}",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "gone": "Ese ingrediente ya no existe."
   }
 }

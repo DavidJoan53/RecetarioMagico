@@ -3,6 +3,7 @@
 import {useTranslations} from 'next-intl'
 import {useActionState, useEffect, useId, useRef, useState} from 'react'
 import type {FormState} from '../actions'
+import {IngredientFields} from './ingredient-fields'
 
 type Props = {
   action: (state: FormState, form: FormData) => Promise<FormState>
@@ -14,8 +15,6 @@ export function IngredientForm({action}: Props) {
   const [name, setName] = useState('')
   const [photoUrl, setPhotoUrl] = useState('')
   const nameRef = useRef<HTMLInputElement>(null)
-  const nameId = useId()
-  const photoId = useId()
   const messageId = useId()
 
   /**
@@ -36,39 +35,14 @@ export function IngredientForm({action}: Props) {
       aria-label={t('addTitle')}
       className="flex flex-col gap-3 rounded-lg border border-light bg-background-foreground p-4"
     >
-      <div className="flex flex-col gap-1">
-        <label className="font-semibold text-sm" htmlFor={nameId}>
-          {t('name')}
-        </label>
-        <input
-          ref={nameRef}
-          id={nameId}
-          name="name"
-          required
-          maxLength={120}
-          value={name}
-          onChange={e => setName(e.target.value)}
-          placeholder={t('namePlaceholder')}
-          aria-describedby={state.error ? messageId : undefined}
-          aria-invalid={state.error ? true : undefined}
-          className="rounded-lg border border-secondary-foreground bg-background px-3 py-2"
-        />
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label className="font-semibold text-sm" htmlFor={photoId}>
-          {t('photoUrl')}
-        </label>
-        <input
-          id={photoId}
-          name="photoUrl"
-          type="url"
-          value={photoUrl}
-          onChange={e => setPhotoUrl(e.target.value)}
-          placeholder={t('photoPlaceholder')}
-          className="rounded-lg border border-secondary-foreground bg-background px-3 py-2"
-        />
-      </div>
+      <IngredientFields
+        name={name}
+        photoUrl={photoUrl}
+        onName={setName}
+        onPhotoUrl={setPhotoUrl}
+        nameRef={nameRef}
+        errorId={state.error ? messageId : undefined}
+      />
 
       <button
         type="submit"
@@ -82,7 +56,7 @@ export function IngredientForm({action}: Props) {
           announced rather than seen. alert interrupts; status waits. */}
       {state.error && (
         <p role="alert" id={messageId} className="text-primary-strong text-sm">
-          {state.error === 'duplicateName' ? t('duplicate') : t('invalid')}
+          {t(state.error === 'duplicateName' ? 'duplicate' : 'invalid')}
         </p>
       )}
       {state.done && (
