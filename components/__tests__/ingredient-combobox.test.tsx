@@ -1,5 +1,5 @@
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
-import {render, screen, waitFor} from '@testing-library/react'
+import {render, screen, waitFor, within} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {NextIntlClientProvider} from 'next-intl'
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
@@ -178,6 +178,37 @@ describe('IngredientCombobox', () => {
     await userEvent.type(input, 'ceb')
     expect(calls.filter(c => c.startsWith('ceb'))).toHaveLength(0)
     await waitFor(() => expect(calls.some(c => c.startsWith('ceb'))).toBe(true))
+  })
+
+  /** Idle is not loading: the row said so for as long as more existed. */
+  it('says it is loading only while a page is on its way', async () => {
+    let release = () => {}
+    mockSearch({'': [ingredient('Ajo')], Ajo: [ingredient('Cebolla')]})
+    const {input} = setup()
+    await userEvent.click(input)
+    await screen.findByRole('option', {name: /Ajo/})
+
+    /* There is a next page, and nothing is fetching it yet. */
+    const list = () => within(screen.getByRole('listbox'))
+    expect(list().queryByText(m.loadingMore)).toBeNull()
+
+    const previous = globalThis.fetch
+    vi.stubGlobal('fetch', (url: string) => {
+      const held = new Promise(resolve => {
+        release = () => resolve(undefined)
+      })
+      return held.then(() => (previous as typeof fetch)(url))
+    })
+
+    observed?.()
+    await waitFor(() =>
+      expect(list().getByText(m.loadingMore)).toBeInTheDocument(),
+    )
+    expect(screen.getByRole('status')).toHaveTextContent(m.loadingMore)
+
+    release()
+    await screen.findByRole('option', {name: /Cebolla/})
+    await waitFor(() => expect(list().queryByText(m.loadingMore)).toBeNull())
   })
 
   /**

@@ -46,15 +46,24 @@ export function IngredientCombobox({value, onChange}: Props) {
     return () => clearTimeout(timer)
   }, [text])
 
-  const {data, fetchNextPage, hasNextPage, isFetching} = useInfiniteQuery({
-    queryKey: ['ingredients', query],
-    queryFn: ({pageParam}) => fetchPage(query, pageParam),
-    initialPageParam: null as string | null,
-    getNextPageParam: page => page.nextCursor,
-    enabled: open,
-  })
+  const {data, fetchNextPage, hasNextPage, isFetchingNextPage, isPending} =
+    useInfiniteQuery({
+      queryKey: ['ingredients', query],
+      queryFn: ({pageParam}) => fetchPage(query, pageParam),
+      initialPageParam: null as string | null,
+      getNextPageParam: page => page.nextCursor,
+      enabled: open,
+    })
 
   const options = data?.pages.flatMap(page => page.items) ?? []
+
+  /* One live region, so the two things worth hearing cannot talk over each
+     other: that more is coming, then how much there is. */
+  const announcement = (() => {
+    if (!open || isPending) return ''
+    if (isFetchingNextPage) return t('loadingMore')
+    return t('resultCount', {count: options.length})
+  })()
 
   /* Loads the next page when the bottom of the list is reached, rather than
      on a button nobody finds while scrolling. */
@@ -67,8 +76,12 @@ export function IngredientCombobox({value, onChange}: Props) {
       },
       /* Rooted to the list, not the viewport. Without this the sentinel
          counts as visible the moment the box opens and every page loads at
-         once, which is a long list arriving rather than paging. */
-      {root: listRef.current},
+         once, which is a long list arriving rather than paging.
+
+         The margin asks slightly early, so the next page is on its way
+         before the last option is reached. Ten options are far taller than
+         the list box, so it still cannot reach at scroll-top. */
+      {root: listRef.current, rootMargin: '50px'},
     )
     observer.observe(target)
     return () => observer.disconnect()
@@ -152,7 +165,7 @@ export function IngredientCombobox({value, onChange}: Props) {
 
       {/* Counted out loud, because the list appearing is a visual event. */}
       <p role="status" className="sr-only">
-        {open && !isFetching ? t('resultCount', {count: options.length}) : ''}
+        {announcement}
       </p>
 
       {open && (
@@ -192,14 +205,21 @@ export function IngredientCombobox({value, onChange}: Props) {
           ))}
 
           {hasNextPage && (
+            /* Watched, not read: reaching it asks for the next page. The row
+               below says when that is happening, and a row that said so
+               while idle would be claiming to work when it is not. */
+            <div ref={sentinel} role="presentation" className="h-px" />
+          )}
+
+          {isFetchingNextPage && (
             /* presentation, not option: it is a loading marker, and counting
                it would make the list one longer than it is. */
-            <div ref={sentinel} className="px-3 py-2 text-center text-sm">
+            <div role="presentation" className="px-3 py-2 text-center text-sm">
               {t('loadingMore')}
             </div>
           )}
 
-          {options.length === 0 && !isFetching && (
+          {options.length === 0 && !isPending && (
             <div className="px-3 py-2 text-center text-secondary-foreground text-sm">
               {t('noMatches')}
             </div>
