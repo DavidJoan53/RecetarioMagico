@@ -1,10 +1,12 @@
 'use client'
 
+import {useQueryClient} from '@tanstack/react-query'
 import {useTranslations} from 'next-intl'
 import {useActionState, useId, useRef, useState} from 'react'
 import {IngredientCombobox} from '@/components/ingredient-combobox'
 import type {IngredientWithPantry} from '@/db/ingredients/queries'
 import {unitEnum} from '@/db/schema'
+import {queryKeys} from '@/lib/query-keys'
 import {type AddState, addToPantryAction} from '../../actions'
 
 export function AddToPantryForm() {
@@ -16,6 +18,7 @@ export function AddToPantryForm() {
   const unitId = useId()
   const messageId = useId()
   const added = useRef<string[]>([])
+  const queryClient = useQueryClient()
 
   /**
    * Cleared here rather than from an effect on the result: the state after a
@@ -29,6 +32,11 @@ export function AddToPantryForm() {
       setChosen(null)
       setQuantity('')
       setUnit('')
+      /* The picker marks what is already in the pantry out of this cache,
+         so without it the one just added goes on being offered as though it
+         were not there. Stale rather than refetched: the list is closed by
+         now, and it asks again when it is next opened. */
+      await queryClient.invalidateQueries({queryKey: queryKeys.ingredients})
     }
     return result
   }
