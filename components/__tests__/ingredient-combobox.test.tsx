@@ -256,6 +256,20 @@ describe('IngredientCombobox', () => {
     await waitFor(() => expect(calls).toContain('|Ajo'))
   })
 
+  /** Escape leaves the field focused, so a second click has no focus to go on. */
+  it('reopens when the field is clicked again', async () => {
+    mockSearch({'': [ingredient('Ajo')]})
+    const {input} = setup()
+    await userEvent.click(input)
+    await screen.findByRole('option', {name: /Ajo/})
+
+    await userEvent.keyboard('{Escape}')
+    expect(screen.queryByRole('listbox')).toBeNull()
+
+    await userEvent.click(input)
+    expect(await screen.findByRole('option', {name: /Ajo/})).toBeInTheDocument()
+  })
+
   /** Closing throws the sentinel away; reopening makes a new one to watch. */
   it('asks for the next page again after it is closed and reopened', async () => {
     const calls = mockSearch({

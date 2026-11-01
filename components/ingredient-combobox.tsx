@@ -162,6 +162,9 @@ export function IngredientCombobox({value, onChange}: Props) {
           if (value) onChange(null)
         }}
         onFocus={() => setOpen(true)}
+        /* Focus alone is not enough: after Escape the field still has it, so
+           nothing fires and clicking the box appears to do nothing. */
+        onClick={() => setOpen(true)}
         onKeyDown={onKeyDown}
         className="rounded-lg border border-secondary-foreground bg-background px-3 py-2"
       />
