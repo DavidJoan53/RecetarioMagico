@@ -144,7 +144,6 @@
     "title": "Despensa",
     "have": "La tengo",
     "haveNot": "No la tengo",
-    "addLabel": "Añadir {name} a la despensa",
     "removeLabel": "Quitar {name} de la despensa",
     "quantity": "Cantidad",
     "unit": "Unidad",

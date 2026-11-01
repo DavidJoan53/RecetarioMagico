@@ -31,7 +31,6 @@ export function PantryToggle({ingredientId, name, inPantry}: Props) {
         type="submit"
         disabled={pending}
         aria-pressed={inPantry}
-        aria-label={t(inPantry ? 'removeLabel' : 'addLabel', {name})}
         className={`flex items-center gap-2 rounded-lg border px-3 py-1 font-semibold text-sm disabled:opacity-60 ${
           inPantry
             ? 'border-primary-strong bg-primary-strong text-white'
@@ -49,6 +48,11 @@ export function PantryToggle({ingredientId, name, inPantry}: Props) {
           {inPantry ? '✓' : ''}
         </span>
         {t(inPantry ? 'have' : 'haveNot')}
+        {/* Not an aria-label. That replaces the visible words, so someone
+            saying "la tengo" to a speech tool cannot reach a button reading
+            "La tengo" — the name has to contain what is on it. This adds the
+            ingredient instead, so the rows stay tellable apart. */}
+        <span className="sr-only">{` ${name}`}</span>
       </button>
     </form>
   )

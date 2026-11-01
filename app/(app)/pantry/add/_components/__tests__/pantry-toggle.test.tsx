@@ -34,18 +34,21 @@ describe('PantryToggle', () => {
     expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'false')
   })
 
-  /** A row of buttons all reading "La tengo" says nothing about which row. */
-  it('names what it would do, and to what', () => {
-    setup(false)
-    expect(
-      screen.getByRole('button', {name: 'Añadir Tomate a la despensa'}),
-    ).toBeInTheDocument()
+  /**
+   * The name must contain the visible words, or a speech-input user saying
+   * what they can read cannot press it. WCAG 2.5.3 — an aria-label replacing
+   * "La tengo" is exactly the failure.
+   */
+  it('keeps the words that are on it in its name', () => {
+    setup(true)
+    expect(screen.getByRole('button', {name: /La tengo/})).toBeInTheDocument()
   })
 
-  it('offers to take it back out once it is in', () => {
-    setup(true)
+  /** And still says which row it belongs to, for a list of identical ones. */
+  it('adds the ingredient to tell the rows apart', () => {
+    setup(false)
     expect(
-      screen.getByRole('button', {name: 'Quitar Tomate de la despensa'}),
+      screen.getByRole('button', {name: 'No la tengo Tomate'}),
     ).toBeInTheDocument()
   })
 
@@ -75,11 +78,11 @@ describe('PantryToggle', () => {
     expect(screen.getByRole('button')).not.toHaveTextContent('✓')
   })
 
-  /** The tick is decoration; the button's name is what is announced. */
+  /** The tick is decoration; it must not land in what gets announced. */
   it('keeps the drawn state out of the accessible name', () => {
     setup(true)
-    expect(screen.getByRole('button').getAttribute('aria-label')).not.toContain(
-      '✓',
-    )
+    expect(
+      screen.getByRole('button', {name: 'La tengo Tomate'}),
+    ).toBeInTheDocument()
   })
 })
