@@ -11,24 +11,25 @@ const m = messages.ingredients
 
 const setup = (state: FormState = {}) => {
   const action = vi.fn(async () => state)
+  const onCancel = vi.fn()
   render(
     /* These forms ask the cached list to refresh once the action is done, so
    there has to be one to ask. */
     <NextIntlClientProvider locale="es" messages={messages}>
       <QueryClientProvider client={new QueryClient()}>
-        <IngredientForm action={action} />
+        <IngredientForm action={action} onCancel={onCancel} />
       </QueryClientProvider>
     </NextIntlClientProvider>,
   )
   const name = screen.getByRole('textbox', {name: m.name})
-  return {action, name}
+  return {action, name, onCancel}
 }
 
 /** State only exists once the action has run, so these submit first. */
 const submit = async (state: FormState) => {
   const {name} = setup(state)
   await userEvent.type(name, 'Tomate')
-  await userEvent.click(screen.getByRole('button', {name: `+ ${m.add}`}))
+  await userEvent.click(screen.getByRole('button', {name: m.add}))
   return name
 }
 
@@ -43,7 +44,7 @@ describe('IngredientForm', () => {
   it('submits to the action given to it', async () => {
     const {action} = setup()
     await userEvent.type(screen.getByRole('textbox', {name: m.name}), 'Tomate')
-    await userEvent.click(screen.getByRole('button', {name: `+ ${m.add}`}))
+    await userEvent.click(screen.getByRole('button', {name: m.add}))
     expect(action).toHaveBeenCalled()
   })
 
@@ -95,7 +96,7 @@ describe('IngredientForm', () => {
 describe('adding several in a row', () => {
   it('clears every time, not only the first', async () => {
     const {name} = setup({done: true})
-    const add = screen.getByRole('button', {name: `+ ${m.add}`})
+    const add = screen.getByRole('button', {name: m.add})
 
     await userEvent.type(name, 'Tomate')
     await userEvent.click(add)

@@ -31,16 +31,31 @@ test.afterEach(async () => {
  */
 async function open(page: Page, path = '/ingredients') {
   await page.goto(path)
-  await page.waitForFunction(() => {
-    const form = document.querySelector('form')
-    return !!form && Object.keys(form).some(k => k.startsWith('__react'))
-  })
+  /* The plus, not the form: there is no form on the page until the plus has
+     been pressed, so waiting for one here would hang until the timeout and
+     report an empty page rather than a closed form. */
+  await page.waitForFunction(label => {
+    const plus = document.querySelector(`button[aria-label="${label}"]`)
+    return !!plus && Object.keys(plus).some(k => k.startsWith('__react'))
+  }, m.addTitle)
+}
+
+/**
+ * The form is behind a plus. It stays open after each ingredient, so this
+ * only presses when it is actually closed — a second press would be looking
+ * for a button that is no longer there.
+ */
+async function openAddForm(page: Page) {
+  const plus = page.getByRole('button', {name: m.addTitle})
+  if (await plus.isVisible()) await plus.click()
+  await expect(addForm(page)).toBeVisible()
 }
 
 async function fillAndAdd(page: Page, name: string) {
   created.ingredientNames.push(name)
+  await openAddForm(page)
   await addForm(page).getByRole('textbox', {name: m.name}).fill(name)
-  await page.getByRole('button', {name: `+ ${m.add}`}).click()
+  await page.getByRole('button', {name: m.add}).click()
 }
 
 const addForm = (page: Page) => page.getByRole('form', {name: m.addTitle})
