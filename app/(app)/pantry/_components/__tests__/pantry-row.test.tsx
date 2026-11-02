@@ -40,7 +40,7 @@ const setup = (it: PantryItem) =>
     </NextIntlClientProvider>,
   )
 
-const amount = () => screen.getByRole('button', {name: 'Cantidad de Tomate'})
+const amount = () => screen.getByRole('button', {name: /cantidad de Tomate/})
 
 beforeEach(() => {
   update.mockReset()
@@ -53,6 +53,15 @@ describe('PantryRow', () => {
   it('shows the amount with its unit', () => {
     setup(item(500, 'g'))
     expect(amount()).toHaveTextContent('500 g')
+  })
+
+  /**
+   * WCAG 2.5.3. The name used to be "Cantidad de Tomate" while the button
+   * read "500 g", so saying what is written on it reached nothing.
+   */
+  it('opens its accessible name with the words on it', () => {
+    setup(item(500, 'g'))
+    expect(amount()).toHaveAccessibleName('500 g, cantidad de Tomate')
   })
 
   /** Salt is had, not measured — a null quantity is a real answer. */

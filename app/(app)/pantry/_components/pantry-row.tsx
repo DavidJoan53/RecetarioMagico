@@ -24,6 +24,12 @@ export function PantryRow({item}: {item: PantryItem}) {
     setEditing(false)
   }, [])
 
+  /* A number and a unit, not prose — the sentence around it is the message. */
+  const amount =
+    item.quantity === null
+      ? t('noAmount')
+      : `${item.quantity}${item.unit ? ` ${item.unit}` : ''}`
+
   if (editing) {
     return (
       <li className="rounded-lg border border-light bg-background-foreground p-4">
@@ -43,12 +49,12 @@ export function PantryRow({item}: {item: PantryItem}) {
         ref={amountButton}
         type="button"
         onClick={() => setEditing(true)}
-        aria-label={t('amountFor', {name: item.name})}
+        /* Opens with the words on it: an accessible name that replaces the
+           visible text leaves "press 500 g" with nothing to reach. */
+        aria-label={t('amountButton', {amount, name: item.name})}
         className="rounded-lg border border-secondary-foreground px-3 py-1 text-sm"
       >
-        {item.quantity === null
-          ? t('noAmount')
-          : `${item.quantity}${item.unit ? ` ${item.unit}` : ''}`}
+        {amount}
       </button>
 
       <RemoveFromPantryButton item={item} />

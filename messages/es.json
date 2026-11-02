@@ -149,6 +149,7 @@
     "unit": "Unidad",
     "noAmount": "Sin cantidad",
     "amountFor": "Cantidad de {name}",
+    "amountButton": "{amount}, cantidad de {name}",
     "save": "Guardar",
     "cancel": "Cancelar",
     "remove": "Quitar",
