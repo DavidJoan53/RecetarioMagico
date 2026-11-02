@@ -128,38 +128,23 @@ describe('DinnerRow', () => {
       ).toBeInTheDocument()
     })
 
-    it('sends the id, so the action knows what it is updating', async () => {
-      await open()
-      await userEvent.click(screen.getByRole('button', {name: m.save}))
-      const form = update.mock.calls[0]?.[1] as FormData
-      expect(form.get('id')).toBe(DINNER.id)
-    })
+    /* What the form sends — the id, the instant with its offset, the recipes
+       still on the dinner — is proven in e2e/dinners.spec.ts against a real
+       database. Asserted against the mock here it would only ever say that a
+       FormData was built. */
 
-    /** The instant, not the wall clock: the server cannot guess the zone. */
-    it('sends the time with its offset on it', async () => {
-      await open()
-      await userEvent.click(screen.getByRole('button', {name: m.save}))
-      const form = update.mock.calls[0]?.[1] as FormData
-      expect(form.get('eatenAt')).toBe(DINNER.eatenAt)
-    })
-
-    it('sends every recipe still on the dinner', async () => {
-      await open()
-      await userEvent.click(screen.getByRole('button', {name: m.save}))
-      const form = update.mock.calls[0]?.[1] as FormData
-      expect(form.getAll('recipeIds')).toEqual(['r1'])
-    })
-
-    it('drops a recipe that was taken off', async () => {
+    it('takes a recipe off the dinner', async () => {
       await open()
       await userEvent.click(
         screen.getByRole('button', {
           name: m.removeRecipe.replace('{name}', 'Arepa'),
         }),
       )
-      await userEvent.click(screen.getByRole('button', {name: m.save}))
-      const form = update.mock.calls[0]?.[1] as FormData
-      expect(form.getAll('recipeIds')).toEqual([])
+      expect(
+        screen.queryByRole('button', {
+          name: m.removeRecipe.replace('{name}', 'Arepa'),
+        }),
+      ).toBeNull()
     })
 
     it('returns focus to the edit button on cancel', async () => {
@@ -218,15 +203,6 @@ describe('DinnerRow', () => {
       await userEvent.click(screen.getByRole('button', {name: m.cancel}))
       expect(deleteButton()).toHaveFocus()
       expect(editButton()).not.toHaveFocus()
-    })
-
-    it('sends the id once confirmed', async () => {
-      await open()
-      await userEvent.click(
-        screen.getByRole('button', {name: m.confirmDeleteAction}),
-      )
-      const form = remove.mock.calls[0]?.[1] as FormData
-      expect(form.get('id')).toBe(DINNER.id)
     })
   })
 })

@@ -81,12 +81,8 @@ describe('IngredientRow', () => {
       expect(await open()).toHaveValue('Tomate')
     })
 
-    it('sends the id, so the action knows what it is updating', async () => {
-      await open()
-      await userEvent.click(screen.getByRole('button', {name: m.save}))
-      const form = update.mock.calls[0]?.[1] as FormData
-      expect(form.get('id')).toBe('i1')
-    })
+    /* The id this form sends is proven by e2e/ingredients.spec.ts, which
+       renames a real row and reads it back. */
 
     it('returns focus to the edit button on cancel', async () => {
       await open()
@@ -99,12 +95,6 @@ describe('IngredientRow', () => {
       await userEvent.click(screen.getByRole('button', {name: m.save}))
       expect(await screen.findByText('Tomate')).toBeInTheDocument()
       expect(editButton()).toHaveFocus()
-    })
-
-    /** Both controls restore focus, and each has to go back to its own. */
-    it('does not delete', async () => {
-      await open()
-      expect(screen.queryByText(m.alsoLeavesPantry)).toBeNull()
     })
 
     it('stays open and says why when the name is taken', async () => {

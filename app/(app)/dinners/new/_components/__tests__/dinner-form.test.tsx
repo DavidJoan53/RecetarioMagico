@@ -4,7 +4,6 @@ import userEvent from '@testing-library/user-event'
 import {NextIntlClientProvider} from 'next-intl'
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
 import {timeZone} from '@/i18n/time-zone'
-import {fromDateTimeLocal} from '@/lib/dinners'
 import messages from '@/messages/es.json'
 import {DinnerForm} from '../dinner-form'
 
@@ -54,7 +53,6 @@ function setup() {
 }
 
 const when = () => screen.getByLabelText(m.when)
-const sent = () => action.mock.calls[0]?.[1] as FormData
 
 /** Picks Arepa out of the combobox and says when the dinner was. */
 async function fillIn() {
@@ -74,30 +72,10 @@ describe('DinnerForm', () => {
     await waitFor(() => expect(when()).not.toHaveValue(''))
   })
 
-  /**
-   * The wall clock the input gives back says nothing about which zone it
-   * meant. Read on the server it would be called UTC, and the dinner would
-   * land hours from when it was eaten.
-   */
-  it('sends the instant, not the clock that was typed', async () => {
-    setup()
-    await fillIn()
-    await submit()
-
-    await waitFor(() => expect(action).toHaveBeenCalled())
-    expect(sent().get('eatenAt')).toBe(
-      fromDateTimeLocal('2026-11-01T20:00', timeZone)?.toISOString(),
-    )
-  })
-
-  it('sends every recipe that was picked', async () => {
-    setup()
-    await fillIn()
-    await submit()
-
-    await waitFor(() => expect(action).toHaveBeenCalled())
-    expect(sent().getAll('recipeIds')).toEqual([AREPA.id])
-  })
+  /* The instant sent rather than the wall clock typed, and the recipes that
+     went with it, are proven in e2e/dinners.spec.ts — "shows and edits one
+     dinner in the house clock" — against a real database and a real zone.
+     Checked here it would assert fromDateTimeLocal against itself. */
 
   /** The pair is a primary key, so the same recipe twice is a failed write. */
   it('refuses to add the same recipe twice', async () => {
@@ -105,10 +83,12 @@ describe('DinnerForm', () => {
     await fillIn()
     await userEvent.click(screen.getByRole('combobox', {name: m.recipes}))
     await userEvent.click(await screen.findByRole('option', {name: /Arepa/}))
-    await submit()
 
-    await waitFor(() => expect(action).toHaveBeenCalled())
-    expect(sent().getAll('recipeIds')).toEqual([AREPA.id])
+    expect(
+      screen.getAllByRole('button', {
+        name: m.removeRecipe.replace('{name}', 'Arepa'),
+      }),
+    ).toHaveLength(1)
   })
 
   it('takes a recipe back off', async () => {

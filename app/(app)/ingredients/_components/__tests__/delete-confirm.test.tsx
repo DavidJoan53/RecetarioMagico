@@ -63,12 +63,8 @@ describe('DeleteConfirm', () => {
     expect(confirm()).not.toHaveFocus()
   })
 
-  it('sends the id', async () => {
-    setup()
-    await userEvent.click(confirm())
-    const form = remove.mock.calls[0]?.[1] as FormData
-    expect(form.get('id')).toBe('i1')
-  })
+  /* That confirming deletes the right row is proven by e2e/ingredients.spec.ts
+     against a real database, where ON DELETE RESTRICT can actually answer. */
 
   it('leaves without deleting when cancelled', async () => {
     const {onCancel} = setup()
