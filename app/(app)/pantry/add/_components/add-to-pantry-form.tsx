@@ -67,7 +67,11 @@ export function AddToPantryForm() {
             step="any"
             value={quantity}
             onChange={e => setQuantity(e.target.value)}
-            aria-describedby={state.error ? messageId : undefined}
+            /* Only the one about the amount. "alreadyThere" is about the
+               ingredient that was picked, and pointing the quantity field at
+               it says the number is wrong when it is not. */
+            aria-describedby={state.error === 'invalid' ? messageId : undefined}
+            aria-invalid={state.error === 'invalid' ? true : undefined}
             className="w-28 rounded-lg border border-secondary-foreground bg-background px-3 py-2"
           />
         </div>
