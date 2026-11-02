@@ -65,14 +65,14 @@ export function DeleteConfirm({id, date, onCancel}: Props) {
           ref={cancel}
           type="button"
           onClick={onCancel}
-          className="rounded-lg border border-secondary-foreground px-4 py-2 font-semibold text-sm"
+          className="flex-1 rounded-lg border border-secondary-foreground px-4 py-2 font-semibold text-sm"
         >
           {t('cancel')}
         </button>
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-primary-strong px-4 py-2 font-semibold text-sm text-white disabled:opacity-60"
+          className="flex-1 rounded-lg bg-primary-strong px-4 py-2 font-semibold text-sm text-white disabled:opacity-60"
         >
           {t('confirmDeleteAction')}
         </button>

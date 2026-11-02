@@ -1,5 +1,6 @@
 'use client'
 
+import {Pencil, Trash2} from 'lucide-react'
 import {useFormatter, useTranslations} from 'next-intl'
 import {useCallback, useEffect, useRef, useState} from 'react'
 import type {DinnerListItem} from '@/lib/dinners'
@@ -74,9 +75,11 @@ export function DinnerRow({dinner}: {dinner: DinnerListItem}) {
           <time dateTime={dinner.eatenAt} className="font-semibold text-sm">
             {date}
           </time>
-          <p className="text-secondary-foreground text-xs">
-            {dinner.notes ?? t('noNotes')}
-          </p>
+          {/* Only when there are some. A line reading "Sin notas" under every
+              dinner is a row of nothing, repeated. */}
+          {dinner.notes && (
+            <p className="text-secondary-foreground text-xs">{dinner.notes}</p>
+          )}
         </div>
 
         <div className="flex shrink-0 gap-2">
@@ -87,18 +90,18 @@ export function DinnerRow({dinner}: {dinner: DinnerListItem}) {
             type="button"
             onClick={() => setMode('edit')}
             aria-label={t('editLabel', {date})}
-            className="rounded-lg border border-secondary-foreground px-3 py-1 font-semibold text-sm"
+            className="flex size-11 items-center justify-center rounded-lg border border-secondary-foreground"
           >
-            {t('edit')}
+            <Pencil aria-hidden="true" size={18} />
           </button>
           <button
             ref={deleteButton}
             type="button"
             onClick={() => setMode('confirm-delete')}
             aria-label={t('deleteLabel', {date})}
-            className="rounded-lg border border-primary-strong px-3 py-1 font-semibold text-primary-strong text-sm"
+            className="flex size-11 items-center justify-center rounded-lg border border-primary-strong text-primary-strong"
           >
-            {t('delete')}
+            <Trash2 aria-hidden="true" size={18} />
           </button>
         </div>
       </div>
