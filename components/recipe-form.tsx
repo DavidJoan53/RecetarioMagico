@@ -107,6 +107,8 @@ export function RecipeForm({action, submitLabel, recipe}: Props) {
 
       <RecipeIngredientFields initial={recipe?.ingredients} />
 
+      {/* Numbered: the steps are a sequence, and which one you are editing
+          is otherwise impossible to tell from a column of equal inputs. */}
       <FieldList
         name="instructions"
         legend={t('instructions')}
@@ -114,6 +116,7 @@ export function RecipeForm({action, submitLabel, recipe}: Props) {
         removeLabel={n => t('removeStep', {n})}
         addLabel={t('addStep')}
         initialValues={recipe?.instructions}
+        numbered
       />
 
       <FieldList
