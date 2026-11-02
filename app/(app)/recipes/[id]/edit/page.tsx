@@ -1,5 +1,8 @@
+import {ArrowLeft} from 'lucide-react'
+import Link from 'next/link'
 import {notFound, redirect} from 'next/navigation'
 import {getTranslations} from 'next-intl/server'
+import {PageHeader} from '@/components/page-header'
 import {RecipeForm} from '@/components/recipe-form'
 import {recipeById} from '@/db/recipes/queries'
 import {getSession} from '@/lib/session'
@@ -27,9 +30,18 @@ export default async function EditRecipePage({
 
   return (
     <main className="flex flex-col gap-5">
-      <h1 className="font-bold text-2xl tracking-tight">
-        {t('editTitle', {name: recipe.name})}
-      </h1>
+      <PageHeader
+        title={t('editTitle', {name: recipe.name})}
+        leading={
+          <Link
+            href={`/recipes/${recipe.id}`}
+            aria-label={t('backToRecipe')}
+            className="flex size-11 items-center justify-center rounded-lg"
+          >
+            <ArrowLeft aria-hidden="true" size={20} />
+          </Link>
+        }
+      />
       <RecipeForm
         action={updateRecipeAction}
         submitLabel={t('save')}

@@ -108,7 +108,7 @@ export function AddToPantryForm() {
       <button
         type="submit"
         disabled={pending || !chosen}
-        className="self-start rounded-lg bg-primary-strong px-4 py-2 font-semibold text-sm text-white disabled:opacity-60"
+        className="w-full rounded-lg bg-primary-strong px-4 py-3 font-semibold text-white disabled:opacity-60"
       >
         {t('addOne')}
       </button>

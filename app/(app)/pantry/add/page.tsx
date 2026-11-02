@@ -1,6 +1,8 @@
+import {ArrowLeft} from 'lucide-react'
 import Link from 'next/link'
 import {redirect} from 'next/navigation'
 import {getTranslations} from 'next-intl/server'
+import {PageHeader} from '@/components/page-header'
 import {getSession} from '@/lib/session'
 import {AddToPantryForm} from './_components/add-to-pantry-form'
 
@@ -14,19 +16,22 @@ export default async function AddToPantryPage() {
 
   return (
     <main className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <h1 className="font-bold text-2xl tracking-tight">{t('addTitle')}</h1>
-        <p className="text-secondary-foreground text-sm">{t('addHint')}</p>
-      </div>
+      <PageHeader
+        title={t('addTitle')}
+        leading={
+          <Link
+            href="/pantry"
+            aria-label={t('backToPantry')}
+            className="flex size-11 items-center justify-center rounded-lg"
+          >
+            <ArrowLeft aria-hidden="true" size={20} />
+          </Link>
+        }
+      />
+
+      <p className="text-secondary-foreground text-sm">{t('addHint')}</p>
 
       <AddToPantryForm />
-
-      <Link
-        href="/pantry"
-        className="text-center font-semibold text-primary-strong text-sm"
-      >
-        ← {t('backToPantry')}
-      </Link>
     </main>
   )
 }

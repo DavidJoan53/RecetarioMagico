@@ -86,7 +86,7 @@ async function logDinner(page: Page, recipe: string, notes: string) {
   await addForm(page).getByLabel(m.when).fill('2026-11-01T20:00')
   await pickRecipe(page, recipe)
   await addForm(page).getByLabel(m.notes).fill(notes)
-  await page.getByRole('button', {name: `+ ${m.add}`}).click()
+  await page.getByRole('button', {name: m.add}).click()
   /* Waited for here, not left to the caller. The form is its own route now,
      so every caller leaves it — and leaving before the action resolves
      abandons it mid-flight, so the dinner is never written and the failure
@@ -192,7 +192,7 @@ test('refuses a dinner with no recipe on it', async ({page}) => {
   await addForm(page).getByLabel(m.when).fill('2026-11-01T20:00')
   await expect(addForm(page).getByText(m.noneChosen)).toBeVisible()
 
-  await page.getByRole('button', {name: `+ ${m.add}`}).click()
+  await page.getByRole('button', {name: m.add}).click()
 
   /* Scoped to the form: Next's route announcer is an alert too. */
   await expect(addForm(page).getByRole('alert')).toHaveText(m.invalid)

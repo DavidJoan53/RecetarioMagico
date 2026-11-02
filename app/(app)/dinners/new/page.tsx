@@ -1,6 +1,8 @@
+import {ArrowLeft} from 'lucide-react'
 import Link from 'next/link'
 import {redirect} from 'next/navigation'
 import {getTranslations} from 'next-intl/server'
+import {PageHeader} from '@/components/page-header'
 import {getSession} from '@/lib/session'
 import {createDinnerAction} from '../actions'
 import {DinnerForm} from './_components/dinner-form'
@@ -15,21 +17,22 @@ export default async function NewDinnerPage() {
 
   return (
     <main className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <h1 className="font-bold text-2xl tracking-tight">{t('addTitle')}</h1>
-        <p className="text-secondary-foreground text-sm">{t('addHint')}</p>
-      </div>
+      <PageHeader
+        title={t('addTitle')}
+        leading={
+          <Link
+            href="/dinners"
+            aria-label={t('backToDinners')}
+            className="flex size-11 items-center justify-center rounded-lg"
+          >
+            <ArrowLeft aria-hidden="true" size={20} />
+          </Link>
+        }
+      />
 
-      {/* Stays put rather than returning to the list: a week is logged
-          several at a time, and the list is one tap away. */}
+      <p className="text-secondary-foreground text-sm">{t('addHint')}</p>
+
       <DinnerForm action={createDinnerAction} />
-
-      <Link
-        href="/dinners"
-        className="text-center font-semibold text-primary-strong text-sm"
-      >
-        ← {t('backToDinners')}
-      </Link>
     </main>
   )
 }

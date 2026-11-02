@@ -66,6 +66,16 @@ describe('RecipeForm', () => {
     ).toBeInTheDocument()
   })
 
+  /** Nothing beside it: the way out is in the header. */
+  it('submits with one full-width button', () => {
+    setup()
+    const submit = screen.getByRole('button', {
+      name: messages.recipeForm.create,
+    })
+    expect(submit).toHaveClass('w-full')
+    expect(screen.queryByRole('link')).toBeNull()
+  })
+
   it('submits to the action given to it', async () => {
     const {action} = setup()
     await userEvent.type(
@@ -78,12 +88,10 @@ describe('RecipeForm', () => {
     expect(action).toHaveBeenCalled()
   })
 
-  it('offers a way out that does not submit', () => {
-    setup()
-    expect(
-      screen.getByRole('link', {name: messages.recipeForm.cancel}),
-    ).toHaveAttribute('href', '/recipes')
-  })
+  /* The way out is the arrow in the page header now, so where it goes is
+     the page's business rather than the form's. Both destinations -- the
+     list from /recipes/new, the recipe from its edit page -- are walked in
+     e2e/recipes.spec.ts. */
 
   describe('when the action reports a problem', () => {
     /** The state only exists after the action runs, so submit first. */
@@ -216,14 +224,6 @@ describe('RecipeForm', () => {
     it('creates without an id, so the action knows it is a new one', () => {
       const {submitted} = setup()
       expect(submitted().get('id')).toBeNull()
-    })
-
-    /** Backing out of an edit returns to the recipe, not to the whole list. */
-    it('cancels back to the recipe being edited', () => {
-      setup({}, recipe)
-      expect(
-        screen.getByRole('link', {name: messages.recipeForm.cancel}),
-      ).toHaveAttribute('href', '/recipes/r1')
     })
   })
 

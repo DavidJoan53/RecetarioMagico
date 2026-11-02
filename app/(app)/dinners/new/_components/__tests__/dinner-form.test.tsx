@@ -62,8 +62,7 @@ async function fillIn() {
   await userEvent.click(await screen.findByRole('option', {name: /Arepa/}))
 }
 
-const submit = () =>
-  userEvent.click(screen.getByRole('button', {name: `+ ${m.add}`}))
+const submit = () => userEvent.click(screen.getByRole('button', {name: m.add}))
 
 describe('DinnerForm', () => {
   /** The server and the browser do not reach `new Date()` at the same tick. */

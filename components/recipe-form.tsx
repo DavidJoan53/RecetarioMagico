@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import {useTranslations} from 'next-intl'
 import {useActionState, useId} from 'react'
 import type {FormState} from '@/app/(app)/recipes/actions'
@@ -118,21 +117,15 @@ export function RecipeForm({action, submitLabel, recipe}: Props) {
         initialValues={recipe?.links}
       />
 
-      <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={pending}
-          className="flex-1 rounded-lg bg-primary-strong px-4 py-3 font-semibold text-white disabled:opacity-60"
-        >
-          {submitLabel}
-        </button>
-        <Link
-          href={recipe ? `/recipes/${recipe.id}` : '/recipes'}
-          className="rounded-lg border border-secondary-foreground px-4 py-3 text-center font-semibold text-sm"
-        >
-          {t('cancel')}
-        </Link>
-      </div>
+      {/* One button, full width. The way out is the arrow in the page
+          header, so there is nothing to sit beside. */}
+      <button
+        type="submit"
+        disabled={pending}
+        className="w-full rounded-lg bg-primary-strong px-4 py-3 font-semibold text-white disabled:opacity-60"
+      >
+        {submitLabel}
+      </button>
     </form>
   )
 }

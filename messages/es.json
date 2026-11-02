@@ -81,6 +81,7 @@
     "removeLink": "Quitar enlace {n}",
     "create": "Crear",
     "cancel": "Cancelar",
+    "backToRecipe": "Volver a la receta",
     "duplicateName": "Ya tienes una receta con ese nombre.",
     "invalid": "Revisa los campos marcados.",
     "editTitle": "Editar {name}",
