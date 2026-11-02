@@ -31,7 +31,11 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals())
 
 function setup(
-  options: {items?: City[]; renderNote?: (city: City) => React.ReactNode} = {},
+  options: {
+    items?: City[]
+    renderNote?: (city: City) => React.ReactNode
+    clearOnSelect?: boolean
+  } = {},
 ) {
   const items = options.items ?? cities
   const fetchPage = vi.fn(
@@ -54,6 +58,7 @@ function setup(
           getKey={city => city.code}
           getLabel={city => city.city}
           renderNote={options.renderNote}
+          clearOnSelect={options.clearOnSelect}
         />
       </QueryClientProvider>
     </NextIntlClientProvider>,
@@ -119,6 +124,17 @@ describe('Combobox', () => {
     expect(
       await screen.findByText('Ninguna ciudad con ese nombre.'),
     ).toBeInTheDocument()
+  })
+
+  /**
+   * A picker that collects several shows the chosen one as a chip. Left in
+   * the box it is on screen twice, and the box claims to still hold it.
+   */
+  it('empties the box on choosing when asked to', async () => {
+    const {input} = setup({clearOnSelect: true})
+    await userEvent.click(input)
+    await userEvent.click(await screen.findByRole('option', {name: 'Bogotá'}))
+    expect(input).toHaveValue('')
   })
 
   /** Each search caches on its own, under the key the caller chose. */

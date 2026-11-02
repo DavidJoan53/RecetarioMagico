@@ -7,4 +7,5 @@ export const queryKeys = {
   recipes: ['recipes'] as const,
   ingredients: ['ingredients'] as const,
   pantry: ['pantry'] as const,
+  dinners: ['dinners'] as const,
 }

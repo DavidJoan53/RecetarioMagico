@@ -109,13 +109,6 @@ describe('PantryRow', () => {
       expect(update).not.toHaveBeenCalled()
     })
 
-    it('sends the ingredient it belongs to', async () => {
-      await open()
-      await userEvent.click(screen.getByRole('button', {name: m.save}))
-      const form = update.mock.calls[0]?.[1] as FormData
-      expect(form.get('id')).toBe('i1')
-    })
-
     it('returns focus to the amount on cancel', async () => {
       await open()
       await userEvent.click(screen.getByRole('button', {name: m.cancel}))
@@ -123,14 +116,17 @@ describe('PantryRow', () => {
     })
   })
 
-  /** Nothing is destroyed, so there is nothing to confirm. */
+  /**
+   * Nothing is destroyed, so there is nothing to confirm — it goes straight
+   * through, unlike every other delete in the app. The name has to say which
+   * ingredient leaves, since the button reads the same on every row.
+   */
   it('removes without asking, and names what it removes', async () => {
     setup(item(1))
-    const button = screen.getByRole('button', {
-      name: 'Quitar Tomate de la despensa',
-    })
-    await userEvent.click(button)
-    const form = remove.mock.calls[0]?.[1] as FormData
-    expect(form.get('id')).toBe('i1')
+    await userEvent.click(
+      screen.getByRole('button', {name: 'Quitar Tomate de la despensa'}),
+    )
+    expect(screen.queryByRole('alertdialog')).toBeNull()
+    expect(remove).toHaveBeenCalled()
   })
 })

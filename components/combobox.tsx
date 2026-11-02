@@ -24,6 +24,12 @@ type Props<T> = {
    * sitting beside it as a badge.
    */
   renderNote?: (item: T) => React.ReactNode
+  /**
+   * Empties the box on choosing rather than leaving the name in it. For a
+   * picker that collects several: the chosen one is shown elsewhere by then,
+   * and leaving it here says it is still what the box holds.
+   */
+  clearOnSelect?: boolean
 }
 
 /** Long enough that typing a word is one request, short enough to feel live. */
@@ -48,6 +54,7 @@ export function Combobox<T>({
   getKey,
   getLabel,
   renderNote,
+  clearOnSelect = false,
 }: Props<T>) {
   const t = useTranslations('common')
   const [text, setText] = useState('')
@@ -125,7 +132,7 @@ export function Combobox<T>({
 
   function choose(item: T) {
     onChange(item)
-    setText(getLabel(item))
+    setText(clearOnSelect ? '' : getLabel(item))
     setOpen(false)
   }
 

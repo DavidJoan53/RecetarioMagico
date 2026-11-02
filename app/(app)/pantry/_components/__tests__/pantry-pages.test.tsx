@@ -4,12 +4,10 @@ import userEvent from '@testing-library/user-event'
 import {NextIntlClientProvider} from 'next-intl'
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
 import type {PantryPage} from '@/db/pantry/queries'
-import {PAGE_SIZE} from '@/lib/validation/page'
 import messages from '@/messages/es.json'
 import {PantryPages} from '../pantry-pages'
 
 const m = messages.pantry
-const loadMore = `Cargar ${PAGE_SIZE} más`
 
 const removed = vi.hoisted(() => vi.fn())
 vi.mock('../../actions', () => ({
@@ -62,24 +60,10 @@ function setup(initialPage: PantryPage) {
   )
 }
 
+/* Rendering the first page and appending the next is the same
+   useInfiniteQuery wiring on all four lists, proven once in recipe-pages.
+   What is specific to this one is its query key. */
 describe('PantryPages', () => {
-  it('shows the page it was given', () => {
-    mockPages({'': page(['Ajo'], null)})
-    setup(page(['Ajo'], null))
-    expect(screen.getByRole('list', {name: m.title})).toBeInTheDocument()
-    expect(screen.getByText('Ajo')).toBeInTheDocument()
-  })
-
-  it('adds the next page below the one already read', async () => {
-    mockPages({'': page(['Ajo'], 'Ajo'), Ajo: page(['Cebolla'], null)})
-    setup(page(['Ajo'], 'Ajo'))
-
-    await userEvent.click(screen.getByRole('button', {name: loadMore}))
-
-    expect(await screen.findByText('Cebolla')).toBeInTheDocument()
-    expect(screen.getByText('Ajo')).toBeInTheDocument()
-  })
-
   /**
    * The list reads its own cache, not the server render, so revalidatePath
    * alone leaves a removed row on screen with nothing to say it has gone.

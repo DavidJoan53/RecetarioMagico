@@ -31,3 +31,11 @@ export function isStillReferenced(error: unknown): boolean {
   const code = codeOf(error)
   return code === RESTRICT_VIOLATION || code === FOREIGN_KEY_VIOLATION
 }
+
+/**
+ * The same code read from the other end: a write pointing at a row that is
+ * not there, rather than a delete blocked by one that is. A dinner naming a
+ * recipe someone deleted while the form was open arrives here.
+ */
+export const isMissingReference = (error: unknown) =>
+  codeOf(error) === FOREIGN_KEY_VIOLATION

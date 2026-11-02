@@ -129,12 +129,38 @@ Three reasons it is a rule and not a preference: a query used by two screens sta
 
 ### Testing
 
-- New component and helper files ship with tests. Target **80%+ coverage on new files**, enforced in CI.
+Three tiers, and they are not graded the same. The coverage config draws the
+line: `lib/**`, `components/**` and `db/seed-data.ts` are measured per-file at
+80% and fail the build. **Nothing under `app/**` is measured by anything.**
+Writing a route-component test that could have been an end-to-end assertion
+costs real time and moves no number.
+
+**`lib/` and `components/` — the gate.** Every new file here ships with its
+test in the same commit. This is the coverage CI enforces.
+
+**`app/**/_components/` — three things only.** Unmeasured, so test only what
+no other tier can see:
+
+- focus movement after an interaction — axe is a static scan and cannot see
+  where focus lands when a row swaps into a form and back
+- accessible naming, where a row's controls must name their subject ("Editar
+  Tomate", not a column of buttons all reading "Editar")
+- cache invalidation — `revalidatePath` does not touch the TanStack cache, so
+  a deleted row otherwise stays on screen with nothing to say it has gone
+
+Anything else about a route component belongs to end-to-end.
+
+**`e2e/` — routes, writes, and the happy path.** Every route with behaviour
+gets a spec. **A route with no spec has no behavioural coverage**, whatever
+its components' unit tests say — the per-file coverage number cannot tell you
+this, because it never looked at `app/**` in the first place.
+
 - Test behaviour through the accessible interface — query by role and name, not by test id or class. This catches accessibility regressions for free.
 - At least one Playwright end-to-end flow covers the core path: create a recipe → label it → find it by label.
 - **Playwright always builds; it never reuses a running server.** A leftover one serves an older build, so the suite passes against code that is not under test. If `npm run test:e2e` reports the port in use, stop whatever is on 3000 — that error is the protection working.
 - **End-to-end tests get their own database, `E2E_DATABASE_URL`.** They create and delete rows. Pointed at the app's own database they edit the live app, and nothing says so — every test still passes, and the mess is found later by whoever opens the page. The suite refuses to start without it, and refuses if it matches `DATABASE_URL`.
 - **A write is only proven against a real database.** Component tests mock the server action, so they prove the message renders, never that the query ran or that the schema answered the way the code assumes. The catch in `delete-ingredient` looked for the wrong SQLSTATE and its unit test passed, because the test asserted the same wrong belief.
+- **Never assert the payload handed to a mocked server action.** Reaching into `action.mock.calls[0][1]` to check `form.get('id')` proves the component built a `FormData` and nothing else — the mock accepts any shape, so the assertion passes just as happily when the field is one the server never reads. Assert what the user can see instead (the chip is gone, the row is named after its ingredient), and let `e2e/` prove the write landed.
 
 ## Data model
 
