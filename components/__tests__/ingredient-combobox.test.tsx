@@ -108,6 +108,16 @@ describe('IngredientCombobox', () => {
     ).toBeInTheDocument()
   })
 
+  /** Glued, these read as "Ajoya está" — and nothing on screen says so. */
+  it('reads the name and its mark as separate words', async () => {
+    mockSearch({'': [ingredient('Ajo', true)]})
+    const {input} = setup()
+    await userEvent.click(input)
+    expect(
+      await screen.findByRole('option', {name: `Ajo ${m.alreadyIn}`}),
+    ).toBeInTheDocument()
+  })
+
   /**
    * The point of aria-activedescendant: focus stays in the text being typed
    * while the arrow keys move through the list.

@@ -18,7 +18,11 @@ type Props<T> = {
   fetchPage: (query: string, after: string | null) => Promise<Page<T>>
   getKey: (item: T) => string
   getLabel: (item: T) => string
-  /** A note after the name — "already in the pantry" and the like. */
+  /**
+   * A note after the name — "already in the pantry" and the like. It is read
+   * as part of the option, so it follows the name as words rather than
+   * sitting beside it as a badge.
+   */
   renderNote?: (item: T) => React.ReactNode
 }
 
@@ -240,9 +244,15 @@ export function Combobox<T>({
               >
                 <span className="truncate">{getLabel(item)}</span>
                 {note && (
-                  <span className="shrink-0 text-secondary-foreground text-xs">
-                    {note}
-                  </span>
+                  /* The space is load-bearing. With no text node between
+                     them the two are read as one word — "Ajoya está" — and
+                     the words on screen stop matching the spoken name. */
+                  <>
+                    {' '}
+                    <span className="shrink-0 text-secondary-foreground text-xs">
+                      {note}
+                    </span>
+                  </>
                 )}
               </div>
             )

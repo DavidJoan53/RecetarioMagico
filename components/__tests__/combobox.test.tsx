@@ -99,6 +99,20 @@ describe('Combobox', () => {
     expect(screen.getByRole('option', {name: 'Medellín'})).toBeInTheDocument()
   })
 
+  /**
+   * Glued, these read as "Bogotácapital" — and the words on screen stop
+   * matching the name they are read under.
+   */
+  it('reads the name and its note as separate words', async () => {
+    const {input} = setup({
+      renderNote: city => (city.code === 'bog' ? 'capital' : null),
+    })
+    await userEvent.click(input)
+    expect(
+      await screen.findByRole('option', {name: 'Bogotá capital'}),
+    ).toBeInTheDocument()
+  })
+
   it('says the caller’s words when nothing matched', async () => {
     const {input} = setup({items: []})
     await userEvent.click(input)
