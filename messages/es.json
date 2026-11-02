@@ -232,5 +232,8 @@
     "keepsRecipes": "Las recetas se quedan; solo se borra el registro.",
     "confirmDeleteAction": "Sí, eliminar",
     "deleted": "Cena del {date} eliminada"
+  },
+  "toast": {
+    "dismiss": "Descartar: {message}"
   }
 }

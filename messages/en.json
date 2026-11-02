@@ -141,5 +141,8 @@
     "keepsRecipes": "The recipes stay; only the log entry goes.",
     "confirmDeleteAction": "Yes, delete it",
     "deleted": "Dinner on {date} deleted"
+  },
+  "toast": {
+    "dismiss": "Dismiss: {message}"
   }
 }

@@ -6,3 +6,7 @@ import '@testing-library/jest-dom/vitest'
  * like the component rendering nothing.
  */
 Element.prototype.scrollIntoView = () => {}
+
+/** Same story: jsdom ships no pointer capture, and calling it throws. */
+Element.prototype.setPointerCapture = () => {}
+Element.prototype.releasePointerCapture = () => {}
