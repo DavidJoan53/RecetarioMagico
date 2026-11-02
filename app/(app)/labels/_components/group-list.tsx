@@ -2,9 +2,9 @@ import {getTranslations} from 'next-intl/server'
 import {EmptyState} from '@/components/empty-state'
 import {FocusCatcher} from '@/components/focus-catcher'
 import {allGroupsWithLabels} from '@/db/label-groups/queries'
+import {AddLabel} from './add-label'
 import {GroupHeader} from './group-header'
 import {LabelItem} from './label-item'
-import {NewLabelForm} from './new-label-form'
 
 export async function GroupList() {
   const t = await getTranslations('labels')
@@ -37,7 +37,7 @@ export async function GroupList() {
               </ul>
             )}
 
-            <NewLabelForm groupId={group.id} groupName={group.name} />
+            <AddLabel groupId={group.id} groupName={group.name} />
           </section>
         ))}
       </div>

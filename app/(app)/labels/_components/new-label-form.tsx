@@ -1,7 +1,8 @@
 'use client'
 
+import {X} from 'lucide-react'
 import {useTranslations} from 'next-intl'
-import {useActionState, useId, useRef, useState} from 'react'
+import {useActionState, useEffect, useId, useRef, useState} from 'react'
 import {useToast} from '@/components/toast-provider'
 import {createLabelAction, type FormState} from '../actions'
 
@@ -11,9 +12,11 @@ const DEFAULT_COLOR = '#118ab2'
 type Props = {
   groupId: string
   groupName: string
+  /** Closes the form. It is opened from a plus — see add-label. */
+  onCancel: () => void
 }
 
-export function NewLabelForm({groupId, groupName}: Props) {
+export function NewLabelForm({groupId, groupName, onCancel}: Props) {
   const t = useTranslations('labels')
   const [name, setName] = useState('')
   const [color, setColor] = useState(DEFAULT_COLOR)
@@ -45,6 +48,11 @@ export function NewLabelForm({groupId, groupName}: Props) {
   }
 
   const [state, formAction, pending] = useActionState(addThenClear, {})
+
+  /** Mounted means opened, so this is where the typing should start. */
+  useEffect(() => {
+    nameRef.current?.focus()
+  }, [])
 
   /* Both of these are about the name: taken already, or not a name at all. */
   const fieldError =
@@ -99,7 +107,18 @@ export function NewLabelForm({groupId, groupName}: Props) {
         disabled={pending}
         className="rounded-lg bg-primary-strong px-3 py-2 font-semibold text-sm text-white disabled:opacity-60"
       >
-        + {t('add')}
+        {t('add')}
+      </button>
+
+      {/* Stays open after each label, so several can be added in a row; this
+          is the only way back out. */}
+      <button
+        type="button"
+        onClick={onCancel}
+        aria-label={t('cancel')}
+        className="flex size-11 items-center justify-center rounded-lg border border-secondary-foreground"
+      >
+        <X aria-hidden="true" size={16} />
       </button>
 
       {fieldError && (
