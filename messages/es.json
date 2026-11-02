@@ -16,7 +16,8 @@
     "dinners": "Cenas",
     "settings": "Ajustes",
     "labels": "Etiquetas",
-    "ingredients": "Ingredientes"
+    "ingredients": "Ingredientes",
+    "pantry": "Despensa"
   },
   "search": {
     "placeholder": "Buscar..."
@@ -52,7 +53,11 @@
   },
   "common": {
     "loading": "Cargando…",
-    "empty": "Nada por aquí todavía."
+    "empty": "Nada por aquí todavía.",
+    "loadMore": "Cargar {count} más",
+    "loadingMore": "Cargando más…",
+    "endOfList": "Ya no hay más.",
+    "resultCount": "{count, plural, =0 {Sin resultados} one {# resultado} other {# resultados}}"
   },
   "recipeForm": {
     "newTitle": "Nueva receta",
@@ -75,8 +80,7 @@
   },
   "recipes": {
     "newRecipe": "Nueva receta",
-    "empty": "Todavía no tienes recetas.",
-    "loadMore": "Cargar 10 más"
+    "empty": "Todavía no tienes recetas."
   },
   "ingredients": {
     "addTitle": "Añadir ingrediente",
@@ -138,5 +142,34 @@
     "groupHasNoLabels": "Este grupo no tiene etiquetas.",
     "deleted": "{name} eliminada",
     "groupDeleted": "Grupo {name} eliminado"
+  },
+  "pantry": {
+    "title": "Despensa",
+    "removeLabel": "Quitar {name} de la despensa",
+    "quantity": "Cantidad",
+    "unit": "Unidad",
+    "noAmount": "Sin cantidad",
+    "amountFor": "Cantidad de {name}",
+    "amountButton": "{amount}, cantidad de {name}",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "remove": "Quitar",
+    "removed": "{name} fuera de la despensa",
+    "gone": "Eso ya no está en la despensa.",
+    "invalid": "Indica cuánto tienes y en qué unidad.",
+    "empty": "Tu despensa está vacía.",
+    "goToIngredients": "Ir a Ingredientes",
+    "addTitle": "Añadir a la despensa",
+    "addHint": "Busca un ingrediente, dile cuánto tienes y añádelo.",
+    "addMore": "Añadir a la despensa",
+    "backToPantry": "Volver a la despensa",
+    "ingredient": "Ingrediente",
+    "searchPlaceholder": "Busca por nombre…",
+    "alreadyIn": "ya está",
+    "noMatches": "Ningún ingrediente con ese nombre.",
+    "addOne": "Añadir a la despensa",
+    "alreadyThere": "Ese ingrediente ya está en tu despensa.",
+    "addedCount": "{name} añadido. {count, plural, one {# en esta sesión} other {# en esta sesión}}.",
+    "chooseUnit": "Elige una unidad"
   }
 }

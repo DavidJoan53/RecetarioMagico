@@ -1,7 +1,9 @@
 'use client'
 
+import {useQueryClient} from '@tanstack/react-query'
 import {useTranslations} from 'next-intl'
 import {useActionState, useId, useRef, useState} from 'react'
+import {queryKeys} from '@/lib/query-keys'
 import type {FormState} from '../actions'
 import {IngredientFields} from './ingredient-fields'
 
@@ -15,6 +17,7 @@ export function IngredientForm({action}: Props) {
   const [photoUrl, setPhotoUrl] = useState('')
   const nameRef = useRef<HTMLInputElement>(null)
   const messageId = useId()
+  const queryClient = useQueryClient()
 
   /**
    * Controlled on purpose. React resets an uncontrolled form after an action
@@ -31,6 +34,9 @@ export function IngredientForm({action}: Props) {
       setName('')
       setPhotoUrl('')
       nameRef.current?.focus()
+      /* The list holds its own pages; revalidating the server's copy no
+         longer reaches it, so the new ingredient would not appear. */
+      await queryClient.invalidateQueries({queryKey: queryKeys.ingredients})
     }
     return result
   }

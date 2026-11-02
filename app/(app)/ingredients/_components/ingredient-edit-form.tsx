@@ -1,9 +1,11 @@
 'use client'
 
+import {useQueryClient} from '@tanstack/react-query'
 import {useTranslations} from 'next-intl'
 import {useActionState, useEffect, useId, useRef, useState} from 'react'
 import type {Ingredient} from '@/db/schema'
-import {updateIngredientAction} from '../actions'
+import {queryKeys} from '@/lib/query-keys'
+import {type FormState, updateIngredientAction} from '../actions'
 import {IngredientFields} from './ingredient-fields'
 
 type Props = {
@@ -14,10 +16,19 @@ type Props = {
 
 export function IngredientEditForm({ingredient, onDone, onCancel}: Props) {
   const t = useTranslations('ingredients')
-  const [state, formAction, pending] = useActionState(
-    updateIngredientAction,
-    {},
-  )
+  const queryClient = useQueryClient()
+
+  /* The list reads its own cache, so a renamed ingredient has to be asked
+     for again rather than revalidated on the server. */
+  const saveThen = async (previous: FormState, form: FormData) => {
+    const result = await updateIngredientAction(previous, form)
+    if (result.done) {
+      await queryClient.invalidateQueries({queryKey: queryKeys.ingredients})
+    }
+    return result
+  }
+
+  const [state, formAction, pending] = useActionState(saveThen, {})
   const [name, setName] = useState(ingredient.name)
   const [photoUrl, setPhotoUrl] = useState(ingredient.photoUrl ?? '')
   const nameRef = useRef<HTMLInputElement>(null)

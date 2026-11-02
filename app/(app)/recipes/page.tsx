@@ -6,9 +6,6 @@ import {SectionSkeleton} from '@/components/section-skeleton'
 import {getSession} from '@/lib/session'
 import {RecipeList} from './_components/recipe-list'
 
-/** Keyset pages of ten; uuid v7 ordering means no OFFSET drift. */
-const PAGE_SIZE = 10
-
 export const dynamic = 'force-dynamic'
 
 export default async function RecipesPage() {
@@ -32,7 +29,7 @@ export default async function RecipesPage() {
       </div>
 
       <Suspense fallback={<SectionSkeleton />}>
-        <RecipeList limit={PAGE_SIZE} />
+        <RecipeList />
       </Suspense>
     </main>
   )

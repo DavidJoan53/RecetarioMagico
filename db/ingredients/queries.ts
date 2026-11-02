@@ -1,8 +1,47 @@
-import {asc} from 'drizzle-orm'
+import {and, asc, eq, getTableColumns, gt, ilike, sql} from 'drizzle-orm'
 import {db} from '@/db'
-import {ingredients} from '@/db/schema'
+import {ingredients, pantry} from '@/db/schema'
+import {pageOf} from '@/lib/validation/page'
 
-/** Alphabetical, not newest first: this list is scanned to find a name. */
-export async function allIngredients() {
-  return db.select().from(ingredients).orderBy(asc(ingredients.name))
+export type IngredientWithPantry = typeof ingredients.$inferSelect & {
+  inPantry: boolean
+}
+
+export type IngredientPage = {
+  items: IngredientWithPantry[]
+  /** The last name on the page, or null when there is no next one. */
+  nextCursor: string | null
+}
+
+/**
+ * Keyset on name, not OFFSET. The list is alphabetical and names are unique,
+ * so the last name read is a complete description of where to continue — and
+ * one added while scrolling cannot shift a row onto a page already seen.
+ */
+export async function searchIngredients({
+  query,
+  after,
+  limit,
+}: {
+  query: string
+  after: string | null
+  limit: number
+}): Promise<IngredientPage> {
+  const rows = await db
+    .select({
+      ...getTableColumns(ingredients),
+      inPantry: sql<boolean>`${pantry.ingredientId} is not null`,
+    })
+    .from(ingredients)
+    .leftJoin(pantry, eq(pantry.ingredientId, ingredients.id))
+    .where(
+      and(
+        query ? ilike(ingredients.name, `%${query}%`) : undefined,
+        after ? gt(ingredients.name, after) : undefined,
+      ),
+    )
+    .orderBy(asc(ingredients.name))
+    .limit(limit + 1)
+
+  return pageOf(rows, limit, row => row.name)
 }

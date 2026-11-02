@@ -1,9 +1,11 @@
 'use client'
 
+import {useQueryClient} from '@tanstack/react-query'
 import {useTranslations} from 'next-intl'
 import {useActionState, useEffect, useRef} from 'react'
 import {useAnnounceDeletion} from '@/components/deletion-announcer'
 import type {Ingredient} from '@/db/schema'
+import {queryKeys} from '@/lib/query-keys'
 import {type DeleteState, deleteIngredientAction} from '../actions'
 
 type Props = {
@@ -15,6 +17,7 @@ export function DeleteConfirm({ingredient, onCancel}: Props) {
   const t = useTranslations('ingredients')
   const announce = useAnnounceDeletion()
   const cancel = useRef<HTMLButtonElement>(null)
+  const queryClient = useQueryClient()
 
   /**
    * Announced here rather than from the resulting state: this row is gone
@@ -22,7 +25,12 @@ export function DeleteConfirm({ingredient, onCancel}: Props) {
    */
   const deleteThen = async (previous: DeleteState, form: FormData) => {
     const result = await deleteIngredientAction(previous, form)
-    if (!result.error) announce(t('deleted', {name: ingredient.name}))
+    if (!result.error) {
+      announce(t('deleted', {name: ingredient.name}))
+      /* The list holds its own pages, so the deleted row would stay on
+         screen on nothing but the server having been revalidated. */
+      await queryClient.invalidateQueries({queryKey: queryKeys.ingredients})
+    }
     return result
   }
 
