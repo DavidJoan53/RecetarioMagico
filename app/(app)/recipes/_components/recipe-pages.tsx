@@ -44,6 +44,7 @@ export function RecipePages({initialPage}: {initialPage: RecipePage}) {
             name={recipe.name}
             imageUrl={recipe.imageUrl}
             prepTimeMinutes={recipe.prepTimeMinutes}
+            ingredients={recipe.ingredients}
           />
         ))}
       </ul>
