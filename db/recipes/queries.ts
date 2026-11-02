@@ -1,6 +1,7 @@
-import {and, desc, ilike, lt} from 'drizzle-orm'
+import {and, asc, desc, eq, ilike, inArray, lt} from 'drizzle-orm'
 import {db} from '@/db'
-import {recipes} from '@/db/schema'
+import type {Unit} from '@/db/schema'
+import {ingredients, recipeIngredients, recipes} from '@/db/schema'
 import {pageOf} from '@/lib/validation/page'
 
 /** One ordering, one cursor: the list and the picker read the same rows. */
@@ -26,15 +27,77 @@ function recipeRows({
     .limit(limit)
 }
 
-/** Keyset, not OFFSET: uuid v7 sorts chronologically and does not drift. */
-export async function latestRecipes(limit: number, before?: string) {
-  return recipeRows({after: before ?? null, limit, query: ''})
+/** An ingredient as it reads inside a recipe: the name, and how much of it. */
+export type RecipeIngredient = {
+  ingredientId: string
+  name: string
+  quantity: number
+  unit: Unit
 }
 
 export type Recipe = typeof recipes.$inferSelect
 
+export type RecipeWithIngredients = Recipe & {
+  ingredients: RecipeIngredient[]
+}
+
+/**
+ * Alphabetical, not by when the row was written. A multi-row insert stamps
+ * every id in the same millisecond, so uuid v7 leaves the order inside one
+ * recipe to the random bits — stable on paper, shuffled in practice.
+ */
+function ingredientRowsFor(recipeIds: string[]) {
+  return db
+    .select({
+      recipeId: recipeIngredients.recipeId,
+      ingredientId: recipeIngredients.ingredientId,
+      name: ingredients.name,
+      quantity: recipeIngredients.quantity,
+      unit: recipeIngredients.unit,
+    })
+    .from(recipeIngredients)
+    .innerJoin(ingredients, eq(ingredients.id, recipeIngredients.ingredientId))
+    .where(inArray(recipeIngredients.recipeId, recipeIds))
+    .orderBy(asc(ingredients.name))
+}
+
+/**
+ * One query for the whole page, grouped here — a page of ten must not become
+ * ten more round trips.
+ */
+async function ingredientsByRecipe(
+  recipeIds: string[],
+): Promise<Map<string, RecipeIngredient[]>> {
+  const grouped = new Map<string, RecipeIngredient[]>()
+  if (recipeIds.length === 0) return grouped
+
+  for (const {recipeId, ...ingredient} of await ingredientRowsFor(recipeIds)) {
+    const existing = grouped.get(recipeId)
+    if (existing) existing.push(ingredient)
+    else grouped.set(recipeId, [ingredient])
+  }
+  return grouped
+}
+
+function withIngredients(
+  rows: Recipe[],
+  byRecipe: Map<string, RecipeIngredient[]>,
+): RecipeWithIngredients[] {
+  return rows.map(row => ({...row, ingredients: byRecipe.get(row.id) ?? []}))
+}
+
+/**
+ * Keyset, not OFFSET: uuid v7 sorts chronologically and does not drift.
+ *
+ * Names only. This feeds the home strip, which has room for a thumbnail and
+ * a time and nothing else, so reading the amounts would be work thrown away.
+ */
+export async function latestRecipes(limit: number, before?: string) {
+  return recipeRows({after: before ?? null, limit, query: ''})
+}
+
 export type RecipePage = {
-  items: Recipe[]
+  items: RecipeWithIngredients[]
   /** The id of the last recipe on the page, or null at the end. */
   nextCursor: string | null
 }
@@ -58,5 +121,18 @@ export async function recipesPage({
   query?: string
 }): Promise<RecipePage> {
   const rows = await recipeRows({after, limit: limit + 1, query})
-  return pageOf(rows, limit, row => row.id)
+  const page = pageOf(rows, limit, row => row.id)
+  const byRecipe = await ingredientsByRecipe(page.items.map(r => r.id))
+  return {...page, items: withIngredients(page.items, byRecipe)}
+}
+
+/** Null rather than a throw: a recipe can be deleted while its link is open. */
+export async function recipeById(
+  id: string,
+): Promise<RecipeWithIngredients | null> {
+  const [recipe] = await db.select().from(recipes).where(eq(recipes.id, id))
+  if (!recipe) return null
+
+  const rows = await ingredientRowsFor([id])
+  return {...recipe, ingredients: rows.map(({recipeId: _, ...rest}) => rest)}
 }
