@@ -49,7 +49,13 @@
   },
   "recipe": {
     "minutes": "{count} min",
-    "noTime": "Sin tiempo"
+    "noTime": "Sin tiempo",
+    "ingredients": "Ingredientes",
+    "noIngredients": "Esta receta no lista ingredientes.",
+    "instructions": "Preparación",
+    "links": "Enlaces",
+    "edit": "Editar",
+    "backToRecipes": "Volver a las recetas"
   },
   "common": {
     "loading": "Cargando…",
@@ -76,7 +82,23 @@
     "create": "Crear",
     "cancel": "Cancelar",
     "duplicateName": "Ya tienes una receta con ese nombre.",
-    "invalid": "Revisa los campos marcados."
+    "invalid": "Revisa los campos marcados.",
+    "editTitle": "Editar {name}",
+    "save": "Guardar",
+    "ingredients": "Ingredientes",
+    "ingredientN": "Ingrediente {n}",
+    "addIngredient": "Añadir ingrediente",
+    "removeIngredient": "Quitar {name}",
+    "noIngredients": "Todavía no has añadido ingredientes.",
+    "quantity": "Cantidad",
+    "quantityOf": "Cantidad de {name}",
+    "unit": "Unidad",
+    "unitOf": "Unidad de {name}",
+    "chooseUnit": "Elige una unidad",
+    "alreadyInRecipe": "ya está en la receta",
+    "duplicateIngredient": "Ese ingrediente ya está en la receta.",
+    "ingredientGone": "Alguno de los ingredientes ya no existe.",
+    "gone": "Esa receta ya no existe."
   },
   "recipes": {
     "newRecipe": "Nueva receta",
