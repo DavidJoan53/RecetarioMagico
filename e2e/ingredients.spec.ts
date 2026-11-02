@@ -2,6 +2,7 @@ import type {Page} from '@playwright/test'
 import es from '@/messages/es.json'
 import {addIngredient, removeAll, uniqueName, useInNewRecipe} from './db'
 import {expect, test} from './signed-in'
+import {toast} from './toast'
 
 const m = es.ingredients
 
@@ -30,28 +31,37 @@ test.afterEach(async () => {
  */
 async function open(page: Page, path = '/ingredients') {
   await page.goto(path)
-  await page.waitForFunction(() => {
-    const form = document.querySelector('form')
-    return !!form && Object.keys(form).some(k => k.startsWith('__react'))
-  })
+  /* The plus, not the form: there is no form on the page until the plus has
+     been pressed, so waiting for one here would hang until the timeout and
+     report an empty page rather than a closed form. */
+  await page.waitForFunction(label => {
+    const plus = document.querySelector(`button[aria-label="${label}"]`)
+    return !!plus && Object.keys(plus).some(k => k.startsWith('__react'))
+  }, m.addTitle)
+}
+
+/**
+ * The form is behind a plus. It stays open after each ingredient, so this
+ * only presses when it is actually closed — a second press would be looking
+ * for a button that is no longer there.
+ */
+async function openAddForm(page: Page) {
+  const plus = page.getByRole('button', {name: m.addTitle})
+  if (await plus.isVisible()) await plus.click()
+  await expect(addForm(page)).toBeVisible()
 }
 
 async function fillAndAdd(page: Page, name: string) {
   created.ingredientNames.push(name)
+  await openAddForm(page)
   await addForm(page).getByRole('textbox', {name: m.name}).fill(name)
-  await page.getByRole('button', {name: `+ ${m.add}`}).click()
+  await page.getByRole('button', {name: m.add}).click()
 }
 
 const addForm = (page: Page) => page.getByRole('form', {name: m.addTitle})
 
 const rowFor = (page: Page, name: string) =>
   page.getByRole('listitem').filter({hasText: name})
-
-/** Two live regions share the page: the form's, and the list's for deletions. */
-const formStatus = (page: Page) => addForm(page).getByRole('status')
-
-const announcement = (page: Page, text: string) =>
-  page.getByRole('status').filter({hasText: text})
 
 test('an added ingredient is saved and comes back in the list', async ({
   page,
@@ -60,7 +70,7 @@ test('an added ingredient is saved and comes back in the list', async ({
   await open(page)
   await fillAndAdd(page, name)
 
-  await expect(formStatus(page)).toHaveText(m.added)
+  await expect(toast(page, m.added)).toBeVisible()
   await expect(rowFor(page, name)).toBeVisible()
 
   /* Reloaded, because the row appearing could be optimistic. */
@@ -74,7 +84,7 @@ test('the unique index refuses a second ingredient with the same name', async ({
   const name = uniqueName('e2e-duplicado')
   await open(page)
   await fillAndAdd(page, name)
-  await expect(formStatus(page)).toHaveText(m.added)
+  await expect(toast(page, m.added)).toBeVisible()
 
   await fillAndAdd(page, name)
   await expect(addForm(page).getByRole('alert')).toHaveText(m.duplicate)
@@ -89,9 +99,13 @@ test('a rename is written and survives a reload', async ({page}) => {
   await fillAndAdd(page, before)
   await expect(rowFor(page, before)).toBeVisible()
 
-  await page.getByRole('button', {name: `${m.edit} ${before}`}).click()
+  await page
+    .getByRole('button', {name: m.editLabel.replace('{name}', before)})
+    .click()
   /* Scoped: the create form at the top has a Nombre field of its own. */
-  const editing = page.getByRole('form', {name: `${m.edit} ${before}`})
+  const editing = page.getByRole('form', {
+    name: m.editTitle.replace('{name}', before),
+  })
   await editing.getByRole('textbox', {name: m.name}).fill(after)
   await editing.getByRole('button', {name: m.save}).click()
 
@@ -109,11 +123,13 @@ test('a deleted ingredient is gone, and the going is announced', async ({
   await fillAndAdd(page, name)
   await expect(rowFor(page, name)).toBeVisible()
 
-  await page.getByRole('button', {name: `${m.delete} ${name}`}).click()
+  await page
+    .getByRole('button', {name: m.deleteLabel.replace('{name}', name)})
+    .click()
   await page.getByRole('button', {name: m.confirmDeleteAction}).click()
 
   /* The row unmounts, so this message is the only word the user gets. */
-  await expect(announcement(page, `${name} eliminado`)).toHaveCount(1)
+  await expect(toast(page, `${name} eliminado`)).toHaveCount(1)
   await expect(rowFor(page, name)).toHaveCount(0)
   await page.reload()
   await expect(rowFor(page, name)).toHaveCount(0)
@@ -135,7 +151,9 @@ test('an ingredient a recipe uses cannot be deleted, and is told why', async ({
   created.recipeIds.push(await useInNewRecipe(id, uniqueName('e2e-receta')))
 
   await open(page)
-  await page.getByRole('button', {name: `${m.delete} ${name}`}).click()
+  await page
+    .getByRole('button', {name: m.deleteLabel.replace('{name}', name)})
+    .click()
   await page.getByRole('button', {name: m.confirmDeleteAction}).click()
 
   await expect(rowFor(page, name).getByRole('alert')).toHaveText(/1 receta/)

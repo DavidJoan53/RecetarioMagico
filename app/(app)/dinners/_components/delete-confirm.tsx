@@ -3,7 +3,8 @@
 import {useQueryClient} from '@tanstack/react-query'
 import {useTranslations} from 'next-intl'
 import {useActionState, useEffect, useRef} from 'react'
-import {useAnnounceDeletion} from '@/components/deletion-announcer'
+import {useCatchFocus} from '@/components/focus-catcher'
+import {useToast} from '@/components/toast-provider'
 import {queryKeys} from '@/lib/query-keys'
 import {type DeleteState, deleteDinnerAction} from '../actions'
 
@@ -16,7 +17,8 @@ type Props = {
 
 export function DeleteConfirm({id, date, onCancel}: Props) {
   const t = useTranslations('dinners')
-  const announce = useAnnounceDeletion()
+  const toast = useToast()
+  const catchFocus = useCatchFocus()
   const cancel = useRef<HTMLButtonElement>(null)
   const queryClient = useQueryClient()
 
@@ -27,7 +29,8 @@ export function DeleteConfirm({id, date, onCancel}: Props) {
   const deleteThen = async (previous: DeleteState, form: FormData) => {
     const result = await deleteDinnerAction(previous, form)
     if (!result.error) {
-      announce(t('deleted', {date}))
+      toast({message: t('deleted', {date})})
+      catchFocus()
       /* The list holds its own pages, so the deleted row would stay on
          screen on nothing but the server having been revalidated. */
       await queryClient.invalidateQueries({queryKey: queryKeys.dinners})
@@ -62,14 +65,14 @@ export function DeleteConfirm({id, date, onCancel}: Props) {
           ref={cancel}
           type="button"
           onClick={onCancel}
-          className="rounded-lg border border-secondary-foreground px-4 py-2 font-semibold text-sm"
+          className="flex-1 rounded-lg border border-secondary-foreground px-4 py-2 font-semibold text-sm"
         >
           {t('cancel')}
         </button>
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-primary-strong px-4 py-2 font-semibold text-sm text-white disabled:opacity-60"
+          className="flex-1 rounded-lg bg-primary-strong px-4 py-2 font-semibold text-sm text-white disabled:opacity-60"
         >
           {t('confirmDeleteAction')}
         </button>

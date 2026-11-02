@@ -15,6 +15,20 @@ const setup = (initialValues?: string[]) =>
     />,
   )
 
+/** The same list, told to show its positions. */
+const numbered = (initialValues: string[]) =>
+  render(
+    <FieldList
+      name="instructions"
+      legend="Preparación"
+      itemLabel={n => `Paso ${n}`}
+      removeLabel={n => `Quitar paso ${n}`}
+      addLabel="Añadir paso"
+      initialValues={initialValues}
+      numbered
+    />,
+  )
+
 describe('FieldList', () => {
   it('starts with one labelled row and no way to remove it', () => {
     setup()
@@ -95,5 +109,40 @@ describe('FieldList', () => {
     await userEvent.click(screen.getByRole('button', {name: /Añadir paso/}))
     await userEvent.click(screen.getByRole('button', {name: 'Quitar paso 2'}))
     expect(screen.queryByRole('button', {name: /Quitar/})).toBeNull()
+  })
+
+  /**
+   * The steps of a recipe are a sequence, and a column of identical inputs
+   * gives no sign of which one is being edited. The detail page numbers them;
+   * the form that writes them did not.
+   */
+  describe('when numbered', () => {
+    it('shows each row its position', () => {
+      numbered(['uno', 'dos'])
+      expect(screen.getByText('1')).toBeInTheDocument()
+      expect(screen.getByText('2')).toBeInTheDocument()
+    })
+
+    /** The input is already called "Paso 1"; the digit would be a second one. */
+    it('hides the digit from the accessible name', () => {
+      const {container} = numbered(['uno'])
+      expect(container.querySelector('[aria-hidden="true"]')).toHaveTextContent(
+        '1',
+      )
+      expect(screen.getByRole('textbox', {name: 'Paso 1'})).toBeInTheDocument()
+    })
+
+    it('renumbers what is left when a row is removed', async () => {
+      numbered(['uno', 'dos', 'tres'])
+      await userEvent.click(screen.getByRole('button', {name: 'Quitar paso 1'}))
+      expect(screen.getAllByRole('textbox')).toHaveLength(2)
+      expect(screen.queryByText('3')).toBeNull()
+    })
+  })
+
+  /** Links read as themselves; a digit beside one is noise. */
+  it('shows no numbers unless asked', () => {
+    setup(['uno', 'dos'])
+    expect(screen.queryByText('1')).toBeNull()
   })
 })

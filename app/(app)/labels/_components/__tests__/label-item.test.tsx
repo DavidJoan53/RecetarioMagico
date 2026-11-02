@@ -74,7 +74,13 @@ describe('LabelItem', () => {
     const openConfirm = async (recipeCount: number) => {
       setup(recipeCount)
       await userEvent.click(chip())
-      await userEvent.click(screen.getByRole('button', {name: m.delete}))
+      /* Icon-only now, so the name is what finds it — and naming it after
+         the label is what tells a page of bins apart. */
+      await userEvent.click(
+        screen.getByRole('button', {
+          name: m.deleteLabel.replace('{name}', 'Cena'),
+        }),
+      )
     }
 
     it('asks first', async () => {

@@ -1,9 +1,11 @@
 'use client'
 
 import {useQueryClient} from '@tanstack/react-query'
+import {useRouter} from 'next/navigation'
 import {useTranslations} from 'next-intl'
-import {useActionState, useId, useRef, useState} from 'react'
+import {useActionState, useId, useState} from 'react'
 import {IngredientCombobox} from '@/components/ingredient-combobox'
+import {useToast} from '@/components/toast-provider'
 import type {IngredientWithPantry} from '@/db/ingredients/queries'
 import {unitEnum} from '@/db/schema'
 import {queryKeys} from '@/lib/query-keys'
@@ -17,31 +19,27 @@ export function AddToPantryForm() {
   const quantityId = useId()
   const unitId = useId()
   const messageId = useId()
-  const added = useRef<string[]>([])
   const queryClient = useQueryClient()
+  const toast = useToast()
+  const router = useRouter()
 
-  /**
-   * Cleared here rather than from an effect on the result: the state after a
-   * second successful add is the same object shape as the first, so an effect
-   * watching it would not fire again.
-   */
-  const addThenClear = async (previous: AddState, form: FormData) => {
+  const addThenLeave = async (previous: AddState, form: FormData) => {
     const result = await addToPantryAction(previous, form)
     if (result.added) {
-      added.current = [result.added, ...added.current]
-      setChosen(null)
-      setQuantity('')
-      setUnit('')
-      /* The picker marks what is already in the pantry out of this cache,
-         so without it the one just added goes on being offered as though it
-         were not there. Stale rather than refetched: the list is closed by
-         now, and it asks again when it is next opened. */
+      /* The name comes from the result rather than from state: what was
+         picked is on its way off screen. */
+      toast({message: t('added', {name: result.added})})
+      /* Two caches. The picker marks what is already in the pantry out of
+         the ingredients one, and the pantry list holds its own pages -- the
+         list this is about to land on. */
       await queryClient.invalidateQueries({queryKey: queryKeys.ingredients})
+      await queryClient.invalidateQueries({queryKey: queryKeys.pantry})
+      router.push('/pantry')
     }
     return result
   }
 
-  const [state, formAction, pending] = useActionState(addThenClear, {})
+  const [state, formAction, pending] = useActionState(addThenLeave, {})
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
@@ -69,7 +67,11 @@ export function AddToPantryForm() {
             step="any"
             value={quantity}
             onChange={e => setQuantity(e.target.value)}
-            aria-describedby={state.error ? messageId : undefined}
+            /* Only the one about the amount. "alreadyThere" is about the
+               ingredient that was picked, and pointing the quantity field at
+               it says the number is wrong when it is not. */
+            aria-describedby={state.error === 'invalid' ? messageId : undefined}
+            aria-invalid={state.error === 'invalid' ? true : undefined}
             className="w-28 rounded-lg border border-secondary-foreground bg-background px-3 py-2"
           />
         </div>
@@ -105,7 +107,7 @@ export function AddToPantryForm() {
       <button
         type="submit"
         disabled={pending || !chosen}
-        className="self-start rounded-lg bg-primary-strong px-4 py-2 font-semibold text-sm text-white disabled:opacity-60"
+        className="w-full rounded-lg bg-primary-strong px-4 py-3 font-semibold text-white disabled:opacity-60"
       >
         {t('addOne')}
       </button>
@@ -113,17 +115,6 @@ export function AddToPantryForm() {
       {state.error && (
         <p role="alert" id={messageId} className="text-primary-strong text-sm">
           {t(state.error === 'alreadyThere' ? 'alreadyThere' : 'invalid')}
-        </p>
-      )}
-
-      {/* The combobox clears on success, so the confirmation is the only
-          trace of what just happened. */}
-      {added.current.length > 0 && !state.error && (
-        <p role="status" className="text-secondary-foreground text-sm">
-          {t('addedCount', {
-            name: added.current[0] ?? '',
-            count: added.current.length,
-          })}
         </p>
       )}
     </form>

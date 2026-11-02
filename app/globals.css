@@ -16,6 +16,10 @@
  * Checked against both surfaces, not white. See lib/__tests__/palette.
  */
 @theme {
+  /* The fallbacks matter: a build that cannot reach Google Fonts still has a
+     stack to fall back to rather than rendering in a serif. */
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+
   --color-primary: #ff3f4d;
   --color-primary-strong: #b02b35;
   --color-secondary: #1c0708;
@@ -23,12 +27,26 @@
   --color-light: #e5e5e5;
   --color-background: #f1f1f1;
   --color-background-foreground: #d9d9d9;
+
+  /* Short enough not to delay the message it carries. Paired everywhere with
+     motion-reduce:animate-none. */
+  --animate-toast-in: toast-in 150ms ease-out;
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 @layer base {
   body {
-    @apply bg-background text-secondary;
-    font-family: system-ui, sans-serif;
+    @apply bg-background font-sans text-secondary;
   }
 
   /* Never remove a focus ring without replacing it. */

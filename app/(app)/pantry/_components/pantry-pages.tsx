@@ -2,7 +2,7 @@
 
 import {useInfiniteQuery} from '@tanstack/react-query'
 import {useTranslations} from 'next-intl'
-import {DeletionAnnouncer} from '@/components/deletion-announcer'
+import {FocusCatcher} from '@/components/focus-catcher'
 import {LoadMore} from '@/components/load-more'
 import type {PantryPage} from '@/db/pantry/queries'
 import {queryKeys} from '@/lib/query-keys'
@@ -39,7 +39,7 @@ export function PantryPages({initialPage}: {initialPage: PantryPage}) {
   const items = data.pages.flatMap(page => page.items)
 
   return (
-    <DeletionAnnouncer>
+    <FocusCatcher>
       <ul aria-label={t('title')} className="flex flex-col gap-2">
         {items.map(item => (
           <PantryRow key={item.ingredientId} item={item} />
@@ -51,6 +51,6 @@ export function PantryPages({initialPage}: {initialPage: PantryPage}) {
         isLoading={isFetchingNextPage}
         onLoadMore={fetchNextPage}
       />
-    </DeletionAnnouncer>
+    </FocusCatcher>
   )
 }

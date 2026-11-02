@@ -102,10 +102,24 @@ describe('PantryRow', () => {
       expect(placeholder).toBeDisabled()
     })
 
+    /** The save is icon-only, so its name is the only thing naming it. */
+    it('names the save after the row it saves', async () => {
+      await open()
+      expect(
+        screen.getByRole('button', {
+          name: m.saveLabel.replace('{name}', 'Tomate'),
+        }),
+      ).toBeInTheDocument()
+    })
+
     it('will not submit without a quantity', async () => {
       await open()
       await userEvent.clear(screen.getByRole('spinbutton', {name: m.quantity}))
-      await userEvent.click(screen.getByRole('button', {name: m.save}))
+      await userEvent.click(
+        screen.getByRole('button', {
+          name: m.saveLabel.replace('{name}', 'Tomate'),
+        }),
+      )
       expect(update).not.toHaveBeenCalled()
     })
 

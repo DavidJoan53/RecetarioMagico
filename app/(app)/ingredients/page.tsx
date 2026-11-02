@@ -3,7 +3,7 @@ import {getTranslations} from 'next-intl/server'
 import {Suspense} from 'react'
 import {SectionSkeleton} from '@/components/section-skeleton'
 import {getSession} from '@/lib/session'
-import {IngredientForm} from './_components/ingredient-form'
+import {AddIngredient} from './_components/add-ingredient'
 import {IngredientList} from './_components/ingredient-list'
 import {createIngredientAction} from './actions'
 
@@ -17,11 +17,12 @@ export default async function IngredientsPage() {
 
   return (
     <main className="flex flex-col gap-4">
-      <h1 className="font-bold text-2xl tracking-tight">
-        {t('nav.ingredients')}
-      </h1>
-
-      <IngredientForm action={createIngredientAction} />
+      {/* The heading and its form travel together: the plus that opens one
+          sits in the other. */}
+      <AddIngredient
+        title={t('nav.ingredients')}
+        action={createIngredientAction}
+      />
 
       <Suspense fallback={<SectionSkeleton />}>
         <IngredientList />

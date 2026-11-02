@@ -19,6 +19,12 @@ const AREPA = {
   createdAt: '2026-10-30T20:00:00.000Z',
 }
 
+/* useRouter needs an app router mounted, which jsdom has none of. Mocked so
+   the push itself can be asserted — where a create lands is behaviour now,
+   not a redirect thrown from the server. */
+const {push} = vi.hoisted(() => ({push: vi.fn()}))
+vi.mock('next/navigation', () => ({useRouter: () => ({push})}))
+
 const action = vi.fn()
 
 beforeEach(() => {
@@ -62,8 +68,7 @@ async function fillIn() {
   await userEvent.click(await screen.findByRole('option', {name: /Arepa/}))
 }
 
-const submit = () =>
-  userEvent.click(screen.getByRole('button', {name: `+ ${m.add}`}))
+const submit = () => userEvent.click(screen.getByRole('button', {name: m.add}))
 
 describe('DinnerForm', () => {
   /** The server and the browser do not reach `new Date()` at the same tick. */
@@ -102,16 +107,25 @@ describe('DinnerForm', () => {
     expect(screen.getByText(m.noneChosen)).toBeInTheDocument()
   })
 
-  it('clears itself for the next dinner once one is logged', async () => {
+  /** Logged dinners are read as a list, so that is where this lands. */
+  it('goes to the list once a dinner is logged', async () => {
     setup()
     await fillIn()
     await userEvent.type(screen.getByLabelText(m.notes), 'Rico')
     await submit()
 
-    expect(await screen.findByText(m.added)).toBeInTheDocument()
-    expect(screen.getByLabelText(m.notes)).toHaveValue('')
-    expect(screen.getByText(m.noneChosen)).toBeInTheDocument()
-    expect(when()).toHaveFocus()
+    await waitFor(() => expect(push).toHaveBeenCalledWith('/dinners'))
+  })
+
+  /** A refusal stays put, or everything picked goes with the navigation. */
+  it('stays on the form when the write is refused', async () => {
+    action.mockResolvedValue({error: 'invalid'})
+    setup()
+    await fillIn()
+    await submit()
+
+    await screen.findByRole('alert')
+    expect(push).not.toHaveBeenCalled()
   })
 
   /**
@@ -119,14 +133,16 @@ describe('DinnerForm', () => {
    * not, which would throw away everything picked on the way to a rejection.
    */
   it('keeps what was picked when the write is refused', async () => {
-    action.mockResolvedValue({error: 'recipeGone'})
+    /* The field error, which is the one that still has somewhere on the form
+       to point. "recipeGone" names nothing here and goes to a toast. */
+    action.mockResolvedValue({error: 'invalid'})
     setup()
     await fillIn()
     await userEvent.type(screen.getByLabelText(m.notes), 'Rico')
     await submit()
 
     const alert = await screen.findByRole('alert')
-    expect(alert).toHaveTextContent(m.recipeGone)
+    expect(alert).toHaveTextContent(m.invalid)
     expect(screen.getByLabelText(m.notes)).toHaveValue('Rico')
     expect(when()).toHaveValue('2026-11-01T20:00')
     expect(when().getAttribute('aria-describedby')).toBe(alert.id)

@@ -1,5 +1,5 @@
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
-import {render, screen} from '@testing-library/react'
+import {render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {NextIntlClientProvider} from 'next-intl'
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
@@ -7,6 +7,13 @@ import type {FormState} from '@/app/(app)/recipes/actions'
 import type {RecipeWithIngredients} from '@/db/recipes/queries'
 import messages from '@/messages/es.json'
 import {RecipeForm} from '../recipe-form'
+import {ToastProvider} from '../toast-provider'
+
+/* useRouter needs an app router mounted, which jsdom has none of. Mocked so
+   the push itself can be asserted — where a create lands is behaviour now,
+   not a redirect thrown from the server. */
+const {push} = vi.hoisted(() => ({push: vi.fn()}))
+vi.mock('next/navigation', () => ({useRouter: () => ({push})}))
 
 /* The ingredient rows carry a combobox, which pages its results. */
 beforeEach(() => {
@@ -20,23 +27,32 @@ beforeEach(() => {
 })
 afterEach(() => vi.unstubAllGlobals())
 
-const setup = (state: FormState = {}, recipe?: RecipeWithIngredients) => {
+const setup = (
+  state: FormState = {},
+  recipe?: RecipeWithIngredients,
+  /* Off by default: the provider's always-mounted role="alert" region would
+     make every inline field-error query below find two alerts. */
+  withToasts = false,
+) => {
   const action = vi.fn(async () => state)
   const client = new QueryClient({defaultOptions: {queries: {retry: false}}})
+  const form = (
+    <RecipeForm
+      action={action}
+      submitLabel={messages.recipeForm.create}
+      recipe={recipe}
+    />
+  )
   const {container} = render(
     <NextIntlClientProvider locale="es" messages={messages}>
       <QueryClientProvider client={client}>
-        <RecipeForm
-          action={action}
-          submitLabel={messages.recipeForm.create}
-          recipe={recipe}
-        />
+        {withToasts ? <ToastProvider>{form}</ToastProvider> : form}
       </QueryClientProvider>
     </NextIntlClientProvider>,
   )
-  const form = container.querySelector('form')
-  if (!form) throw new Error('no form rendered')
-  return {action, submitted: () => new FormData(form)}
+  const element = container.querySelector('form')
+  if (!element) throw new Error('no form rendered')
+  return {action, submitted: () => new FormData(element)}
 }
 
 describe('RecipeForm', () => {
@@ -56,6 +72,28 @@ describe('RecipeForm', () => {
     ).toBeInTheDocument()
   })
 
+  /** Nothing beside it: the way out is in the header. */
+  it('submits with one full-width button', () => {
+    setup()
+    const submit = screen.getByRole('button', {
+      name: messages.recipeForm.create,
+    })
+    expect(submit).toHaveClass('w-full')
+    expect(screen.queryByRole('link')).toBeNull()
+  })
+
+  it('lands on the list once a recipe is created', async () => {
+    setup({done: true})
+    await userEvent.type(
+      screen.getByRole('textbox', {name: messages.recipeForm.name}),
+      'Arepa',
+    )
+    await userEvent.click(
+      screen.getByRole('button', {name: messages.recipeForm.create}),
+    )
+    await waitFor(() => expect(push).toHaveBeenCalledWith('/recipes'))
+  })
+
   it('submits to the action given to it', async () => {
     const {action} = setup()
     await userEvent.type(
@@ -68,12 +106,10 @@ describe('RecipeForm', () => {
     expect(action).toHaveBeenCalled()
   })
 
-  it('offers a way out that does not submit', () => {
-    setup()
-    expect(
-      screen.getByRole('link', {name: messages.recipeForm.cancel}),
-    ).toHaveAttribute('href', '/recipes')
-  })
+  /* The way out is the arrow in the page header now, so where it goes is
+     the page's business rather than the form's. Both destinations -- the
+     list from /recipes/new, the recipe from its edit page -- are walked in
+     e2e/recipes.spec.ts. */
 
   describe('when the action reports a problem', () => {
     /** The state only exists after the action runs, so submit first. */
@@ -107,14 +143,42 @@ describe('RecipeForm', () => {
       expect(alert).toHaveTextContent(messages.recipeForm.duplicateIngredient)
     })
 
-    it('announces an ingredient that has gone', async () => {
-      const alert = await submit({error: 'ingredientGone'})
-      expect(alert).toHaveTextContent(messages.recipeForm.ingredientGone)
+    /**
+     * These two name nothing on the form. An ingredient that has been deleted
+     * elsewhere and a recipe that has been deleted elsewhere are both answers
+     * about the write, not about a field, so they go to a toast and the form
+     * says nothing — there is no field for it to mark.
+     */
+    const submitWithToasts = async (state: FormState) => {
+      setup(state, undefined, true)
+      await userEvent.type(
+        screen.getByRole('textbox', {name: messages.recipeForm.name}),
+        'Arepa',
+      )
+      await userEvent.click(
+        screen.getByRole('button', {name: messages.recipeForm.create}),
+      )
+    }
+
+    it('sends a gone ingredient to a toast, not to the form', async () => {
+      await submitWithToasts({error: 'ingredientGone'})
+      expect(
+        await screen.findByRole('button', {
+          name: `Descartar: ${messages.recipeForm.ingredientGone}`,
+        }),
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole('textbox', {name: messages.recipeForm.name}),
+      ).not.toHaveAttribute('aria-invalid')
     })
 
-    it('announces a recipe that has gone', async () => {
-      const alert = await submit({error: 'gone'})
-      expect(alert).toHaveTextContent(messages.recipeForm.gone)
+    it('sends a gone recipe to a toast, not to the form', async () => {
+      await submitWithToasts({error: 'gone'})
+      expect(
+        await screen.findByRole('button', {
+          name: `Descartar: ${messages.recipeForm.gone}`,
+        }),
+      ).toBeInTheDocument()
     })
 
     /** A message about an ingredient must not point at the name field. */
@@ -178,14 +242,6 @@ describe('RecipeForm', () => {
     it('creates without an id, so the action knows it is a new one', () => {
       const {submitted} = setup()
       expect(submitted().get('id')).toBeNull()
-    })
-
-    /** Backing out of an edit returns to the recipe, not to the whole list. */
-    it('cancels back to the recipe being edited', () => {
-      setup({}, recipe)
-      expect(
-        screen.getByRole('link', {name: messages.recipeForm.cancel}),
-      ).toHaveAttribute('href', '/recipes/r1')
     })
   })
 

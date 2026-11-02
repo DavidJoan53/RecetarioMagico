@@ -1,3 +1,4 @@
+import {Carrot, ChevronRight, Refrigerator, Tag} from 'lucide-react'
 import Link from 'next/link'
 import {redirect} from 'next/navigation'
 import {getTranslations} from 'next-intl/server'
@@ -7,10 +8,11 @@ import {getSession} from '@/lib/session'
 import {LatestDinners} from './_components/latest-dinners'
 import {NewRecipes} from './_components/new-recipes'
 
+/** The icon belongs to the row, not to the page it leads to. */
 const MANAGEMENT = [
-  {href: '/labels', key: 'labels'},
-  {href: '/ingredients', key: 'ingredients'},
-  {href: '/pantry', key: 'pantry'},
+  {href: '/labels', key: 'labels', Icon: Tag},
+  {href: '/ingredients', key: 'ingredients', Icon: Carrot},
+  {href: '/pantry', key: 'pantry', Icon: Refrigerator},
 ] as const
 
 /** Five per section, each with one way through to the full list. */
@@ -40,18 +42,23 @@ export default async function HomePage() {
         <NewRecipes limit={PREVIEW_COUNT} />
       </Suspense>
 
-      {/* The pages the tab bar has no room for. */}
-      <div className="grid grid-cols-2 gap-2">
-        {MANAGEMENT.map(({href, key}) => (
+      {/* The pages the tab bar has no room for. Full width and stacked: three
+          in a two-column grid left the last one half a row on its own. */}
+      <nav aria-label={t('manage')} className="flex flex-col gap-2">
+        {MANAGEMENT.map(({href, key, Icon}) => (
           <Link
             key={href}
             href={href}
-            className="rounded-lg border border-light bg-background-foreground p-3 font-semibold text-sm"
+            className="flex items-center gap-3 rounded-lg border border-light bg-background-foreground p-4 font-semibold text-sm"
           >
-            {t(key)}
+            {/* Decoration: the link is already named by its own text, and a
+                carrot read out before "Ingredientes" says it twice. */}
+            <Icon aria-hidden="true" size={18} className="shrink-0" />
+            <span className="flex-1">{t(key)}</span>
+            <ChevronRight aria-hidden="true" size={16} className="shrink-0" />
           </Link>
         ))}
-      </div>
+      </nav>
     </main>
   )
 }

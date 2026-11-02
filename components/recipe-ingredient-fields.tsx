@@ -57,7 +57,7 @@ export function RecipeIngredientFields({
 
   return (
     <fieldset className="flex flex-col gap-3">
-      <legend className="font-mono text-secondary-foreground text-xs uppercase tracking-wider">
+      <legend className="font-semibold text-secondary-foreground text-xs uppercase tracking-wider">
         {t('ingredients')}
       </legend>
 

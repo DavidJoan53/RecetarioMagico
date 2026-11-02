@@ -12,6 +12,31 @@ const wrap = (ui: React.ReactNode) =>
   )
 
 describe('RecipeCard', () => {
+  /**
+   * The card used to be drawn on the link, which left the ingredient line --
+   * a sibling of it, and necessarily so -- outside the box. The border moved
+   * to the li; the DOM relationship did not change.
+   */
+  it('draws the card on the row so the ingredient line is inside it', () => {
+    const {container} = wrap(
+      <RecipeCard
+        id="a"
+        name="Arepa"
+        imageUrl={null}
+        ingredients={[
+          {ingredientId: 'i1', name: 'Tomate', quantity: 200, unit: 'g'},
+        ]}
+      />,
+    )
+    const row = container.querySelector('li')
+    expect(row).toHaveClass('border')
+    expect(row?.querySelector('a')).not.toHaveClass('border')
+    /* Inside the card, still outside the link. */
+    const line = screen.getByText(/Tomate/)
+    expect(row?.contains(line)).toBe(true)
+    expect(row?.querySelector('a')?.contains(line)).toBe(false)
+  })
+
   it('links to the recipe by its accessible name', () => {
     wrap(<RecipeCard id="abc" name="Arepa de huevo" imageUrl={null} />)
     expect(screen.getByRole('link', {name: /Arepa de huevo/})).toHaveAttribute(
@@ -64,7 +89,7 @@ describe('RecipeCard', () => {
       } as const,
     ]
 
-    it('names each one with how much of it there is', () => {
+    it('names them without their amounts', () => {
       wrap(
         <RecipeCard
           id="a"
@@ -73,7 +98,49 @@ describe('RecipeCard', () => {
           ingredients={ingredients}
         />,
       )
-      expect(screen.getByText('Tomate 200 g · Cebolla 1 unidad')).toBeVisible()
+      expect(screen.getByText(/Tomate · Cebolla/)).toBeVisible()
+      expect(screen.queryByText(/200 g/)).toBeNull()
+    })
+
+    /**
+     * A long list would otherwise push the card to two or three lines, or
+     * truncate mid-word with nothing to say more was cut.
+     */
+    it('stops at five and counts the rest', () => {
+      wrap(
+        <RecipeCard
+          id="a"
+          name="Arepa"
+          imageUrl={null}
+          ingredients={Array.from({length: 8}, (_, i) => ({
+            ingredientId: `i${i}`,
+            name: `Ingrediente ${i + 1}`,
+            quantity: 1,
+            unit: 'g' as const,
+          }))}
+        />,
+      )
+      expect(screen.getByText(/Ingrediente 5/)).toBeVisible()
+      expect(screen.queryByText(/Ingrediente 6/)).toBeNull()
+      expect(screen.getByText(/\+3/)).toBeVisible()
+    })
+
+    /** "+3" alone means nothing read aloud, so the words go beside it. */
+    it('says in words how many more there are', () => {
+      wrap(
+        <RecipeCard
+          id="a"
+          name="Arepa"
+          imageUrl={null}
+          ingredients={Array.from({length: 7}, (_, i) => ({
+            ingredientId: `i${i}`,
+            name: `Ingrediente ${i + 1}`,
+            quantity: 1,
+            unit: 'g' as const,
+          }))}
+        />,
+      )
+      expect(screen.getByText('y 2 más', {exact: false})).toBeInTheDocument()
     })
 
     /**

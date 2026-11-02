@@ -2,7 +2,8 @@
 
 import {useTranslations} from 'next-intl'
 import {useActionState, useEffect, useRef} from 'react'
-import {useAnnounceDeletion} from '@/components/deletion-announcer'
+import {useCatchFocus} from '@/components/focus-catcher'
+import {useToast} from '@/components/toast-provider'
 import type {LabelWithUsage} from '@/lib/labels'
 import {deleteLabelAction, type FormState} from '../actions'
 
@@ -14,14 +15,16 @@ type Props = {
 
 export function DeleteLabelConfirm({label, onCancel, onDeleted}: Props) {
   const t = useTranslations('labels')
-  const announce = useAnnounceDeletion()
+  const toast = useToast()
+  const catchFocus = useCatchFocus()
   const cancel = useRef<HTMLButtonElement>(null)
 
   /** Announced from the action: the chip is gone before any state renders. */
   const removeThen = async (previous: FormState, form: FormData) => {
     const result = await deleteLabelAction(previous, form)
     if (result.done) {
-      announce(t('deleted', {name: label.name}))
+      toast({message: t('deleted', {name: label.name})})
+      catchFocus()
       onDeleted()
     }
     return result
@@ -60,14 +63,14 @@ export function DeleteLabelConfirm({label, onCancel, onDeleted}: Props) {
           ref={cancel}
           type="button"
           onClick={onCancel}
-          className="rounded-lg border border-secondary-foreground px-3 py-2 font-semibold text-sm"
+          className="flex-1 rounded-lg border border-secondary-foreground px-3 py-2 font-semibold text-sm"
         >
           {t('cancel')}
         </button>
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-primary-strong px-3 py-2 font-semibold text-sm text-white disabled:opacity-60"
+          className="flex-1 rounded-lg bg-primary-strong px-3 py-2 font-semibold text-sm text-white disabled:opacity-60"
         >
           {t('confirmDeleteAction')}
         </button>

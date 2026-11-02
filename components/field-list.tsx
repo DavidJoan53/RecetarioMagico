@@ -11,6 +11,8 @@ type Props = {
   placeholder?: string
   /** What the rows start as, when an existing recipe is being edited. */
   initialValues?: readonly string[]
+  /** Shows each row's position. For a sequence, where it is the content. */
+  numbered?: boolean
 }
 
 /**
@@ -26,6 +28,7 @@ export function FieldList({
   addLabel,
   placeholder,
   initialValues,
+  numbered = false,
 }: Props) {
   const base = useId()
   /* One empty row when there is nothing to edit, so the field is never a
@@ -40,12 +43,22 @@ export function FieldList({
 
   return (
     <fieldset className="flex flex-col gap-2">
-      <legend className="font-mono text-secondary-foreground text-xs uppercase tracking-wider">
+      <legend className="font-semibold text-secondary-foreground text-xs uppercase tracking-wider">
         {legend}
       </legend>
 
       {rows.map((row, index) => (
         <div key={row.key} className="flex items-center gap-2">
+          {/* aria-hidden: itemLabel already names the input "Paso 3", so a
+              reader told the number here would hear it twice. */}
+          {numbered && (
+            <span
+              aria-hidden="true"
+              className="w-6 shrink-0 text-right font-semibold text-secondary-foreground text-sm tabular-nums"
+            >
+              {index + 1}
+            </span>
+          )}
           <label className="sr-only" htmlFor={`${base}-${row.key}`}>
             {itemLabel(index + 1)}
           </label>

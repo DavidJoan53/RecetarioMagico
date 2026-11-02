@@ -2,6 +2,7 @@ import type {Page} from '@playwright/test'
 import es from '@/messages/es.json'
 import {addRecipe, removeAll, uniqueName} from './db'
 import {expect, test} from './signed-in'
+import {toast} from './toast'
 
 const m = es.dinners
 
@@ -85,12 +86,12 @@ async function logDinner(page: Page, recipe: string, notes: string) {
   await addForm(page).getByLabel(m.when).fill('2026-11-01T20:00')
   await pickRecipe(page, recipe)
   await addForm(page).getByLabel(m.notes).fill(notes)
-  await page.getByRole('button', {name: `+ ${m.add}`}).click()
+  await page.getByRole('button', {name: m.add}).click()
   /* Waited for here, not left to the caller. The form is its own route now,
      so every caller leaves it — and leaving before the action resolves
      abandons it mid-flight, so the dinner is never written and the failure
      lands on the list, which looks like the list being wrong. */
-  await expect(page.getByText(m.added)).toBeVisible()
+  await expect(toast(page, m.added)).toBeVisible()
 }
 
 const list = (page: Page) => page.getByRole('list', {name: m.listLabel})
@@ -191,11 +192,11 @@ test('refuses a dinner with no recipe on it', async ({page}) => {
   await addForm(page).getByLabel(m.when).fill('2026-11-01T20:00')
   await expect(addForm(page).getByText(m.noneChosen)).toBeVisible()
 
-  await page.getByRole('button', {name: `+ ${m.add}`}).click()
+  await page.getByRole('button', {name: m.add}).click()
 
   /* Scoped to the form: Next's route announcer is an alert too. */
   await expect(addForm(page).getByRole('alert')).toHaveText(m.invalid)
-  await expect(page.getByText(m.added)).toBeHidden()
+  await expect(toast(page, m.added)).toBeHidden()
 })
 
 /**

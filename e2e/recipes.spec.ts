@@ -2,6 +2,7 @@ import type {Page} from '@playwright/test'
 import es from '@/messages/es.json'
 import {addIngredient, addRecipe, removeAll, uniqueName} from './db'
 import {expect, test} from './signed-in'
+import {toast} from './toast'
 
 /**
  * The unit tests mock the endpoint and stub the observer, so they prove the
@@ -80,7 +81,6 @@ test('reading on does not take the list back to the top', async ({page}) => {
  */
 
 const f = es.recipeForm
-const r = es.recipe
 
 /**
  * A server-rendered button is clickable before React attaches to it. Click it
@@ -144,8 +144,14 @@ test('a recipe is created with its ingredients and reads them back', async ({
   await addIngredientRow(page, 2, onion, '1', 'unidad')
   await page.getByRole('button', {name: f.create}).click()
 
-  /* The action redirects to the recipe it just wrote, so arriving here is
-     itself the proof that the id came back. */
+  /* Creating lands on the list, so the new recipe being there at all is
+     the first proof the write went through. */
+  await expect(page).toHaveURL(/\/recipes$/)
+  await expect(toast(page, f.created)).toBeVisible()
+
+  /* Through to the recipe for the amounts. The link carries its id, so
+     arriving on a detail page is still proof the id came back. */
+  await page.getByRole('link', {name: new RegExp(recipeName)}).click()
   await expect(page).toHaveURL(/\/recipes\/[0-9a-f-]{36}$/)
   await expect(
     page.getByRole('heading', {name: recipeName, level: 1}),
@@ -172,10 +178,13 @@ test('the list shows what a recipe is made of', async ({page}) => {
   await page.getByRole('textbox', {name: f.name}).fill(recipeName)
   await addIngredientRow(page, 1, tomato, '200', 'g')
   await page.getByRole('button', {name: f.create}).click()
-  await expect(page).toHaveURL(/\/recipes\/[0-9a-f-]{36}$/)
 
-  await page.goto('/recipes')
-  await expect(page.getByText(`${tomato} 200 g`)).toBeVisible()
+  /* Already the list: creating goes there now, so there is nothing to
+     navigate to before reading it. Names without amounts -- a card is for
+     recognising a recipe, not cooking from it. */
+  await expect(page).toHaveURL(/\/recipes$/)
+  await expect(page.getByText(tomato)).toBeVisible()
+  await expect(page.getByText('200 g')).toBeHidden()
 
   /* Beside the link, never inside it: everything within a link becomes its
      accessible name, and a list of them would read as a wall of text. */
@@ -197,9 +206,16 @@ test('an edited amount replaces the old one rather than adding a row', async ({
   await page.getByRole('textbox', {name: f.name}).fill(recipeName)
   await addIngredientRow(page, 1, tomato, '200', 'g')
   await page.getByRole('button', {name: f.create}).click()
+
+  /* Creating lands on the list, which carries names without amounts, so the
+     recipe has to be opened before there is an amount to read. */
+  await expect(page).toHaveURL(/\/recipes$/)
+  await page.getByRole('link', {name: new RegExp(recipeName)}).click()
   await expect(ingredientRow(page, tomato)).toContainText('200 g')
 
-  await page.getByRole('link', {name: r.edit}).click()
+  await page
+    .getByRole('link', {name: f.editTitle.replace('{name}', recipeName)})
+    .click()
   /* The form opens on what the recipe says, so the row is already there. */
   await expect(
     page.getByRole('combobox', {
@@ -213,7 +229,10 @@ test('an edited amount replaces the old one rather than adding a row', async ({
     .fill('350')
   await page.getByRole('button', {name: f.save}).click()
 
+  /* Saving goes back to the recipe, not to the list: an edit is about one
+     recipe, and that is where it was started from. */
   await expect(page).toHaveURL(/\/recipes\/[0-9a-f-]{36}$/)
+  await expect(toast(page, f.saved)).toBeVisible()
   /* One row, not two: the set is replaced, and the unique index is what
      makes a second row for the same ingredient impossible anyway. */
   await expect(ingredientRow(page, tomato)).toHaveCount(1)

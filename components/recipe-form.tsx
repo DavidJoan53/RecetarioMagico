@@ -1,12 +1,13 @@
 'use client'
 
-import Link from 'next/link'
+import {useRouter} from 'next/navigation'
 import {useTranslations} from 'next-intl'
 import {useActionState, useId} from 'react'
 import type {FormState} from '@/app/(app)/recipes/actions'
 import type {RecipeWithIngredients} from '@/db/recipes/queries'
 import {FieldList} from './field-list'
 import {RecipeIngredientFields} from './recipe-ingredient-fields'
+import {useToast} from './toast-provider'
 
 type Props = {
   action: (state: FormState, form: FormData) => Promise<FormState>
@@ -17,7 +18,27 @@ type Props = {
 
 export function RecipeForm({action, submitLabel, recipe}: Props) {
   const t = useTranslations('recipeForm')
-  const [state, formAction, pending] = useActionState(action, {})
+  const toast = useToast()
+  const router = useRouter()
+
+  /* Neither is about a field. "gone" means the recipe was deleted while this
+     was open; "ingredientGone" means one of the picked ingredients was. */
+  const saveThen = async (previous: FormState, form: FormData) => {
+    const result = await action(previous, form)
+    if (result.error === 'gone' || result.error === 'ingredientGone') {
+      toast({message: t(result.error), tone: 'error'})
+    }
+    if (result.done) {
+      toast({message: recipe ? t('saved') : t('created')})
+      /* Creating lands on the list; saving goes back to the recipe. Pushed
+         from here rather than redirected from the action, so the toast
+         raised a line above survives the navigation. */
+      router.push(recipe ? `/recipes/${recipe.id}` : '/recipes')
+    }
+    return result
+  }
+
+  const [state, formAction, pending] = useActionState(saveThen, {})
   const nameId = useId()
   const errorId = useId()
   const minutesId = useId()
@@ -27,13 +48,20 @@ export function RecipeForm({action, submitLabel, recipe}: Props) {
   const nameIsAtFault =
     state.error === 'duplicateName' || state.error === 'invalid'
 
+  /* What is left for the form to say: the two above, plus an ingredient
+     picked twice, which is about the rows rather than the name. */
+  const fieldError =
+    state.error && state.error !== 'gone' && state.error !== 'ingredientGone'
+      ? state.error
+      : null
+
   return (
     <form action={formAction} className="flex flex-col gap-5">
       {/* Which recipe is being saved. Absent when creating, which is what
           tells the action the two apart. */}
       {recipe && <input type="hidden" name="id" value={recipe.id} />}
 
-      {state.error && (
+      {fieldError && (
         /* Announced rather than only coloured: an alert reaches a screen
            reader without the user having to go looking for it. */
         <p
@@ -41,7 +69,7 @@ export function RecipeForm({action, submitLabel, recipe}: Props) {
           id={errorId}
           className="rounded-lg border border-primary-strong px-3 py-2 text-primary-strong text-sm"
         >
-          {t(state.error)}
+          {t(fieldError)}
         </p>
       )}
 
@@ -79,6 +107,8 @@ export function RecipeForm({action, submitLabel, recipe}: Props) {
 
       <RecipeIngredientFields initial={recipe?.ingredients} />
 
+      {/* Numbered: the steps are a sequence, and which one you are editing
+          is otherwise impossible to tell from a column of equal inputs. */}
       <FieldList
         name="instructions"
         legend={t('instructions')}
@@ -86,6 +116,7 @@ export function RecipeForm({action, submitLabel, recipe}: Props) {
         removeLabel={n => t('removeStep', {n})}
         addLabel={t('addStep')}
         initialValues={recipe?.instructions}
+        numbered
       />
 
       <FieldList
@@ -98,21 +129,15 @@ export function RecipeForm({action, submitLabel, recipe}: Props) {
         initialValues={recipe?.links}
       />
 
-      <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={pending}
-          className="flex-1 rounded-lg bg-primary-strong px-4 py-3 font-semibold text-white disabled:opacity-60"
-        >
-          {submitLabel}
-        </button>
-        <Link
-          href={recipe ? `/recipes/${recipe.id}` : '/recipes'}
-          className="rounded-lg border border-secondary-foreground px-4 py-3 text-center font-semibold text-sm"
-        >
-          {t('cancel')}
-        </Link>
-      </div>
+      {/* One button, full width. The way out is the arrow in the page
+          header, so there is nothing to sit beside. */}
+      <button
+        type="submit"
+        disabled={pending}
+        className="w-full rounded-lg bg-primary-strong px-4 py-3 font-semibold text-white disabled:opacity-60"
+      >
+        {submitLabel}
+      </button>
     </form>
   )
 }

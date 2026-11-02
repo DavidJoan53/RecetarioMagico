@@ -1,9 +1,9 @@
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
-import {render, screen} from '@testing-library/react'
+import {render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {NextIntlClientProvider} from 'next-intl'
 import {beforeEach, describe, expect, it, vi} from 'vitest'
-import {DeletionAnnouncer} from '@/components/deletion-announcer'
+import {FocusCatcher} from '@/components/focus-catcher'
 import type {Ingredient} from '@/db/schema'
 import messages from '@/messages/es.json'
 import {DeleteConfirm} from '../delete-confirm'
@@ -23,18 +23,22 @@ const TOMATE: Ingredient = {
 
 const setup = () => {
   const onCancel = vi.fn()
-  render(
+  const {container} = render(
     /* These forms ask the cached list to refresh once the action is done, so
    there has to be one to ask. */
     <NextIntlClientProvider locale="es" messages={messages}>
       <QueryClientProvider client={new QueryClient()}>
-        <DeletionAnnouncer>
+        {/* No ToastProvider: useToast falls back to a no-op, and the toast
+            itself is covered by components/__tests__/toast-provider. A
+            second role="alert" in here would make the inline error below
+            ambiguous to query. */}
+        <FocusCatcher>
           <DeleteConfirm ingredient={TOMATE} onCancel={onCancel} />
-        </DeletionAnnouncer>
+        </FocusCatcher>
       </QueryClientProvider>
     </NextIntlClientProvider>,
   )
-  return {onCancel}
+  return {onCancel, container}
 }
 
 const confirm = () => screen.getByRole('button', {name: m.confirmDeleteAction})
@@ -92,19 +96,27 @@ describe('DeleteConfirm', () => {
       expect(await screen.findByRole('alert')).toHaveTextContent('1 receta')
     })
 
-    it('says nothing was deleted', async () => {
+    /** The row stays put: a refusal is not a deletion with an apology. */
+    it('leaves the confirmation open rather than closing on a refusal', async () => {
       remove.mockResolvedValue({error: 'inUse', recipeCount: 2})
-      setup()
+      const {container} = setup()
       await userEvent.click(confirm())
       await screen.findByRole('alert')
-      expect(screen.getByRole('status')).toHaveTextContent('')
+      expect(confirm()).toBeInTheDocument()
+      expect(container.querySelector('[tabindex="-1"]')).not.toHaveFocus()
     })
   })
 
-  /** The row unmounts on success, so this is the only word the user gets. */
-  it('announces the deletion before the row disappears', async () => {
-    setup()
+  /**
+   * The row unmounts on success, taking the button that was pressed with it.
+   * Without somewhere deliberate to put focus it falls to the body and the
+   * page loses its place. What was deleted is said by a toast.
+   */
+  it('catches focus on the list as the row goes', async () => {
+    const {container} = setup()
     await userEvent.click(confirm())
-    expect(await screen.findByText('Tomate eliminado')).toBeInTheDocument()
+    await waitFor(() =>
+      expect(container.querySelector('[tabindex="-1"]')).toHaveFocus(),
+    )
   })
 })

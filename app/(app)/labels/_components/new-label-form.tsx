@@ -1,7 +1,9 @@
 'use client'
 
+import {X} from 'lucide-react'
 import {useTranslations} from 'next-intl'
-import {useActionState, useId, useRef, useState} from 'react'
+import {useActionState, useEffect, useId, useRef, useState} from 'react'
+import {useToast} from '@/components/toast-provider'
 import {createLabelAction, type FormState} from '../actions'
 
 /** Any hex is allowed, so this only has to be a reasonable starting point. */
@@ -10,9 +12,11 @@ const DEFAULT_COLOR = '#118ab2'
 type Props = {
   groupId: string
   groupName: string
+  /** Closes the form. It is opened from a plus — see add-label. */
+  onCancel: () => void
 }
 
-export function NewLabelForm({groupId, groupName}: Props) {
+export function NewLabelForm({groupId, groupName, onCancel}: Props) {
   const t = useTranslations('labels')
   const [name, setName] = useState('')
   const [color, setColor] = useState(DEFAULT_COLOR)
@@ -20,6 +24,7 @@ export function NewLabelForm({groupId, groupName}: Props) {
   const nameId = useId()
   const colorId = useId()
   const messageId = useId()
+  const toast = useToast()
 
   /**
    * Controlled: React clears an uncontrolled form after an action even when it
@@ -30,13 +35,32 @@ export function NewLabelForm({groupId, groupName}: Props) {
   const addThenClear = async (previous: FormState, form: FormData) => {
     const result = await createLabelAction(previous, form)
     if (result.done) {
+      toast({message: t('added')})
       setName('')
       nameRef.current?.focus()
+    }
+    /* The group this form belongs to has gone: there is no field to point
+       at and nothing left here that would fix it. */
+    if (result.error === 'noGroup') {
+      toast({message: t('groupGone'), tone: 'error'})
     }
     return result
   }
 
   const [state, formAction, pending] = useActionState(addThenClear, {})
+
+  /** Mounted means opened, so this is where the typing should start. */
+  useEffect(() => {
+    nameRef.current?.focus()
+  }, [])
+
+  /* Both of these are about the name: taken already, or not a name at all. */
+  const fieldError =
+    state.error === 'duplicateName'
+      ? 'duplicate'
+      : state.error === 'invalid'
+        ? 'invalid'
+        : null
 
   return (
     <form
@@ -58,8 +82,8 @@ export function NewLabelForm({groupId, groupName}: Props) {
           maxLength={80}
           value={name}
           onChange={e => setName(e.target.value)}
-          aria-describedby={state.error ? messageId : undefined}
-          aria-invalid={state.error ? true : undefined}
+          aria-describedby={fieldError ? messageId : undefined}
+          aria-invalid={fieldError ? true : undefined}
           className="rounded-lg border border-secondary-foreground bg-background px-3 py-2 text-sm"
         />
       </div>
@@ -83,27 +107,27 @@ export function NewLabelForm({groupId, groupName}: Props) {
         disabled={pending}
         className="rounded-lg bg-primary-strong px-3 py-2 font-semibold text-sm text-white disabled:opacity-60"
       >
-        + {t('add')}
+        {t('add')}
       </button>
 
-      {state.error && (
+      {/* Stays open after each label, so several can be added in a row; this
+          is the only way back out. */}
+      <button
+        type="button"
+        onClick={onCancel}
+        aria-label={t('cancel')}
+        className="flex size-8 items-center justify-center rounded-lg border border-secondary-foreground"
+      >
+        <X aria-hidden="true" size={16} />
+      </button>
+
+      {fieldError && (
         <p
           role="alert"
           id={messageId}
           className="w-full text-primary-strong text-sm"
         >
-          {t(
-            state.error === 'duplicateName'
-              ? 'duplicate'
-              : state.error === 'noGroup'
-                ? 'groupGone'
-                : 'invalid',
-          )}
-        </p>
-      )}
-      {state.done && (
-        <p role="status" className="w-full text-secondary-foreground text-sm">
-          {t('added')}
+          {t(fieldError)}
         </p>
       )}
     </form>

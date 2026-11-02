@@ -17,7 +17,7 @@ export function TabBar() {
 
   return (
     <nav
-      aria-label={t('home')}
+      aria-label={t('main')}
       className="sticky bottom-0 flex border-light border-t bg-background"
     >
       {TABS.map(tab => {

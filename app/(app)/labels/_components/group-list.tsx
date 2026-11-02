@@ -1,24 +1,20 @@
 import {getTranslations} from 'next-intl/server'
-import {DeletionAnnouncer} from '@/components/deletion-announcer'
+import {EmptyState} from '@/components/empty-state'
+import {FocusCatcher} from '@/components/focus-catcher'
 import {allGroupsWithLabels} from '@/db/label-groups/queries'
 import {GroupHeader} from './group-header'
 import {LabelItem} from './label-item'
-import {NewLabelForm} from './new-label-form'
 
 export async function GroupList() {
   const t = await getTranslations('labels')
   const groups = await allGroupsWithLabels()
 
   if (groups.length === 0) {
-    return (
-      <p className="rounded-lg border border-light border-dashed p-6 text-center text-secondary-foreground text-sm">
-        {t('empty')}
-      </p>
-    )
+    return <EmptyState title={t('empty')} hint={t('emptyHint')} />
   }
 
   return (
-    <DeletionAnnouncer>
+    <FocusCatcher>
       <div className="flex flex-col gap-4">
         {groups.map(group => (
           <section
@@ -39,11 +35,9 @@ export async function GroupList() {
                 ))}
               </ul>
             )}
-
-            <NewLabelForm groupId={group.id} groupName={group.name} />
           </section>
         ))}
       </div>
-    </DeletionAnnouncer>
+    </FocusCatcher>
   )
 }

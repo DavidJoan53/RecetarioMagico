@@ -1,5 +1,6 @@
 'use client'
 
+import {Pencil, Trash2} from 'lucide-react'
 import {useTranslations} from 'next-intl'
 import {useCallback, useEffect, useRef, useState} from 'react'
 import type {Ingredient} from '@/db/schema'
@@ -90,9 +91,9 @@ export function IngredientRow({ingredient, children}: Props) {
         type="button"
         onClick={() => setMode('edit')}
         aria-label={t('editLabel', {name: ingredient.name})}
-        className="rounded-lg border border-secondary-foreground px-3 py-1 font-semibold text-sm"
+        className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-secondary-foreground"
       >
-        {t('edit')}
+        <Pencil aria-hidden="true" size={16} />
       </button>
 
       <button
@@ -100,9 +101,9 @@ export function IngredientRow({ingredient, children}: Props) {
         type="button"
         onClick={() => setMode('confirm-delete')}
         aria-label={t('deleteLabel', {name: ingredient.name})}
-        className="rounded-lg border border-primary-strong px-3 py-1 font-semibold text-primary-strong text-sm"
+        className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-primary-strong text-primary-strong"
       >
-        {t('delete')}
+        <Trash2 aria-hidden="true" size={16} />
       </button>
     </li>
   )

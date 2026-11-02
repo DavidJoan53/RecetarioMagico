@@ -11,6 +11,7 @@ const remove = vi.fn()
 vi.mock('../../actions', () => ({
   updateLabelGroupAction: (...a: unknown[]) => update(...a),
   deleteLabelGroupAction: (...a: unknown[]) => remove(...a),
+  createLabelAction: vi.fn(async () => ({})),
 }))
 
 const m = messages.labels
@@ -34,6 +35,8 @@ const setup = (labels: {recipeCount: number}[] = []) =>
     </NextIntlClientProvider>,
   )
 
+const addButton = () =>
+  screen.getByRole('button', {name: m.addTo.replace('{group}', 'Momento')})
 const editButton = () =>
   screen.getByRole('button', {name: 'Editar grupo Momento'})
 const deleteButton = () =>
@@ -47,10 +50,49 @@ beforeEach(() => {
 })
 
 describe('GroupHeader', () => {
-  it('names both controls after the group', () => {
+  it('names all three controls after the group', () => {
     setup()
+    expect(addButton()).toBeInTheDocument()
     expect(editButton()).toBeInTheDocument()
     expect(deleteButton()).toBeInTheDocument()
+  })
+
+  /**
+   * The section around this is named by the heading. A mode that stopped
+   * rendering it would leave that reference pointing at nothing, and you
+   * would lose sight of which group the open form belongs to.
+   */
+  it('keeps the heading while a form is open', async () => {
+    setup()
+    await userEvent.click(editButton())
+    expect(screen.getByRole('heading', {name: 'Momento'})).toHaveAttribute(
+      'id',
+      'h',
+    )
+  })
+
+  describe('adding a label', () => {
+    it('opens the form and puts the cursor in it', async () => {
+      setup()
+      await userEvent.click(addButton())
+      expect(screen.getByRole('textbox', {name: m.name})).toHaveFocus()
+    })
+
+    /** The plus is gone while the form is open, so focus has to come back. */
+    it('closes back to the plus, with focus on it', async () => {
+      setup()
+      await userEvent.click(addButton())
+      await userEvent.click(screen.getByRole('button', {name: m.cancel}))
+
+      expect(screen.queryByRole('textbox', {name: m.name})).toBeNull()
+      expect(addButton()).toHaveFocus()
+    })
+
+    /** Closed to begin with: a form per group buries the labels. */
+    it('starts closed', () => {
+      setup()
+      expect(screen.queryByRole('textbox', {name: m.name})).toBeNull()
+    })
   })
 
   it('renames from the current name and sends the id', async () => {

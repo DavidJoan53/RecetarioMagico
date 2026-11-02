@@ -17,7 +17,9 @@
     "settings": "Ajustes",
     "labels": "Etiquetas",
     "ingredients": "Ingredientes",
-    "pantry": "Despensa"
+    "pantry": "Despensa",
+    "manage": "Gestionar",
+    "main": "Navegación principal"
   },
   "search": {
     "placeholder": "Buscar..."
@@ -45,21 +47,22 @@
     "newRecipes": "Recetas nuevas",
     "seeAll": "Ver todas",
     "noDinners": "Todavía no has registrado ninguna cena.",
-    "noRecipes": "Todavía no tienes recetas. Crea la primera."
+    "noDinnersHint": "Lo que cocines esta semana aparecerá aquí.",
+    "noRecipes": "Todavía no tienes recetas. Crea la primera.",
+    "noRecipesHint": "La primera que guardes aparecerá aquí."
   },
   "recipe": {
     "minutes": "{count} min",
     "noTime": "Sin tiempo",
     "ingredients": "Ingredientes",
-    "noIngredients": "Esta receta no lista ingredientes.",
+    "moreIngredients": "y {count} más",
+    "noIngredients": "Esta receta no lista ingredientes. Edítala para añadirlos.",
     "instructions": "Preparación",
     "links": "Enlaces",
-    "edit": "Editar",
     "backToRecipes": "Volver a las recetas"
   },
   "common": {
     "loading": "Cargando…",
-    "empty": "Nada por aquí todavía.",
     "loadMore": "Cargar {count} más",
     "loadingMore": "Cargando más…",
     "endOfList": "Ya no hay más.",
@@ -80,16 +83,19 @@
     "addLink": "Añadir enlace",
     "removeLink": "Quitar enlace {n}",
     "create": "Crear",
+    "created": "Receta creada",
     "cancel": "Cancelar",
+    "backToRecipe": "Volver a la receta",
     "duplicateName": "Ya tienes una receta con ese nombre.",
     "invalid": "Revisa los campos marcados.",
     "editTitle": "Editar {name}",
     "save": "Guardar",
+    "saved": "Receta guardada",
     "ingredients": "Ingredientes",
     "ingredientN": "Ingrediente {n}",
     "addIngredient": "Añadir ingrediente",
     "removeIngredient": "Quitar {name}",
-    "noIngredients": "Todavía no has añadido ingredientes.",
+    "noIngredients": "Esta receta todavía no lleva ingredientes. Usa «Añadir ingrediente» para poner el primero.",
     "quantity": "Cantidad",
     "quantityOf": "Cantidad de {name}",
     "unit": "Unidad",
@@ -102,7 +108,8 @@
   },
   "recipes": {
     "newRecipe": "Nueva receta",
-    "empty": "Todavía no tienes recetas."
+    "empty": "Todavía no tienes recetas.",
+    "emptyHint": "Crea la primera y aparecerá aquí."
   },
   "ingredients": {
     "addTitle": "Añadir ingrediente",
@@ -115,14 +122,13 @@
     "duplicate": "Ya tienes un ingrediente con ese nombre.",
     "invalid": "Revisa el nombre y el enlace de la foto.",
     "empty": "Todavía no tienes ingredientes.",
+    "emptyHint": "Usa «Añadir» arriba para crear el primero.",
     "listLabel": "Ingredientes",
-    "edit": "Editar",
     "editLabel": "Editar {name}",
     "editTitle": "Editar {name}",
     "save": "Guardar",
     "cancel": "Cancelar",
     "gone": "Ese ingrediente ya no existe.",
-    "delete": "Eliminar",
     "deleteLabel": "Eliminar {name}",
     "confirmDelete": "¿Eliminar {name}?",
     "alsoLeavesPantry": "También saldrá de la despensa.",
@@ -136,8 +142,9 @@
     "createGroup": "Crear grupo",
     "groupAdded": "Grupo creado",
     "groupDuplicate": "Ya tienes un grupo con ese nombre.",
-    "groupEmpty": "Este grupo todavía no tiene etiquetas.",
-    "empty": "Todavía no tienes grupos. Crea uno para empezar.",
+    "groupEmpty": "Este grupo todavía no tiene etiquetas. Añade una con «Añadir».",
+    "empty": "Todavía no tienes grupos de etiquetas.",
+    "emptyHint": "Un grupo reúne etiquetas parecidas, como «Desayuno» o «Rápido».",
     "addTo": "Añadir etiqueta a {group}",
     "name": "Etiqueta",
     "color": "Color",
@@ -146,10 +153,9 @@
     "duplicate": "Ya existe una etiqueta con ese nombre, en este grupo o en otro.",
     "groupGone": "Ese grupo ya no existe.",
     "invalid": "Revisa el nombre y el color.",
-    "edit": "Editar",
     "save": "Guardar",
     "cancel": "Cancelar",
-    "delete": "Eliminar",
+    "deleteLabel": "Eliminar {name}",
     "groupName": "Nombre del grupo",
     "editLabel": "Editar {name}",
     "editGroupLabel": "Editar grupo {name}",
@@ -174,12 +180,13 @@
     "amountFor": "Cantidad de {name}",
     "amountButton": "{amount}, cantidad de {name}",
     "save": "Guardar",
+    "saveLabel": "Guardar {name}",
     "cancel": "Cancelar",
-    "remove": "Quitar",
     "removed": "{name} fuera de la despensa",
     "gone": "Eso ya no está en la despensa.",
     "invalid": "Indica cuánto tienes y en qué unidad.",
     "empty": "Tu despensa está vacía.",
+    "emptyHint": "Apunta lo que tienes en casa para saber qué te falta.",
     "goToIngredients": "Ir a Ingredientes",
     "addTitle": "Añadir a la despensa",
     "addHint": "Busca un ingrediente, dile cuánto tienes y añádelo.",
@@ -191,7 +198,7 @@
     "noMatches": "Ningún ingrediente con ese nombre.",
     "addOne": "Añadir a la despensa",
     "alreadyThere": "Ese ingrediente ya está en tu despensa.",
-    "addedCount": "{name} añadido. {count, plural, one {# en esta sesión} other {# en esta sesión}}.",
+    "added": "{name} añadido a la despensa",
     "chooseUnit": "Elige una unidad"
   },
   "dinners": {
@@ -208,7 +215,7 @@
     "noMatches": "Ninguna receta con ese nombre.",
     "alreadyAdded": "ya está",
     "chosen": "Recetas de esta cena",
-    "noneChosen": "Todavía no has elegido ninguna receta.",
+    "noneChosen": "Todavía no has elegido ninguna receta. Búscala arriba y se añadirá aquí.",
     "removeRecipe": "Quitar {name}",
     "recipeAdded": "{name} añadida",
     "recipeRemoved": "{name} quitada",
@@ -219,8 +226,8 @@
     "recipeGone": "Una de esas recetas ya no existe.",
     "gone": "Esa cena ya no existe.",
     "empty": "Todavía no has registrado ninguna cena.",
+    "emptyHint": "Apunta qué cocinaste y cuándo, y se quedará en la lista.",
     "listLabel": "Cenas",
-    "noNotes": "Sin notas",
     "edit": "Editar",
     "editLabel": "Editar la cena del {date}",
     "editTitle": "Editar la cena del {date}",
@@ -232,5 +239,13 @@
     "keepsRecipes": "Las recetas se quedan; solo se borra el registro.",
     "confirmDeleteAction": "Sí, eliminar",
     "deleted": "Cena del {date} eliminada"
+  },
+  "toast": {
+    "dismiss": "Descartar: {message}"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "empty": "Todavía no hay nada que ajustar.",
+    "emptyHint": "Las preferencias llegarán en una versión próxima."
   }
 }
