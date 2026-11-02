@@ -160,3 +160,38 @@ test('refuses a dinner with no recipe on it', async ({page}) => {
   await expect(addForm(page).getByRole('alert')).toHaveText(m.invalid)
   await expect(page.getByText(m.added)).toBeHidden()
 })
+
+/**
+ * The list formats through next-intl and the form writes against the zone
+ * constant. They agree only while the configured zone actually reaches a
+ * client component; without it the row renders in one zone and the form it
+ * opens in another, and nothing says so. Tokyo is what rules out the
+ * browser's own zone — left to it, this row would read 10:00.
+ *
+ * Run on a machine already in America/Bogota it cannot tell the configured
+ * zone from the server's default, because both are the same answer. With the
+ * server in UTC — a runner, or TZ=UTC — it reads 1:00 and fails, which is
+ * where the teeth are.
+ */
+test.describe('read from another timezone', () => {
+  test.use({timezoneId: 'Asia/Tokyo'})
+
+  test('shows and edits one dinner in the house clock', async ({page}) => {
+    const recipe = await ownRecipe()
+    const notes = uniqueName('tokio')
+    await open(page)
+    await logDinner(page, recipe, notes)
+
+    const row = list(page)
+      .getByRole('listitem')
+      .filter({hasText: notes})
+      .first()
+    await expect(row.getByRole('time')).toContainText('20:00')
+    await expect(row.getByRole('time')).not.toContainText('10:00')
+
+    await row.getByRole('button', {name: rowButton('editLabel')}).click()
+    await expect(
+      page.getByRole('form', {name: /Editar la cena/}).getByLabel(m.when),
+    ).toHaveValue('2026-11-01T20:00')
+  })
+})
