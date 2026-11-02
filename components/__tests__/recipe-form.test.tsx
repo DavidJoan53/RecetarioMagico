@@ -1,19 +1,42 @@
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
 import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {NextIntlClientProvider} from 'next-intl'
-import {describe, expect, it, vi} from 'vitest'
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
 import type {FormState} from '@/app/(app)/recipes/actions'
+import type {RecipeWithIngredients} from '@/db/recipes/queries'
 import messages from '@/messages/es.json'
 import {RecipeForm} from '../recipe-form'
 
-const setup = (state: FormState = {}) => {
+/* The ingredient rows carry a combobox, which pages its results. */
+beforeEach(() => {
+  vi.stubGlobal(
+    'IntersectionObserver',
+    class {
+      observe() {}
+      disconnect() {}
+    },
+  )
+})
+afterEach(() => vi.unstubAllGlobals())
+
+const setup = (state: FormState = {}, recipe?: RecipeWithIngredients) => {
   const action = vi.fn(async () => state)
-  render(
+  const client = new QueryClient({defaultOptions: {queries: {retry: false}}})
+  const {container} = render(
     <NextIntlClientProvider locale="es" messages={messages}>
-      <RecipeForm action={action} submitLabel={messages.recipeForm.create} />
+      <QueryClientProvider client={client}>
+        <RecipeForm
+          action={action}
+          submitLabel={messages.recipeForm.create}
+          recipe={recipe}
+        />
+      </QueryClientProvider>
     </NextIntlClientProvider>,
   )
-  return {action}
+  const form = container.querySelector('form')
+  if (!form) throw new Error('no form rendered')
+  return {action, submitted: () => new FormData(form)}
 }
 
 describe('RecipeForm', () => {
@@ -77,6 +100,31 @@ describe('RecipeForm', () => {
       expect(alert).toHaveTextContent(messages.recipeForm.invalid)
     })
 
+    /* Each its own test: a loop would render a second form into the first
+       one's container, and every query would then find two of everything. */
+    it('announces a repeated ingredient', async () => {
+      const alert = await submit({error: 'duplicateIngredient'})
+      expect(alert).toHaveTextContent(messages.recipeForm.duplicateIngredient)
+    })
+
+    it('announces an ingredient that has gone', async () => {
+      const alert = await submit({error: 'ingredientGone'})
+      expect(alert).toHaveTextContent(messages.recipeForm.ingredientGone)
+    })
+
+    it('announces a recipe that has gone', async () => {
+      const alert = await submit({error: 'gone'})
+      expect(alert).toHaveTextContent(messages.recipeForm.gone)
+    })
+
+    /** A message about an ingredient must not point at the name field. */
+    it('marks the name invalid only when the name is what is wrong', async () => {
+      const alert = await submit({error: 'duplicateIngredient'})
+      const name = screen.getByRole('textbox', {name: messages.recipeForm.name})
+      expect(alert).toBeInTheDocument()
+      expect(name).not.toHaveAttribute('aria-invalid')
+    })
+
     it('ties the message to the field it is about', async () => {
       const alert = await submit({error: 'duplicateName'})
       const name = screen.getByRole('textbox', {name: messages.recipeForm.name})
@@ -88,6 +136,57 @@ describe('RecipeForm', () => {
   it('shows no alert before anything has gone wrong', () => {
     setup()
     expect(screen.queryByRole('alert')).toBeNull()
+  })
+
+  describe('when an existing recipe is being edited', () => {
+    const recipe: RecipeWithIngredients = {
+      id: 'r1',
+      name: 'Arepa de huevo',
+      prepTimeMinutes: 25,
+      instructions: ['Amasar', 'Freír'],
+      links: ['https://youtu.be/dQw4w9WgXcQ'],
+      imageUrl: null,
+      createdAt: new Date('2026-01-01'),
+      ingredients: [
+        {ingredientId: 'i1', name: 'Tomate', quantity: 200, unit: 'g'},
+      ],
+    }
+
+    it('starts on what the recipe already says', () => {
+      setup({}, recipe)
+      expect(
+        screen.getByRole('textbox', {name: messages.recipeForm.name}),
+      ).toHaveValue('Arepa de huevo')
+      expect(
+        screen.getByRole('spinbutton', {name: messages.recipeForm.minutes}),
+      ).toHaveValue(25)
+      expect(screen.getByRole('textbox', {name: 'Paso 1'})).toHaveValue(
+        'Amasar',
+      )
+      expect(screen.getByRole('textbox', {name: 'Enlace 1'})).toHaveValue(
+        'https://youtu.be/dQw4w9WgXcQ',
+      )
+    })
+
+    /** Which recipe is being saved — the only thing telling the two apart. */
+    it('submits the id of the recipe it is editing', () => {
+      const {submitted} = setup({}, recipe)
+      expect(submitted().get('id')).toBe('r1')
+      expect(submitted().getAll('ingredientId')).toEqual(['i1'])
+    })
+
+    it('creates without an id, so the action knows it is a new one', () => {
+      const {submitted} = setup()
+      expect(submitted().get('id')).toBeNull()
+    })
+
+    /** Backing out of an edit returns to the recipe, not to the whole list. */
+    it('cancels back to the recipe being edited', () => {
+      setup({}, recipe)
+      expect(
+        screen.getByRole('link', {name: messages.recipeForm.cancel}),
+      ).toHaveAttribute('href', '/recipes/r1')
+    })
   })
 
   /** The labels are callbacks, so they only run once a row exists to name. */
