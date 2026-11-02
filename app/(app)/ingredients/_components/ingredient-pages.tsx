@@ -2,7 +2,7 @@
 
 import {useInfiniteQuery} from '@tanstack/react-query'
 import {useTranslations} from 'next-intl'
-import {DeletionAnnouncer} from '@/components/deletion-announcer'
+import {FocusCatcher} from '@/components/focus-catcher'
 import {LoadMore} from '@/components/load-more'
 import type {IngredientPage} from '@/db/ingredients/queries'
 import {queryKeys} from '@/lib/query-keys'
@@ -41,7 +41,7 @@ export function IngredientPages({initialPage}: {initialPage: IngredientPage}) {
   const list = data.pages.flatMap(page => page.items)
 
   return (
-    <DeletionAnnouncer>
+    <FocusCatcher>
       <ul aria-label={t('listLabel')} className="flex flex-col gap-2">
         {list.map(ingredient => (
           <IngredientRow key={ingredient.id} ingredient={ingredient} />
@@ -53,6 +53,6 @@ export function IngredientPages({initialPage}: {initialPage: IngredientPage}) {
         isLoading={isFetchingNextPage}
         onLoadMore={fetchNextPage}
       />
-    </DeletionAnnouncer>
+    </FocusCatcher>
   )
 }

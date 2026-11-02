@@ -1,5 +1,5 @@
 import {getTranslations} from 'next-intl/server'
-import {DeletionAnnouncer} from '@/components/deletion-announcer'
+import {FocusCatcher} from '@/components/focus-catcher'
 import {allGroupsWithLabels} from '@/db/label-groups/queries'
 import {GroupHeader} from './group-header'
 import {LabelItem} from './label-item'
@@ -18,7 +18,7 @@ export async function GroupList() {
   }
 
   return (
-    <DeletionAnnouncer>
+    <FocusCatcher>
       <div className="flex flex-col gap-4">
         {groups.map(group => (
           <section
@@ -44,6 +44,6 @@ export async function GroupList() {
           </section>
         ))}
       </div>
-    </DeletionAnnouncer>
+    </FocusCatcher>
   )
 }

@@ -3,7 +3,8 @@
 import {useQueryClient} from '@tanstack/react-query'
 import {useTranslations} from 'next-intl'
 import {useActionState} from 'react'
-import {useAnnounceDeletion} from '@/components/deletion-announcer'
+import {useCatchFocus} from '@/components/focus-catcher'
+import {useToast} from '@/components/toast-provider'
 import type {PantryItem} from '@/db/pantry/queries'
 import {queryKeys} from '@/lib/query-keys'
 import {type FormState, removeFromPantryAction} from '../actions'
@@ -14,7 +15,8 @@ import {type FormState, removeFromPantryAction} from '../actions'
  */
 export function RemoveFromPantryButton({item}: {item: PantryItem}) {
   const t = useTranslations('pantry')
-  const announce = useAnnounceDeletion()
+  const toast = useToast()
+  const catchFocus = useCatchFocus()
   const queryClient = useQueryClient()
 
   /**
@@ -25,7 +27,8 @@ export function RemoveFromPantryButton({item}: {item: PantryItem}) {
   const removeThen = async (previous: FormState, form: FormData) => {
     const result = await removeFromPantryAction(previous, form)
     if (result.done) {
-      announce(t('removed', {name: item.name}))
+      toast({message: t('removed', {name: item.name})})
+      catchFocus()
       await queryClient.invalidateQueries({queryKey: queryKeys.pantry})
     }
     return result

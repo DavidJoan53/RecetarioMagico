@@ -2,7 +2,8 @@
 
 import {useTranslations} from 'next-intl'
 import {useActionState, useEffect, useRef} from 'react'
-import {useAnnounceDeletion} from '@/components/deletion-announcer'
+import {useCatchFocus} from '@/components/focus-catcher'
+import {useToast} from '@/components/toast-provider'
 import type {GroupWithLabels} from '@/lib/labels'
 import {deleteLabelGroupAction, type FormState} from '../actions'
 
@@ -13,15 +14,19 @@ type Props = {
 
 export function DeleteGroupConfirm({group, onCancel}: Props) {
   const t = useTranslations('labels')
-  const announce = useAnnounceDeletion()
+  const toast = useToast()
+  const catchFocus = useCatchFocus()
   const cancel = useRef<HTMLButtonElement>(null)
 
   const attachments = group.labels.reduce((n, l) => n + l.recipeCount, 0)
 
-  /** Announced from the action: the section is gone before state renders. */
+  /** Reported from the action: the section is gone before state renders. */
   const removeThen = async (previous: FormState, form: FormData) => {
     const result = await deleteLabelGroupAction(previous, form)
-    if (result.done) announce(t('groupDeleted', {name: group.name}))
+    if (result.done) {
+      toast({message: t('groupDeleted', {name: group.name})})
+      catchFocus()
+    }
     return result
   }
 
