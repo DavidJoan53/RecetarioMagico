@@ -83,6 +83,9 @@
   },
   "dinners": {
     "addTitle": "Log a dinner",
+    "addHint": "Say when it was, pick what you cooked, and save it.",
+    "addMore": "Log a dinner",
+    "backToDinners": "Back to dinners",
     "when": "When",
     "notes": "Notes",
     "notesPlaceholder": "Half of it was left…",

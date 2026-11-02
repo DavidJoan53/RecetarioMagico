@@ -6,8 +6,8 @@ import {useActionState, useEffect, useId, useRef, useState} from 'react'
 import {timeZone} from '@/i18n/time-zone'
 import {type DinnerRecipe, toDateTimeLocal} from '@/lib/dinners'
 import {queryKeys} from '@/lib/query-keys'
-import type {FormState} from '../actions'
-import {DinnerFields} from './dinner-fields'
+import {DinnerFields} from '../../_components/dinner-fields'
+import type {FormState} from '../../actions'
 
 type Props = {
   action: (state: FormState, form: FormData) => Promise<FormState>

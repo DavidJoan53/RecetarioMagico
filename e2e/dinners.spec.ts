@@ -25,16 +25,28 @@ test.afterEach(async () => {
 })
 
 /**
- * A server-rendered button is clickable before React attaches to it. Click it
- * then and the form posts natively, the page navigates, and none of the
- * client state these tests assert on is ever created.
+ * A server-rendered control is clickable before React attaches to it. Click
+ * it then and a button does nothing at all, or a form posts natively and
+ * navigates — and none of the client state these tests assert on is ever
+ * created. React tags the DOM as it hydrates, so that is the thing to wait
+ * for.
  */
-async function open(page: Page) {
+async function hydrated(page: Page, selector: string) {
+  await page.waitForFunction(one => {
+    const node = document.querySelector(one)
+    return !!node && Object.keys(node).some(k => k.startsWith('__react'))
+  }, selector)
+}
+
+/** The form lives on its own route; the list is what /dinners holds. */
+async function openNew(page: Page) {
+  await page.goto('/dinners/new')
+  await hydrated(page, 'form')
+}
+
+async function openList(page: Page) {
   await page.goto('/dinners')
-  await page.waitForFunction(() => {
-    const form = document.querySelector('form')
-    return !!form && Object.keys(form).some(k => k.startsWith('__react'))
-  })
+  await hydrated(page, `ul[aria-label="${m.listLabel}"] li`)
 }
 
 const addForm = (page: Page) => page.getByRole('form', {name: m.addTitle})
@@ -73,11 +85,12 @@ test('logs a dinner, shows it in the list, and takes it off again', async ({
 }) => {
   const recipe = await ownRecipe()
   const notes = uniqueName('nota')
-  await open(page)
+  await openNew(page)
 
   await logDinner(page, recipe, notes)
   await expect(page.getByText(m.added)).toBeVisible()
 
+  await openList(page)
   const row = list(page).getByRole('listitem').filter({hasText: notes}).first()
   await expect(row).toBeVisible()
   /* The recipe came back from the join, not from what was typed. */
@@ -94,15 +107,17 @@ test('logs a dinner, shows it in the list, and takes it off again', async ({
 test('keeps the dinner and its recipes together', async ({page}) => {
   const recipe = await ownRecipe()
   const notes = uniqueName('junta')
-  await open(page)
+  await openNew(page)
   await logDinner(page, recipe, notes)
 
+  await openList(page)
   const row = list(page).getByRole('listitem').filter({hasText: notes}).first()
   await expect(row.getByText(recipe)).toBeVisible()
 
   /* Reloaded, so what is asserted is what the database holds rather than
      what the form left on screen. */
   await page.reload()
+  await hydrated(page, `ul[aria-label="${m.listLabel}"] li`)
   const reloaded = list(page)
     .getByRole('listitem')
     .filter({hasText: notes})
@@ -117,9 +132,10 @@ test('edits a dinner in a form that starts from what is there', async ({
   const first = await ownRecipe()
   const second = await ownRecipe()
   const notes = uniqueName('editar')
-  await open(page)
+  await openNew(page)
   await logDinner(page, first, notes)
 
+  await openList(page)
   const row = list(page).getByRole('listitem').filter({hasText: notes}).first()
   await row.getByRole('button', {name: rowButton('editLabel')}).click()
 
@@ -150,7 +166,7 @@ test('edits a dinner in a form that starts from what is there', async ({
 
 /** A dinner recording no recipe records nothing, so the form refuses it. */
 test('refuses a dinner with no recipe on it', async ({page}) => {
-  await open(page)
+  await openNew(page)
   await addForm(page).getByLabel(m.when).fill('2026-11-01T20:00')
   await expect(addForm(page).getByText(m.noneChosen)).toBeVisible()
 
@@ -179,9 +195,10 @@ test.describe('read from another timezone', () => {
   test('shows and edits one dinner in the house clock', async ({page}) => {
     const recipe = await ownRecipe()
     const notes = uniqueName('tokio')
-    await open(page)
+    await openNew(page)
     await logDinner(page, recipe, notes)
 
+    await openList(page)
     const row = list(page)
       .getByRole('listitem')
       .filter({hasText: notes})
