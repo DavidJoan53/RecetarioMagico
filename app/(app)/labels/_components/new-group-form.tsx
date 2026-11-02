@@ -39,7 +39,7 @@ export function NewGroupForm() {
       <label className="font-semibold text-sm" htmlFor={nameId}>
         {t('newGroup')}
       </label>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <input
           ref={nameRef}
           id={nameId}
@@ -59,9 +59,9 @@ export function NewGroupForm() {
           type="submit"
           disabled={pending}
           aria-label={t('createGroup')}
-          className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary-strong text-white disabled:opacity-60"
+          className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-strong text-white disabled:opacity-60"
         >
-          <Save aria-hidden="true" size={18} />
+          <Save aria-hidden="true" size={16} />
         </button>
       </div>
 

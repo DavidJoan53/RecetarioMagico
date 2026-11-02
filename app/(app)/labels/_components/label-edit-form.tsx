@@ -121,7 +121,7 @@ export function LabelEditForm({label, onDone, onCancel}: Props) {
         type="button"
         onClick={() => setConfirming(true)}
         aria-label={t('deleteLabel', {name: label.name})}
-        className="flex size-11 items-center justify-center rounded-lg border border-primary-strong text-primary-strong"
+        className="flex size-8 items-center justify-center rounded-lg border border-primary-strong text-primary-strong"
       >
         <Trash2 aria-hidden="true" size={16} />
       </button>

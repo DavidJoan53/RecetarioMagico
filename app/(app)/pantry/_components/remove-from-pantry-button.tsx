@@ -44,9 +44,9 @@ export function RemoveFromPantryButton({item}: {item: PantryItem}) {
         type="submit"
         disabled={pending}
         aria-label={t('removeLabel', {name: item.name})}
-        className="flex size-11 items-center justify-center rounded-lg border border-primary-strong text-primary-strong disabled:opacity-60"
+        className="flex size-8 items-center justify-center rounded-lg border border-primary-strong text-primary-strong disabled:opacity-60"
       >
-        <Trash2 aria-hidden="true" size={18} />
+        <Trash2 aria-hidden="true" size={16} />
       </button>
     </form>
   )

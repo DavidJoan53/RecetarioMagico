@@ -11,7 +11,7 @@ import {RenameGroupForm} from './rename-group-form'
 type Mode = 'view' | 'add-label' | 'edit' | 'confirm-delete'
 
 const ACTION =
-  'flex size-11 items-center justify-center rounded-lg border border-secondary-foreground'
+  'flex size-8 items-center justify-center rounded-lg border border-secondary-foreground'
 
 export function GroupHeader({
   group,
@@ -82,7 +82,7 @@ export function GroupHeader({
               type="button"
               onClick={() => setMode('confirm-delete')}
               aria-label={t('deleteGroupLabel', {name: group.name})}
-              className="flex size-11 items-center justify-center rounded-lg border border-primary-strong text-primary-strong"
+              className="flex size-8 items-center justify-center rounded-lg border border-primary-strong text-primary-strong"
             >
               <Trash2 aria-hidden="true" size={16} />
             </button>

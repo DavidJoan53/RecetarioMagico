@@ -116,7 +116,7 @@ export function NewLabelForm({groupId, groupName, onCancel}: Props) {
         type="button"
         onClick={onCancel}
         aria-label={t('cancel')}
-        className="flex size-11 items-center justify-center rounded-lg border border-secondary-foreground"
+        className="flex size-8 items-center justify-center rounded-lg border border-secondary-foreground"
       >
         <X aria-hidden="true" size={16} />
       </button>

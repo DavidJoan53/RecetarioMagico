@@ -21,14 +21,14 @@ export default async function RecipesPage() {
       <PageHeader
         title={t('nav.recipes')}
         actions={
-          /* Icon only, so the name has to be carried by the label. size-11
+          /* Icon only, so the name has to be carried by the label. size-8
              is the 44px target; the glyph inside it is smaller. */
           <Link
             href="/recipes/new"
             aria-label={t('recipes.newRecipe')}
-            className="flex size-11 items-center justify-center rounded-lg bg-primary-strong text-white"
+            className="flex size-8 items-center justify-center rounded-lg bg-primary-strong text-white"
           >
-            <Plus aria-hidden="true" size={20} />
+            <Plus aria-hidden="true" size={16} />
           </Link>
         }
       />

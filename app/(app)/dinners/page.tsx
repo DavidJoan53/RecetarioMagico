@@ -24,9 +24,9 @@ export default async function DinnersPage() {
           <Link
             href="/dinners/new"
             aria-label={t('dinners.addMore')}
-            className="flex size-11 items-center justify-center rounded-lg bg-primary-strong text-white"
+            className="flex size-8 items-center justify-center rounded-lg bg-primary-strong text-white"
           >
-            <Plus aria-hidden="true" size={20} />
+            <Plus aria-hidden="true" size={16} />
           </Link>
         }
       />

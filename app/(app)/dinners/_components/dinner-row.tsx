@@ -68,7 +68,7 @@ export function DinnerRow({dinner}: {dinner: DinnerListItem}) {
 
   return (
     <li className="flex flex-col gap-2 rounded-lg border border-light bg-background-foreground p-3">
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           {/* A machine-readable instant beside the words, so the date is not
               only readable as whatever this locale renders. */}
@@ -90,18 +90,18 @@ export function DinnerRow({dinner}: {dinner: DinnerListItem}) {
             type="button"
             onClick={() => setMode('edit')}
             aria-label={t('editLabel', {date})}
-            className="flex size-11 items-center justify-center rounded-lg border border-secondary-foreground"
+            className="flex size-8 items-center justify-center rounded-lg border border-secondary-foreground"
           >
-            <Pencil aria-hidden="true" size={18} />
+            <Pencil aria-hidden="true" size={16} />
           </button>
           <button
             ref={deleteButton}
             type="button"
             onClick={() => setMode('confirm-delete')}
             aria-label={t('deleteLabel', {date})}
-            className="flex size-11 items-center justify-center rounded-lg border border-primary-strong text-primary-strong"
+            className="flex size-8 items-center justify-center rounded-lg border border-primary-strong text-primary-strong"
           >
-            <Trash2 aria-hidden="true" size={18} />
+            <Trash2 aria-hidden="true" size={16} />
           </button>
         </div>
       </div>

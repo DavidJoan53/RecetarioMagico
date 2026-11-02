@@ -113,9 +113,9 @@ export function PantryAmountForm({item, onDone, onCancel}: Props) {
           type="submit"
           disabled={pending}
           aria-label={t('saveLabel', {name: item.name})}
-          className="flex size-11 items-center justify-center rounded-lg bg-primary-strong text-white disabled:opacity-60"
+          className="flex size-8 items-center justify-center rounded-lg bg-primary-strong text-white disabled:opacity-60"
         >
-          <Save aria-hidden="true" size={18} />
+          <Save aria-hidden="true" size={16} />
         </button>
       </div>
 

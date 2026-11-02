@@ -22,9 +22,9 @@ export default async function AddToPantryPage() {
           <Link
             href="/pantry"
             aria-label={t('backToPantry')}
-            className="flex size-11 items-center justify-center rounded-lg"
+            className="flex size-8 items-center justify-center rounded-lg"
           >
-            <ArrowLeft aria-hidden="true" size={20} />
+            <ArrowLeft aria-hidden="true" size={16} />
           </Link>
         }
       />

@@ -91,9 +91,9 @@ export function IngredientRow({ingredient, children}: Props) {
         type="button"
         onClick={() => setMode('edit')}
         aria-label={t('editLabel', {name: ingredient.name})}
-        className="flex size-11 shrink-0 items-center justify-center rounded-lg border border-secondary-foreground"
+        className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-secondary-foreground"
       >
-        <Pencil aria-hidden="true" size={18} />
+        <Pencil aria-hidden="true" size={16} />
       </button>
 
       <button
@@ -101,9 +101,9 @@ export function IngredientRow({ingredient, children}: Props) {
         type="button"
         onClick={() => setMode('confirm-delete')}
         aria-label={t('deleteLabel', {name: ingredient.name})}
-        className="flex size-11 shrink-0 items-center justify-center rounded-lg border border-primary-strong text-primary-strong"
+        className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-primary-strong text-primary-strong"
       >
-        <Trash2 aria-hidden="true" size={18} />
+        <Trash2 aria-hidden="true" size={16} />
       </button>
     </li>
   )

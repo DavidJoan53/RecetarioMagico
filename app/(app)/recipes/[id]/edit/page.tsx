@@ -36,9 +36,9 @@ export default async function EditRecipePage({
           <Link
             href={`/recipes/${recipe.id}`}
             aria-label={t('backToRecipe')}
-            className="flex size-11 items-center justify-center rounded-lg"
+            className="flex size-8 items-center justify-center rounded-lg"
           >
-            <ArrowLeft aria-hidden="true" size={20} />
+            <ArrowLeft aria-hidden="true" size={16} />
           </Link>
         }
       />

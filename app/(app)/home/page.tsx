@@ -51,7 +51,7 @@ export default async function HomePage() {
             className="flex items-center justify-between gap-2 rounded-lg border border-light bg-background-foreground p-4 font-semibold text-sm"
           >
             {t(key)}
-            <ChevronRight aria-hidden="true" size={18} />
+            <ChevronRight aria-hidden="true" size={16} />
           </Link>
         ))}
       </nav>
