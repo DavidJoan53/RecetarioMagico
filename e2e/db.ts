@@ -75,6 +75,12 @@ export async function removeAll(created: {
   recipeIds: string[]
   ingredientNames: string[]
   /**
+   * Created through the UI, so there is no id to keep — the name is what the
+   * test knows, and it is unique per test. recipe_ingredients is ON DELETE
+   * CASCADE, so the amounts go with the row.
+   */
+  recipeNames?: string[]
+  /**
    * Logged through the UI, so there is no id to keep — the note is what the
    * test knows, and it is unique per test. dinner_recipes is ON DELETE
    * CASCADE, so the pairings go with the row.
@@ -94,6 +100,13 @@ export async function removeAll(created: {
   if (created.recipeIds.length > 0) {
     await resilient(() =>
       db.delete(recipes).where(inArray(recipes.id, created.recipeIds)),
+    )
+  }
+  if (created.recipeNames?.length) {
+    await resilient(() =>
+      db
+        .delete(recipes)
+        .where(inArray(recipes.name, created.recipeNames ?? [])),
     )
   }
   if (created.ingredientNames.length > 0) {
