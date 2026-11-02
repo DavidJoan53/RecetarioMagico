@@ -191,7 +191,7 @@
     "noMatches": "No ingredient by that name.",
     "addOne": "Add to the pantry",
     "alreadyThere": "That ingredient is already in your pantry.",
-    "addedCount": "{name} added. {count, plural, one {# this session} other {# this session}}.",
+    "added": "{name} added to the pantry",
     "chooseUnit": "Choose a unit"
   },
   "dinners": {

@@ -7,6 +7,7 @@ import type {FormState} from '@/app/(app)/recipes/actions'
 import type {RecipeWithIngredients} from '@/db/recipes/queries'
 import messages from '@/messages/es.json'
 import {RecipeForm} from '../recipe-form'
+import {ToastProvider} from '../toast-provider'
 
 /* The ingredient rows carry a combobox, which pages its results. */
 beforeEach(() => {
@@ -20,23 +21,32 @@ beforeEach(() => {
 })
 afterEach(() => vi.unstubAllGlobals())
 
-const setup = (state: FormState = {}, recipe?: RecipeWithIngredients) => {
+const setup = (
+  state: FormState = {},
+  recipe?: RecipeWithIngredients,
+  /* Off by default: the provider's always-mounted role="alert" region would
+     make every inline field-error query below find two alerts. */
+  withToasts = false,
+) => {
   const action = vi.fn(async () => state)
   const client = new QueryClient({defaultOptions: {queries: {retry: false}}})
+  const form = (
+    <RecipeForm
+      action={action}
+      submitLabel={messages.recipeForm.create}
+      recipe={recipe}
+    />
+  )
   const {container} = render(
     <NextIntlClientProvider locale="es" messages={messages}>
       <QueryClientProvider client={client}>
-        <RecipeForm
-          action={action}
-          submitLabel={messages.recipeForm.create}
-          recipe={recipe}
-        />
+        {withToasts ? <ToastProvider>{form}</ToastProvider> : form}
       </QueryClientProvider>
     </NextIntlClientProvider>,
   )
-  const form = container.querySelector('form')
-  if (!form) throw new Error('no form rendered')
-  return {action, submitted: () => new FormData(form)}
+  const element = container.querySelector('form')
+  if (!element) throw new Error('no form rendered')
+  return {action, submitted: () => new FormData(element)}
 }
 
 describe('RecipeForm', () => {
@@ -107,14 +117,42 @@ describe('RecipeForm', () => {
       expect(alert).toHaveTextContent(messages.recipeForm.duplicateIngredient)
     })
 
-    it('announces an ingredient that has gone', async () => {
-      const alert = await submit({error: 'ingredientGone'})
-      expect(alert).toHaveTextContent(messages.recipeForm.ingredientGone)
+    /**
+     * These two name nothing on the form. An ingredient that has been deleted
+     * elsewhere and a recipe that has been deleted elsewhere are both answers
+     * about the write, not about a field, so they go to a toast and the form
+     * says nothing — there is no field for it to mark.
+     */
+    const submitWithToasts = async (state: FormState) => {
+      setup(state, undefined, true)
+      await userEvent.type(
+        screen.getByRole('textbox', {name: messages.recipeForm.name}),
+        'Arepa',
+      )
+      await userEvent.click(
+        screen.getByRole('button', {name: messages.recipeForm.create}),
+      )
+    }
+
+    it('sends a gone ingredient to a toast, not to the form', async () => {
+      await submitWithToasts({error: 'ingredientGone'})
+      expect(
+        await screen.findByRole('button', {
+          name: `Descartar: ${messages.recipeForm.ingredientGone}`,
+        }),
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole('textbox', {name: messages.recipeForm.name}),
+      ).not.toHaveAttribute('aria-invalid')
     })
 
-    it('announces a recipe that has gone', async () => {
-      const alert = await submit({error: 'gone'})
-      expect(alert).toHaveTextContent(messages.recipeForm.gone)
+    it('sends a gone recipe to a toast, not to the form', async () => {
+      await submitWithToasts({error: 'gone'})
+      expect(
+        await screen.findByRole('button', {
+          name: `Descartar: ${messages.recipeForm.gone}`,
+        }),
+      ).toBeInTheDocument()
     })
 
     /** A message about an ingredient must not point at the name field. */

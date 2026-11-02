@@ -3,6 +3,7 @@
 import {useQueryClient} from '@tanstack/react-query'
 import {useTranslations} from 'next-intl'
 import {useActionState, useEffect, useId, useRef, useState} from 'react'
+import {useToast} from '@/components/toast-provider'
 import {timeZone} from '@/i18n/time-zone'
 import {type DinnerListItem, toDateTimeLocal} from '@/lib/dinners'
 import {queryKeys} from '@/lib/query-keys'
@@ -21,6 +22,7 @@ type Props = {
 export function DinnerEditForm({dinner, date, onDone, onCancel}: Props) {
   const t = useTranslations('dinners')
   const queryClient = useQueryClient()
+  const toast = useToast()
 
   /* The list reads its own cache, so a changed dinner has to be asked for
      again rather than revalidated on the server. */
@@ -28,6 +30,11 @@ export function DinnerEditForm({dinner, date, onDone, onCancel}: Props) {
     const result = await updateDinnerAction(previous, form)
     if (result.done) {
       await queryClient.invalidateQueries({queryKey: queryKeys.dinners})
+    }
+    /* Either this dinner or one of its recipes went while the form was open.
+       Neither is something a field on it can be corrected to fix. */
+    if (result.error === 'gone' || result.error === 'recipeGone') {
+      toast({message: t(result.error), tone: 'error'})
     }
     return result
   }
@@ -67,18 +74,13 @@ export function DinnerEditForm({dinner, date, onDone, onCancel}: Props) {
         onAdd={recipe => setChosen(current => [...current, recipe])}
         onRemove={id => setChosen(current => current.filter(r => r.id !== id))}
         whenRef={whenRef}
-        errorId={state.error ? messageId : undefined}
+        errorId={state.error === 'invalid' ? messageId : undefined}
       />
 
-      {state.error && (
+      {/* About the fields: a missing date, or no recipe left chosen. */}
+      {state.error === 'invalid' && (
         <p role="alert" id={messageId} className="text-primary-strong text-sm">
-          {t(
-            state.error === 'recipeGone'
-              ? 'recipeGone'
-              : state.error === 'gone'
-                ? 'gone'
-                : 'invalid',
-          )}
+          {t('invalid')}
         </p>
       )}
 

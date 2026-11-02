@@ -164,13 +164,29 @@ describe('DinnerRow', () => {
       await waitFor(() => expect(editButton()).toHaveFocus())
     })
 
-    it('stays open and says why when a recipe has gone', async () => {
+    /**
+     * A failed save must not close the row: everything typed would go with
+     * it. "recipeGone" names nothing on the form, so it is said by a toast
+     * and the form marks no field -- but it still has to stay put.
+     */
+    it('stays open when a recipe has gone', async () => {
       update.mockResolvedValue({error: 'recipeGone'})
       await open()
       await userEvent.click(screen.getByRole('button', {name: m.save}))
 
+      await waitFor(() => expect(update).toHaveBeenCalled())
+      expect(screen.getByLabelText(m.when)).toBeInTheDocument()
+      expect(screen.getByLabelText(m.when)).not.toHaveAttribute('aria-invalid')
+    })
+
+    /** The one that does name a field still points at it. */
+    it('marks the date when the form itself is incomplete', async () => {
+      update.mockResolvedValue({error: 'invalid'})
+      await open()
+      await userEvent.click(screen.getByRole('button', {name: m.save}))
+
       const alert = await screen.findByRole('alert')
-      expect(alert).toHaveTextContent(m.recipeGone)
+      expect(alert).toHaveTextContent(m.invalid)
       expect(
         screen.getByLabelText(m.when).getAttribute('aria-describedby'),
       ).toBe(alert.id)

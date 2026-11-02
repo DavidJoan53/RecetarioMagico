@@ -3,6 +3,7 @@
 import {useQueryClient} from '@tanstack/react-query'
 import {useTranslations} from 'next-intl'
 import {useActionState, useEffect, useId, useRef, useState} from 'react'
+import {useToast} from '@/components/toast-provider'
 import type {PantryItem} from '@/db/pantry/queries'
 import {unitEnum} from '@/db/schema'
 import {queryKeys} from '@/lib/query-keys'
@@ -17,6 +18,7 @@ type Props = {
 export function PantryAmountForm({item, onDone, onCancel}: Props) {
   const t = useTranslations('pantry')
   const queryClient = useQueryClient()
+  const toast = useToast()
 
   /* The list holds its own pages now, so the saved amount has to be asked
      for again — revalidating the server's copy no longer reaches it. */
@@ -24,6 +26,11 @@ export function PantryAmountForm({item, onDone, onCancel}: Props) {
     const result = await updatePantryEntryAction(previous, form)
     if (result.done) {
       await queryClient.invalidateQueries({queryKey: queryKeys.pantry})
+    }
+    /* Taken out of the pantry elsewhere while this was open: the amount
+       typed here is fine, there is just nothing to save it against. */
+    if (result.error === 'gone') {
+      toast({message: t('gone'), tone: 'error'})
     }
     return result
   }
@@ -67,8 +74,8 @@ export function PantryAmountForm({item, onDone, onCancel}: Props) {
           step="any"
           value={quantity}
           onChange={e => setQuantity(e.target.value)}
-          aria-describedby={state.error ? messageId : undefined}
-          aria-invalid={state.error ? true : undefined}
+          aria-describedby={state.error === 'invalid' ? messageId : undefined}
+          aria-invalid={state.error === 'invalid' ? true : undefined}
           className="w-28 rounded-lg border border-secondary-foreground bg-background px-3 py-2 text-sm"
         />
       </div>
@@ -113,13 +120,14 @@ export function PantryAmountForm({item, onDone, onCancel}: Props) {
         {t('cancel')}
       </button>
 
-      {state.error && (
+      {/* About the amount: a missing number or no unit chosen. */}
+      {state.error === 'invalid' && (
         <p
           role="alert"
           id={messageId}
           className="w-full text-primary-strong text-sm"
         >
-          {t(state.error === 'gone' ? 'gone' : 'invalid')}
+          {t('invalid')}
         </p>
       )}
     </form>

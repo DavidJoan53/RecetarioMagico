@@ -2,8 +2,9 @@
 
 import {useTranslations} from 'next-intl'
 import {useActionState, useEffect, useId, useRef, useState} from 'react'
+import {useToast} from '@/components/toast-provider'
 import type {LabelWithUsage} from '@/lib/labels'
-import {updateLabelAction} from '../actions'
+import {type FormState, updateLabelAction} from '../actions'
 import {DeleteLabelConfirm} from './delete-label-confirm'
 
 type Props = {
@@ -14,7 +15,19 @@ type Props = {
 
 export function LabelEditForm({label, onDone, onCancel}: Props) {
   const t = useTranslations('labels')
-  const [state, formAction, pending] = useActionState(updateLabelAction, {})
+  const toast = useToast()
+
+  /* The label was deleted from elsewhere while this form was open: nothing
+     typed here is wrong, so there is no field for it to point at. */
+  const saveThen = async (previous: FormState, form: FormData) => {
+    const result = await updateLabelAction(previous, form)
+    if (result.error === 'gone') {
+      toast({message: t('labelGone'), tone: 'error'})
+    }
+    return result
+  }
+
+  const [state, formAction, pending] = useActionState(saveThen, {})
   const [name, setName] = useState(label.name)
   const [color, setColor] = useState(label.color)
   const [confirming, setConfirming] = useState(false)
@@ -22,6 +35,13 @@ export function LabelEditForm({label, onDone, onCancel}: Props) {
   const nameId = useId()
   const colorId = useId()
   const messageId = useId()
+
+  const fieldError =
+    state.error === 'duplicateName'
+      ? 'duplicate'
+      : state.error === 'invalid'
+        ? 'invalid'
+        : null
 
   useEffect(() => {
     nameRef.current?.focus()
@@ -62,8 +82,8 @@ export function LabelEditForm({label, onDone, onCancel}: Props) {
           maxLength={80}
           value={name}
           onChange={e => setName(e.target.value)}
-          aria-describedby={state.error ? messageId : undefined}
-          aria-invalid={state.error ? true : undefined}
+          aria-describedby={fieldError ? messageId : undefined}
+          aria-invalid={fieldError ? true : undefined}
           className="rounded-lg border border-secondary-foreground bg-background px-3 py-2 text-sm"
         />
       </div>
@@ -104,19 +124,14 @@ export function LabelEditForm({label, onDone, onCancel}: Props) {
         {t('delete')}
       </button>
 
-      {state.error && (
+      {/* Both about the name field, and bound to it. */}
+      {fieldError && (
         <p
           role="alert"
           id={messageId}
           className="w-full text-primary-strong text-sm"
         >
-          {t(
-            state.error === 'duplicateName'
-              ? 'duplicate'
-              : state.error === 'gone'
-                ? 'labelGone'
-                : 'invalid',
-          )}
+          {t(fieldError)}
         </p>
       )}
     </form>

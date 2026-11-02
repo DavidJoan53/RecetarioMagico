@@ -108,8 +108,7 @@ describe('DinnerForm', () => {
     await userEvent.type(screen.getByLabelText(m.notes), 'Rico')
     await submit()
 
-    expect(await screen.findByText(m.added)).toBeInTheDocument()
-    expect(screen.getByLabelText(m.notes)).toHaveValue('')
+    await waitFor(() => expect(screen.getByLabelText(m.notes)).toHaveValue(''))
     expect(screen.getByText(m.noneChosen)).toBeInTheDocument()
     expect(when()).toHaveFocus()
   })
@@ -119,14 +118,16 @@ describe('DinnerForm', () => {
    * not, which would throw away everything picked on the way to a rejection.
    */
   it('keeps what was picked when the write is refused', async () => {
-    action.mockResolvedValue({error: 'recipeGone'})
+    /* The field error, which is the one that still has somewhere on the form
+       to point. "recipeGone" names nothing here and goes to a toast. */
+    action.mockResolvedValue({error: 'invalid'})
     setup()
     await fillIn()
     await userEvent.type(screen.getByLabelText(m.notes), 'Rico')
     await submit()
 
     const alert = await screen.findByRole('alert')
-    expect(alert).toHaveTextContent(m.recipeGone)
+    expect(alert).toHaveTextContent(m.invalid)
     expect(screen.getByLabelText(m.notes)).toHaveValue('Rico')
     expect(when()).toHaveValue('2026-11-01T20:00')
     expect(when().getAttribute('aria-describedby')).toBe(alert.id)

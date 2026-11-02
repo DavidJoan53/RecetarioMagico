@@ -2,6 +2,7 @@
 
 import {useTranslations} from 'next-intl'
 import {useActionState, useId, useRef, useState} from 'react'
+import {useToast} from '@/components/toast-provider'
 import {createLabelGroupAction, type FormState} from '../actions'
 
 export function NewGroupForm() {
@@ -10,6 +11,7 @@ export function NewGroupForm() {
   const nameRef = useRef<HTMLInputElement>(null)
   const nameId = useId()
   const messageId = useId()
+  const toast = useToast()
 
   /**
    * Cleared here, not from an effect on state.done: that is true after the
@@ -18,6 +20,7 @@ export function NewGroupForm() {
   const createThenClear = async (previous: FormState, form: FormData) => {
     const result = await createLabelGroupAction(previous, form)
     if (result.done) {
+      toast({message: t('groupAdded')})
       setName('')
       nameRef.current?.focus()
     }
@@ -61,11 +64,6 @@ export function NewGroupForm() {
       {state.error && (
         <p role="alert" id={messageId} className="text-primary-strong text-sm">
           {t(state.error === 'duplicateName' ? 'groupDuplicate' : 'invalid')}
-        </p>
-      )}
-      {state.done && (
-        <p role="status" className="text-secondary-foreground text-sm">
-          {t('groupAdded')}
         </p>
       )}
     </form>

@@ -191,7 +191,7 @@
     "noMatches": "Ningún ingrediente con ese nombre.",
     "addOne": "Añadir a la despensa",
     "alreadyThere": "Ese ingrediente ya está en tu despensa.",
-    "addedCount": "{name} añadido. {count, plural, one {# en esta sesión} other {# en esta sesión}}.",
+    "added": "{name} añadido a la despensa",
     "chooseUnit": "Elige una unidad"
   },
   "dinners": {

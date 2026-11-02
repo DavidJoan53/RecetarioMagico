@@ -3,6 +3,7 @@
 import {useQueryClient} from '@tanstack/react-query'
 import {useTranslations} from 'next-intl'
 import {useActionState, useEffect, useId, useRef, useState} from 'react'
+import {useToast} from '@/components/toast-provider'
 import type {Ingredient} from '@/db/schema'
 import {queryKeys} from '@/lib/query-keys'
 import {type FormState, updateIngredientAction} from '../actions'
@@ -17,6 +18,7 @@ type Props = {
 export function IngredientEditForm({ingredient, onDone, onCancel}: Props) {
   const t = useTranslations('ingredients')
   const queryClient = useQueryClient()
+  const toast = useToast()
 
   /* The list reads its own cache, so a renamed ingredient has to be asked
      for again rather than revalidated on the server. */
@@ -24,6 +26,11 @@ export function IngredientEditForm({ingredient, onDone, onCancel}: Props) {
     const result = await updateIngredientAction(previous, form)
     if (result.done) {
       await queryClient.invalidateQueries({queryKey: queryKeys.ingredients})
+    }
+    /* The row was deleted from somewhere else while this form was open.
+       Nothing typed here is wrong, so there is no field to point at. */
+    if (result.error === 'gone') {
+      toast({message: t('gone'), tone: 'error'})
     }
     return result
   }
@@ -33,6 +40,13 @@ export function IngredientEditForm({ingredient, onDone, onCancel}: Props) {
   const [photoUrl, setPhotoUrl] = useState(ingredient.photoUrl ?? '')
   const nameRef = useRef<HTMLInputElement>(null)
   const messageId = useId()
+
+  const fieldError =
+    state.error === 'duplicateName'
+      ? 'duplicate'
+      : state.error === 'invalid'
+        ? 'invalid'
+        : null
 
   /** The row became a form; say where you are rather than moving silently. */
   useEffect(() => {
@@ -57,18 +71,13 @@ export function IngredientEditForm({ingredient, onDone, onCancel}: Props) {
         onName={setName}
         onPhotoUrl={setPhotoUrl}
         nameRef={nameRef}
-        errorId={state.error ? messageId : undefined}
+        errorId={fieldError ? messageId : undefined}
       />
 
-      {state.error && (
+      {/* Both about the name field, and bound to it. */}
+      {fieldError && (
         <p role="alert" id={messageId} className="text-primary-strong text-sm">
-          {t(
-            state.error === 'duplicateName'
-              ? 'duplicate'
-              : state.error === 'gone'
-                ? 'gone'
-                : 'invalid',
-          )}
+          {t(fieldError)}
         </p>
       )}
 

@@ -3,6 +3,7 @@
 import {useQueryClient} from '@tanstack/react-query'
 import {useTranslations} from 'next-intl'
 import {useActionState, useId, useRef, useState} from 'react'
+import {useToast} from '@/components/toast-provider'
 import {queryKeys} from '@/lib/query-keys'
 import type {FormState} from '../actions'
 import {IngredientFields} from './ingredient-fields'
@@ -18,6 +19,7 @@ export function IngredientForm({action}: Props) {
   const nameRef = useRef<HTMLInputElement>(null)
   const messageId = useId()
   const queryClient = useQueryClient()
+  const toast = useToast()
 
   /**
    * Controlled on purpose. React resets an uncontrolled form after an action
@@ -31,6 +33,9 @@ export function IngredientForm({action}: Props) {
   const addThenClear = async (previous: FormState, form: FormData) => {
     const result = await action(previous, form)
     if (result.done) {
+      /* Raised before the clearing below: the confirmation is about a name
+         this form is no longer holding. */
+      toast({message: t('added')})
       setName('')
       setPhotoUrl('')
       nameRef.current?.focus()
@@ -66,16 +71,12 @@ export function IngredientForm({action}: Props) {
         + {t('add')}
       </button>
 
-      {/* Focus moves back to the input on success, so the outcome has to be
-          announced rather than seen. alert interrupts; status waits. */}
+      {/* Both of these name the field: a clash with an existing name, or a
+          name and link that did not parse. They stay here, bound to the
+          input, rather than going to a toast with nothing to point at. */}
       {state.error && (
         <p role="alert" id={messageId} className="text-primary-strong text-sm">
           {t(state.error === 'duplicateName' ? 'duplicate' : 'invalid')}
-        </p>
-      )}
-      {state.done && (
-        <p role="status" className="text-secondary-foreground text-sm">
-          {t('added')}
         </p>
       )}
     </form>

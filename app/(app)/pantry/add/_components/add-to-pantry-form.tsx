@@ -2,8 +2,9 @@
 
 import {useQueryClient} from '@tanstack/react-query'
 import {useTranslations} from 'next-intl'
-import {useActionState, useId, useRef, useState} from 'react'
+import {useActionState, useId, useState} from 'react'
 import {IngredientCombobox} from '@/components/ingredient-combobox'
+import {useToast} from '@/components/toast-provider'
 import type {IngredientWithPantry} from '@/db/ingredients/queries'
 import {unitEnum} from '@/db/schema'
 import {queryKeys} from '@/lib/query-keys'
@@ -17,8 +18,8 @@ export function AddToPantryForm() {
   const quantityId = useId()
   const unitId = useId()
   const messageId = useId()
-  const added = useRef<string[]>([])
   const queryClient = useQueryClient()
+  const toast = useToast()
 
   /**
    * Cleared here rather than from an effect on the result: the state after a
@@ -28,7 +29,9 @@ export function AddToPantryForm() {
   const addThenClear = async (previous: AddState, form: FormData) => {
     const result = await addToPantryAction(previous, form)
     if (result.added) {
-      added.current = [result.added, ...added.current]
+      /* Before the clearing: the picker is empty by the time this is read,
+         so the name has to come from the result. */
+      toast({message: t('added', {name: result.added})})
       setChosen(null)
       setQuantity('')
       setUnit('')
@@ -113,17 +116,6 @@ export function AddToPantryForm() {
       {state.error && (
         <p role="alert" id={messageId} className="text-primary-strong text-sm">
           {t(state.error === 'alreadyThere' ? 'alreadyThere' : 'invalid')}
-        </p>
-      )}
-
-      {/* The combobox clears on success, so the confirmation is the only
-          trace of what just happened. */}
-      {added.current.length > 0 && !state.error && (
-        <p role="status" className="text-secondary-foreground text-sm">
-          {t('addedCount', {
-            name: added.current[0] ?? '',
-            count: added.current.length,
-          })}
         </p>
       )}
     </form>
