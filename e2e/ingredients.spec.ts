@@ -2,6 +2,7 @@ import type {Page} from '@playwright/test'
 import es from '@/messages/es.json'
 import {addIngredient, removeAll, uniqueName, useInNewRecipe} from './db'
 import {expect, test} from './signed-in'
+import {toast} from './toast'
 
 const m = es.ingredients
 
@@ -47,12 +48,6 @@ const addForm = (page: Page) => page.getByRole('form', {name: m.addTitle})
 const rowFor = (page: Page, name: string) =>
   page.getByRole('listitem').filter({hasText: name})
 
-/** Two live regions share the page: the form's, and the list's for deletions. */
-const formStatus = (page: Page) => addForm(page).getByRole('status')
-
-const announcement = (page: Page, text: string) =>
-  page.getByRole('status').filter({hasText: text})
-
 test('an added ingredient is saved and comes back in the list', async ({
   page,
 }) => {
@@ -60,7 +55,7 @@ test('an added ingredient is saved and comes back in the list', async ({
   await open(page)
   await fillAndAdd(page, name)
 
-  await expect(formStatus(page)).toHaveText(m.added)
+  await expect(toast(page, m.added)).toBeVisible()
   await expect(rowFor(page, name)).toBeVisible()
 
   /* Reloaded, because the row appearing could be optimistic. */
@@ -74,7 +69,7 @@ test('the unique index refuses a second ingredient with the same name', async ({
   const name = uniqueName('e2e-duplicado')
   await open(page)
   await fillAndAdd(page, name)
-  await expect(formStatus(page)).toHaveText(m.added)
+  await expect(toast(page, m.added)).toBeVisible()
 
   await fillAndAdd(page, name)
   await expect(addForm(page).getByRole('alert')).toHaveText(m.duplicate)
@@ -113,7 +108,7 @@ test('a deleted ingredient is gone, and the going is announced', async ({
   await page.getByRole('button', {name: m.confirmDeleteAction}).click()
 
   /* The row unmounts, so this message is the only word the user gets. */
-  await expect(announcement(page, `${name} eliminado`)).toHaveCount(1)
+  await expect(toast(page, `${name} eliminado`)).toHaveCount(1)
   await expect(rowFor(page, name)).toHaveCount(0)
   await page.reload()
   await expect(rowFor(page, name)).toHaveCount(0)
