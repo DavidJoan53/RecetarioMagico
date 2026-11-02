@@ -1,6 +1,7 @@
 'use client'
 
 import {useQueryClient} from '@tanstack/react-query'
+import {Trash2} from 'lucide-react'
 import {useTranslations} from 'next-intl'
 import {useActionState} from 'react'
 import {useCatchFocus} from '@/components/focus-catcher'
@@ -43,9 +44,9 @@ export function RemoveFromPantryButton({item}: {item: PantryItem}) {
         type="submit"
         disabled={pending}
         aria-label={t('removeLabel', {name: item.name})}
-        className="rounded-lg border border-primary-strong px-3 py-1 font-semibold text-primary-strong text-sm disabled:opacity-60"
+        className="flex size-11 items-center justify-center rounded-lg border border-primary-strong text-primary-strong disabled:opacity-60"
       >
-        {t('remove')}
+        <Trash2 aria-hidden="true" size={18} />
       </button>
     </form>
   )

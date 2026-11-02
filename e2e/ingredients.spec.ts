@@ -84,9 +84,13 @@ test('a rename is written and survives a reload', async ({page}) => {
   await fillAndAdd(page, before)
   await expect(rowFor(page, before)).toBeVisible()
 
-  await page.getByRole('button', {name: `${m.edit} ${before}`}).click()
+  await page
+    .getByRole('button', {name: m.editLabel.replace('{name}', before)})
+    .click()
   /* Scoped: the create form at the top has a Nombre field of its own. */
-  const editing = page.getByRole('form', {name: `${m.edit} ${before}`})
+  const editing = page.getByRole('form', {
+    name: m.editTitle.replace('{name}', before),
+  })
   await editing.getByRole('textbox', {name: m.name}).fill(after)
   await editing.getByRole('button', {name: m.save}).click()
 
@@ -104,7 +108,9 @@ test('a deleted ingredient is gone, and the going is announced', async ({
   await fillAndAdd(page, name)
   await expect(rowFor(page, name)).toBeVisible()
 
-  await page.getByRole('button', {name: `${m.delete} ${name}`}).click()
+  await page
+    .getByRole('button', {name: m.deleteLabel.replace('{name}', name)})
+    .click()
   await page.getByRole('button', {name: m.confirmDeleteAction}).click()
 
   /* The row unmounts, so this message is the only word the user gets. */
@@ -130,7 +136,9 @@ test('an ingredient a recipe uses cannot be deleted, and is told why', async ({
   created.recipeIds.push(await useInNewRecipe(id, uniqueName('e2e-receta')))
 
   await open(page)
-  await page.getByRole('button', {name: `${m.delete} ${name}`}).click()
+  await page
+    .getByRole('button', {name: m.deleteLabel.replace('{name}', name)})
+    .click()
   await page.getByRole('button', {name: m.confirmDeleteAction}).click()
 
   await expect(rowFor(page, name).getByRole('alert')).toHaveText(/1 receta/)
