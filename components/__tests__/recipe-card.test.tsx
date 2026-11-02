@@ -89,7 +89,7 @@ describe('RecipeCard', () => {
       } as const,
     ]
 
-    it('names each one with how much of it there is', () => {
+    it('names them without their amounts', () => {
       wrap(
         <RecipeCard
           id="a"
@@ -98,7 +98,49 @@ describe('RecipeCard', () => {
           ingredients={ingredients}
         />,
       )
-      expect(screen.getByText('Tomate 200 g · Cebolla 1 unidad')).toBeVisible()
+      expect(screen.getByText(/Tomate · Cebolla/)).toBeVisible()
+      expect(screen.queryByText(/200 g/)).toBeNull()
+    })
+
+    /**
+     * A long list would otherwise push the card to two or three lines, or
+     * truncate mid-word with nothing to say more was cut.
+     */
+    it('stops at five and counts the rest', () => {
+      wrap(
+        <RecipeCard
+          id="a"
+          name="Arepa"
+          imageUrl={null}
+          ingredients={Array.from({length: 8}, (_, i) => ({
+            ingredientId: `i${i}`,
+            name: `Ingrediente ${i + 1}`,
+            quantity: 1,
+            unit: 'g' as const,
+          }))}
+        />,
+      )
+      expect(screen.getByText(/Ingrediente 5/)).toBeVisible()
+      expect(screen.queryByText(/Ingrediente 6/)).toBeNull()
+      expect(screen.getByText(/\+3/)).toBeVisible()
+    })
+
+    /** "+3" alone means nothing read aloud, so the words go beside it. */
+    it('says in words how many more there are', () => {
+      wrap(
+        <RecipeCard
+          id="a"
+          name="Arepa"
+          imageUrl={null}
+          ingredients={Array.from({length: 7}, (_, i) => ({
+            ingredientId: `i${i}`,
+            name: `Ingrediente ${i + 1}`,
+            quantity: 1,
+            unit: 'g' as const,
+          }))}
+        />,
+      )
+      expect(screen.getByText('y 2 más', {exact: false})).toBeInTheDocument()
     })
 
     /**

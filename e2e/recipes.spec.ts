@@ -181,9 +181,11 @@ test('the list shows what a recipe is made of', async ({page}) => {
   await page.getByRole('button', {name: f.create}).click()
 
   /* Already the list: creating goes there now, so there is nothing to
-     navigate to before reading it. */
+     navigate to before reading it. Names without amounts -- a card is for
+     recognising a recipe, not cooking from it. */
   await expect(page).toHaveURL(/\/recipes$/)
-  await expect(page.getByText(`${tomato} 200 g`)).toBeVisible()
+  await expect(page.getByText(tomato)).toBeVisible()
+  await expect(page.getByText('200 g')).toBeHidden()
 
   /* Beside the link, never inside it: everything within a link becomes its
      accessible name, and a list of them would read as a wall of text. */

@@ -51,6 +51,7 @@
     "minutes": "{count} min",
     "noTime": "Sin tiempo",
     "ingredients": "Ingredientes",
+    "moreIngredients": "y {count} más",
     "noIngredients": "Esta receta no lista ingredientes.",
     "instructions": "Preparación",
     "links": "Enlaces",

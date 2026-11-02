@@ -51,6 +51,7 @@
     "minutes": "{count} min",
     "noTime": "No time set",
     "ingredients": "Ingredients",
+    "moreIngredients": "and {count} more",
     "noIngredients": "This recipe lists no ingredients.",
     "instructions": "Instructions",
     "links": "Links",
