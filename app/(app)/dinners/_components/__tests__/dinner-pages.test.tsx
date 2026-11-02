@@ -71,29 +71,11 @@ function setup(initialPage: DinnerPage) {
   )
 }
 
+/* Rendering the first page and appending the next is the same
+   useInfiniteQuery wiring on all four lists, proven once in recipe-pages.
+   What is specific to this one is the compound cursor and its query key. */
 describe('DinnerPages', () => {
-  it('shows the page it was given', () => {
-    mockPages({'': page([['d1', 'Arepa']], null)})
-    setup(page([['d1', 'Arepa']], null))
-    expect(screen.getByRole('list', {name: m.listLabel})).toBeInTheDocument()
-    expect(screen.getByText('Arepa')).toBeInTheDocument()
-  })
-
-  it('adds the next page below the one already read', async () => {
-    const cursor = '2026-11-02T01:00:00.000Z|d1'
-    mockPages({
-      '': page([['d1', 'Arepa']], cursor),
-      [cursor]: page([['d2', 'Café']], null),
-    })
-    setup(page([['d1', 'Arepa']], cursor))
-
-    await userEvent.click(screen.getByRole('button', {name: loadMore}))
-
-    expect(await screen.findByText('Café')).toBeInTheDocument()
-    expect(screen.getByText('Arepa')).toBeInTheDocument()
-  })
-
-  /** Reading on must not take the list back to the top. */
+  /** A dinner's cursor is `instant|id`, so it has to survive encoding. */
   it('passes the cursor the last page ended on', async () => {
     const cursor = '2026-11-02T01:00:00.000Z|d1'
     const fetched = mockPages({
