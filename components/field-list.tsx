@@ -9,6 +9,8 @@ type Props = {
   removeLabel: (n: number) => string
   addLabel: string
   placeholder?: string
+  /** What the rows start as, when an existing recipe is being edited. */
+  initialValues?: readonly string[]
 }
 
 /**
@@ -23,10 +25,18 @@ export function FieldList({
   removeLabel,
   addLabel,
   placeholder,
+  initialValues,
 }: Props) {
   const base = useId()
-  const [rows, setRows] = useState([0])
-  const [next, setNext] = useState(1)
+  /* One empty row when there is nothing to edit, so the field is never a
+     legend with no input under it. */
+  const [rows, setRows] = useState(() =>
+    (initialValues?.length ? initialValues : ['']).map((value, index) => ({
+      key: index,
+      value,
+    })),
+  )
+  const [next, setNext] = useState(rows.length)
 
   return (
     <fieldset className="flex flex-col gap-2">
@@ -35,21 +45,22 @@ export function FieldList({
       </legend>
 
       {rows.map((row, index) => (
-        <div key={row} className="flex items-center gap-2">
-          <label className="sr-only" htmlFor={`${base}-${row}`}>
+        <div key={row.key} className="flex items-center gap-2">
+          <label className="sr-only" htmlFor={`${base}-${row.key}`}>
             {itemLabel(index + 1)}
           </label>
           <input
-            id={`${base}-${row}`}
+            id={`${base}-${row.key}`}
             name={name}
             placeholder={placeholder}
+            defaultValue={row.value}
             className="min-w-0 flex-1 rounded-lg border border-secondary-foreground bg-background px-3 py-2 text-sm"
           />
           {rows.length > 1 && (
             <button
               type="button"
               aria-label={removeLabel(index + 1)}
-              onClick={() => setRows(r => r.filter(x => x !== row))}
+              onClick={() => setRows(r => r.filter(x => x.key !== row.key))}
               className="rounded-lg border border-secondary-foreground px-3 py-2 text-sm"
             >
               −
@@ -61,7 +72,7 @@ export function FieldList({
       <button
         type="button"
         onClick={() => {
-          setRows(r => [...r, next])
+          setRows(r => [...r, {key: next, value: ''}])
           setNext(n => n + 1)
         }}
         className="self-start font-semibold text-primary-strong text-sm"

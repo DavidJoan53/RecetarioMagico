@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import {describe, expect, it} from 'vitest'
 import {FieldList} from '../field-list'
 
-const setup = () =>
+const setup = (initialValues?: string[]) =>
   render(
     <FieldList
       name="instructions"
@@ -11,6 +11,7 @@ const setup = () =>
       itemLabel={n => `Paso ${n}`}
       removeLabel={n => `Quitar paso ${n}`}
       addLabel="Añadir paso"
+      initialValues={initialValues}
     />,
   )
 
@@ -56,6 +57,37 @@ describe('FieldList', () => {
       .getAllByRole('textbox')
       .map(i => (i as HTMLInputElement).value)
     expect(values).toEqual(['first', 'third'])
+  })
+
+  describe('when an existing recipe is being edited', () => {
+    it('starts with a row per value, already filled in', () => {
+      setup(['Amasar', 'Freír'])
+      expect(screen.getByRole('textbox', {name: 'Paso 1'})).toHaveValue(
+        'Amasar',
+      )
+      expect(screen.getByRole('textbox', {name: 'Paso 2'})).toHaveValue('Freír')
+    })
+
+    /** A legend with no input under it is a field that cannot be filled. */
+    it('still offers one empty row when there is nothing to edit', () => {
+      setup([])
+      expect(screen.getByRole('textbox', {name: 'Paso 1'})).toHaveValue('')
+    })
+
+    /** Keyed past the seeded rows, or an added row reuses a key in use. */
+    it('adds a row after the ones it started with', async () => {
+      setup(['Amasar', 'Freír'])
+      await userEvent.click(screen.getByRole('button', {name: /Añadir paso/}))
+      await userEvent.type(
+        screen.getByRole('textbox', {name: 'Paso 3'}),
+        'Servir',
+      )
+
+      const values = screen
+        .getAllByRole('textbox')
+        .map(i => (i as HTMLInputElement).value)
+      expect(values).toEqual(['Amasar', 'Freír', 'Servir'])
+    })
   })
 
   it('hides the remove control again when one row is left', async () => {
