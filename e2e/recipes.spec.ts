@@ -58,7 +58,7 @@ test('reading on does not take the list back to the top', async ({page}) => {
   const mine = page.getByRole('link', {name: new RegExp(prefix)})
   await expect(mine).toHaveCount(PAGE_SIZE)
 
-  await mine.last().scrollIntoViewIfNeeded()
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
   const before = await page.evaluate(() => window.scrollY)
   expect(before).toBeGreaterThan(0)
 

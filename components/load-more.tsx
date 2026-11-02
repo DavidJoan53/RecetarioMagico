@@ -26,13 +26,13 @@ export function LoadMore({hasMore, isLoading, onLoadMore}: Props) {
   useEffect(() => {
     const target = button.current
     if (!target || !hasMore) return
-    const observer = new IntersectionObserver(
-      entries => {
-        if (entries[0]?.isIntersecting) onLoadMore()
-      },
-      /* Early, so the next page is on its way before the end is reached. */
-      {rootMargin: '200px'},
-    )
+    /* No rootMargin. Rooted to the viewport, any margin large enough to be
+       worth having also reaches the button before anyone scrolls: ten recipe
+       cards end 88px below the fold on a 720px-tall window, so a page of ten
+       would quietly arrive as twenty. Reaching it is what asks. */
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0]?.isIntersecting) onLoadMore()
+    })
     observer.observe(target)
     return () => observer.disconnect()
   }, [hasMore, onLoadMore])
