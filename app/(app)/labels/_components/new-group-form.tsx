@@ -1,5 +1,6 @@
 'use client'
 
+import {Save} from 'lucide-react'
 import {useTranslations} from 'next-intl'
 import {useActionState, useId, useRef, useState} from 'react'
 import {useToast} from '@/components/toast-provider'
@@ -52,12 +53,15 @@ export function NewGroupForm() {
           aria-invalid={state.error ? true : undefined}
           className="min-w-40 flex-1 rounded-lg border border-secondary-foreground bg-background px-3 py-2 text-sm"
         />
+        {/* Icon only, so the label carries what the word used to. The same
+            string, so nothing announced changes. */}
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-primary-strong px-4 py-2 font-semibold text-sm text-white disabled:opacity-60"
+          aria-label={t('createGroup')}
+          className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary-strong text-white disabled:opacity-60"
         >
-          {t('createGroup')}
+          <Save aria-hidden="true" size={18} />
         </button>
       </div>
 

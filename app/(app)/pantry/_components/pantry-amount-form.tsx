@@ -1,7 +1,7 @@
 'use client'
 
 import {useQueryClient} from '@tanstack/react-query'
-import {Check} from 'lucide-react'
+import {Save} from 'lucide-react'
 import {useTranslations} from 'next-intl'
 import {useActionState, useEffect, useId, useRef, useState} from 'react'
 import {useToast} from '@/components/toast-provider'
@@ -115,7 +115,7 @@ export function PantryAmountForm({item, onDone, onCancel}: Props) {
           aria-label={t('saveLabel', {name: item.name})}
           className="flex size-11 items-center justify-center rounded-lg bg-primary-strong text-white disabled:opacity-60"
         >
-          <Check aria-hidden="true" size={18} />
+          <Save aria-hidden="true" size={18} />
         </button>
       </div>
 
