@@ -1,5 +1,6 @@
 'use client'
 
+import {Pencil, Trash2} from 'lucide-react'
 import {useTranslations} from 'next-intl'
 import {useCallback, useEffect, useRef, useState} from 'react'
 import type {GroupWithLabels} from '@/lib/labels'
@@ -56,18 +57,18 @@ export function GroupHeader({
         type="button"
         onClick={() => setMode('edit')}
         aria-label={t('editGroupLabel', {name: group.name})}
-        className="rounded-lg border border-secondary-foreground px-2 py-1 font-semibold text-xs"
+        className="flex size-11 items-center justify-center rounded-lg border border-secondary-foreground"
       >
-        {t('edit')}
+        <Pencil aria-hidden="true" size={16} />
       </button>
       <button
         ref={deleteButton}
         type="button"
         onClick={() => setMode('confirm-delete')}
         aria-label={t('deleteGroupLabel', {name: group.name})}
-        className="rounded-lg border border-primary-strong px-2 py-1 font-semibold text-primary-strong text-xs"
+        className="flex size-11 items-center justify-center rounded-lg border border-primary-strong text-primary-strong"
       >
-        {t('delete')}
+        <Trash2 aria-hidden="true" size={16} />
       </button>
     </div>
   )

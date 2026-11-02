@@ -1,5 +1,6 @@
 'use client'
 
+import {Trash2} from 'lucide-react'
 import {useTranslations} from 'next-intl'
 import {useActionState, useEffect, useId, useRef, useState} from 'react'
 import {useToast} from '@/components/toast-provider'
@@ -119,9 +120,10 @@ export function LabelEditForm({label, onDone, onCancel}: Props) {
       <button
         type="button"
         onClick={() => setConfirming(true)}
-        className="rounded-lg border border-primary-strong px-3 py-2 font-semibold text-primary-strong text-sm"
+        aria-label={t('deleteLabel', {name: label.name})}
+        className="flex size-11 items-center justify-center rounded-lg border border-primary-strong text-primary-strong"
       >
-        {t('delete')}
+        <Trash2 aria-hidden="true" size={16} />
       </button>
 
       {/* Both about the name field, and bound to it. */}
