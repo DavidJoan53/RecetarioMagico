@@ -1,6 +1,7 @@
 'use client'
 
 import {useQueryClient} from '@tanstack/react-query'
+import {useRouter} from 'next/navigation'
 import {useTranslations} from 'next-intl'
 import {useActionState, useEffect, useId, useRef, useState} from 'react'
 import {useToast} from '@/components/toast-provider'
@@ -23,6 +24,7 @@ export function DinnerForm({action}: Props) {
   const messageId = useId()
   const queryClient = useQueryClient()
   const toast = useToast()
+  const router = useRouter()
 
   /**
    * Now, filled after the first paint rather than during it. The server and
@@ -37,21 +39,17 @@ export function DinnerForm({action}: Props) {
   /**
    * Controlled on purpose. React resets an uncontrolled form after an action
    * whether it succeeded or not, so a rejected dinner would lose everything
-   * that was picked. Clearing is a thing that happens on success only.
+   * that was picked.
    */
-  const logThenClear = async (previous: FormState, form: FormData) => {
+  const logThenLeave = async (previous: FormState, form: FormData) => {
     const result = await action(previous, form)
     if (result.done) {
-      /* Before the clearing below: the form no longer holds what this is
-         confirming by the time it is read. */
       toast({message: t('added')})
-      setNotes('')
-      setChosen([])
-      setEatenAt(toDateTimeLocal(new Date(), timeZone))
-      whenRef.current?.focus()
       /* The list holds its own pages; revalidating the server's copy no
-         longer reaches it, so the new dinner would not appear. */
+         longer reaches it, so the new dinner would be missing from the list
+         this is about to arrive on. Awaited for that reason. */
       await queryClient.invalidateQueries({queryKey: queryKeys.dinners})
+      router.push('/dinners')
     }
     /* One of the chosen recipes has gone. Nothing on this form is wrong, so
        there is no field for it to point at. */
@@ -61,7 +59,7 @@ export function DinnerForm({action}: Props) {
     return result
   }
 
-  const [state, formAction, pending] = useActionState(logThenClear, {})
+  const [state, formAction, pending] = useActionState(logThenLeave, {})
 
   return (
     <form

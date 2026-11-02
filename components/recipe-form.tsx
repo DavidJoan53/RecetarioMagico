@@ -1,5 +1,6 @@
 'use client'
 
+import {useRouter} from 'next/navigation'
 import {useTranslations} from 'next-intl'
 import {useActionState, useId} from 'react'
 import type {FormState} from '@/app/(app)/recipes/actions'
@@ -18,6 +19,7 @@ type Props = {
 export function RecipeForm({action, submitLabel, recipe}: Props) {
   const t = useTranslations('recipeForm')
   const toast = useToast()
+  const router = useRouter()
 
   /* Neither is about a field. "gone" means the recipe was deleted while this
      was open; "ingredientGone" means one of the picked ingredients was. */
@@ -25,6 +27,13 @@ export function RecipeForm({action, submitLabel, recipe}: Props) {
     const result = await action(previous, form)
     if (result.error === 'gone' || result.error === 'ingredientGone') {
       toast({message: t(result.error), tone: 'error'})
+    }
+    if (result.done) {
+      toast({message: recipe ? t('saved') : t('created')})
+      /* Creating lands on the list; saving goes back to the recipe. Pushed
+         from here rather than redirected from the action, so the toast
+         raised a line above survives the navigation. */
+      router.push(recipe ? `/recipes/${recipe.id}` : '/recipes')
     }
     return result
   }

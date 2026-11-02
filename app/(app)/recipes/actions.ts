@@ -14,6 +14,7 @@ export type FormState = {
     | 'duplicateIngredient'
     | 'ingredientGone'
     | 'gone'
+  done?: boolean
 }
 
 /** Every action re-checks: each one is an endpoint of its own. */
@@ -46,9 +47,11 @@ export async function createRecipeAction(
   }
 
   revalidateRecipes()
-  /* Outside the checks above: redirect throws to unwind, so anything after
-     it is never reached. */
-  redirect(`/recipes/${result.id}`)
+  /* Returned rather than redirected. redirect throws to unwind, so the
+     action never returns and the form has nothing to raise a toast from --
+     the confirmation would be lost on the way to the list. Where to go is
+     the form's to decide now. */
+  return {done: true}
 }
 
 export async function updateRecipeAction(
@@ -72,5 +75,5 @@ export async function updateRecipeAction(
   }
 
   revalidateRecipes(id)
-  redirect(`/recipes/${id}`)
+  return {done: true}
 }

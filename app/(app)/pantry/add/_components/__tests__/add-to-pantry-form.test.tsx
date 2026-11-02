@@ -11,6 +11,10 @@ const m = messages.pantry
 const add = vi.hoisted(() => vi.fn())
 vi.mock('../../../actions', () => ({addToPantryAction: add}))
 
+/* useRouter needs an app router mounted, which jsdom has none of. */
+const {push} = vi.hoisted(() => ({push: vi.fn()}))
+vi.mock('next/navigation', () => ({useRouter: () => ({push})}))
+
 beforeEach(() => {
   add.mockReset()
   vi.stubGlobal(

@@ -1,6 +1,7 @@
 'use client'
 
 import {useQueryClient} from '@tanstack/react-query'
+import {useRouter} from 'next/navigation'
 import {useTranslations} from 'next-intl'
 import {useActionState, useId, useState} from 'react'
 import {IngredientCombobox} from '@/components/ingredient-combobox'
@@ -20,31 +21,25 @@ export function AddToPantryForm() {
   const messageId = useId()
   const queryClient = useQueryClient()
   const toast = useToast()
+  const router = useRouter()
 
-  /**
-   * Cleared here rather than from an effect on the result: the state after a
-   * second successful add is the same object shape as the first, so an effect
-   * watching it would not fire again.
-   */
-  const addThenClear = async (previous: AddState, form: FormData) => {
+  const addThenLeave = async (previous: AddState, form: FormData) => {
     const result = await addToPantryAction(previous, form)
     if (result.added) {
-      /* Before the clearing: the picker is empty by the time this is read,
-         so the name has to come from the result. */
+      /* The name comes from the result rather than from state: what was
+         picked is on its way off screen. */
       toast({message: t('added', {name: result.added})})
-      setChosen(null)
-      setQuantity('')
-      setUnit('')
-      /* The picker marks what is already in the pantry out of this cache,
-         so without it the one just added goes on being offered as though it
-         were not there. Stale rather than refetched: the list is closed by
-         now, and it asks again when it is next opened. */
+      /* Two caches. The picker marks what is already in the pantry out of
+         the ingredients one, and the pantry list holds its own pages -- the
+         list this is about to land on. */
       await queryClient.invalidateQueries({queryKey: queryKeys.ingredients})
+      await queryClient.invalidateQueries({queryKey: queryKeys.pantry})
+      router.push('/pantry')
     }
     return result
   }
 
-  const [state, formAction, pending] = useActionState(addThenClear, {})
+  const [state, formAction, pending] = useActionState(addThenLeave, {})
 
   return (
     <form action={formAction} className="flex flex-col gap-4">

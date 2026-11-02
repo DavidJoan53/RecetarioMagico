@@ -1,5 +1,5 @@
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
-import {render, screen} from '@testing-library/react'
+import {render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {NextIntlClientProvider} from 'next-intl'
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
@@ -8,6 +8,12 @@ import type {RecipeWithIngredients} from '@/db/recipes/queries'
 import messages from '@/messages/es.json'
 import {RecipeForm} from '../recipe-form'
 import {ToastProvider} from '../toast-provider'
+
+/* useRouter needs an app router mounted, which jsdom has none of. Mocked so
+   the push itself can be asserted — where a create lands is behaviour now,
+   not a redirect thrown from the server. */
+const {push} = vi.hoisted(() => ({push: vi.fn()}))
+vi.mock('next/navigation', () => ({useRouter: () => ({push})}))
 
 /* The ingredient rows carry a combobox, which pages its results. */
 beforeEach(() => {
@@ -74,6 +80,18 @@ describe('RecipeForm', () => {
     })
     expect(submit).toHaveClass('w-full')
     expect(screen.queryByRole('link')).toBeNull()
+  })
+
+  it('lands on the list once a recipe is created', async () => {
+    setup({done: true})
+    await userEvent.type(
+      screen.getByRole('textbox', {name: messages.recipeForm.name}),
+      'Arepa',
+    )
+    await userEvent.click(
+      screen.getByRole('button', {name: messages.recipeForm.create}),
+    )
+    await waitFor(() => expect(push).toHaveBeenCalledWith('/recipes'))
   })
 
   it('submits to the action given to it', async () => {
