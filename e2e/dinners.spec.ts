@@ -44,9 +44,26 @@ async function openNew(page: Page) {
   await hydrated(page, 'form')
 }
 
+/**
+ * A row carries buttons that do nothing until React attaches, so it is worth
+ * waiting for. The empty state is a server-rendered paragraph with nothing to
+ * hydrate and no row to wait for — waiting on one anyway would hang until the
+ * timeout and report an empty list as a page that never rendered.
+ */
+async function listReady(page: Page) {
+  await page.waitForFunction(
+    ({rows, empty}) => {
+      const row = document.querySelector(rows)
+      if (!row) return document.body.textContent?.includes(empty) === true
+      return Object.keys(row).some(k => k.startsWith('__react'))
+    },
+    {rows: `ul[aria-label="${m.listLabel}"] li`, empty: m.empty},
+  )
+}
+
 async function openList(page: Page) {
   await page.goto('/dinners')
-  await hydrated(page, `ul[aria-label="${m.listLabel}"] li`)
+  await listReady(page)
 }
 
 const addForm = (page: Page) => page.getByRole('form', {name: m.addTitle})
@@ -69,6 +86,11 @@ async function logDinner(page: Page, recipe: string, notes: string) {
   await pickRecipe(page, recipe)
   await addForm(page).getByLabel(m.notes).fill(notes)
   await page.getByRole('button', {name: `+ ${m.add}`}).click()
+  /* Waited for here, not left to the caller. The form is its own route now,
+     so every caller leaves it — and leaving before the action resolves
+     abandons it mid-flight, so the dinner is never written and the failure
+     lands on the list, which looks like the list being wrong. */
+  await expect(page.getByText(m.added)).toBeVisible()
 }
 
 const list = (page: Page) => page.getByRole('list', {name: m.listLabel})
@@ -88,7 +110,6 @@ test('logs a dinner, shows it in the list, and takes it off again', async ({
   await openNew(page)
 
   await logDinner(page, recipe, notes)
-  await expect(page.getByText(m.added)).toBeVisible()
 
   await openList(page)
   const row = list(page).getByRole('listitem').filter({hasText: notes}).first()
@@ -117,7 +138,7 @@ test('keeps the dinner and its recipes together', async ({page}) => {
   /* Reloaded, so what is asserted is what the database holds rather than
      what the form left on screen. */
   await page.reload()
-  await hydrated(page, `ul[aria-label="${m.listLabel}"] li`)
+  await listReady(page)
   const reloaded = list(page)
     .getByRole('listitem')
     .filter({hasText: notes})

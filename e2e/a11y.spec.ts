@@ -30,6 +30,7 @@ const GATED = [
   '/recipes',
   '/recipes/new',
   '/dinners',
+  '/dinners/new',
   '/ingredients',
   '/labels',
   '/pantry',
