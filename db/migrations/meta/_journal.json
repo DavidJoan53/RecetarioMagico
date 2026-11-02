@@ -29,6 +29,13 @@
       "when": 1793482633174,
       "tag": "0003_recipes_name_unique",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793588065589,
+      "tag": "0004_recipe_ingredients_amount_required",
+      "breakpoints": true
     }
   ]
 }
