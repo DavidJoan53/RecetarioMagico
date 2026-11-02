@@ -21,11 +21,22 @@ if (!testDatabase) {
   )
 }
 /**
+ * Every worker loads this file again, inheriting the environment the first
+ * pass already rewrote — so by then the two always match and the check fires
+ * on its own handiwork. The marker is what tells the second pass apart from
+ * a laptop genuinely pointed at the live database.
+ *
+ * Only ever seen locally: CI skips the comparison, so the suite there never
+ * reached it.
+ */
+const swapped = process.env.E2E_DATABASE_SWAPPED === '1'
+
+/**
  * Not on a runner, where both are the throwaway branch on purpose — there is
  * no second database there to protect. This guards a laptop, where the other
  * one is the app people are using.
  */
-if (!process.env.CI && testDatabase === process.env.DATABASE_URL) {
+if (!process.env.CI && !swapped && testDatabase === process.env.DATABASE_URL) {
   throw new Error(
     'E2E_DATABASE_URL is the same database the app uses. Point it at the `ci`\n' +
       'branch instead.',
@@ -34,6 +45,7 @@ if (!process.env.CI && testDatabase === process.env.DATABASE_URL) {
 
 /** Everything downstream reads DATABASE_URL, so there is one value to get right. */
 process.env.DATABASE_URL = testDatabase
+process.env.E2E_DATABASE_SWAPPED = '1'
 
 export default defineConfig({
   testDir: './e2e',
