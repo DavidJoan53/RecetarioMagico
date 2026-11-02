@@ -16,6 +16,10 @@
  * Checked against both surfaces, not white. See lib/__tests__/palette.
  */
 @theme {
+  /* The fallbacks matter: a build that cannot reach Google Fonts still has a
+     stack to fall back to rather than rendering in a serif. */
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+
   --color-primary: #ff3f4d;
   --color-primary-strong: #b02b35;
   --color-secondary: #1c0708;
@@ -27,8 +31,7 @@
 
 @layer base {
   body {
-    @apply bg-background text-secondary;
-    font-family: system-ui, sans-serif;
+    @apply bg-background font-sans text-secondary;
   }
 
   /* Never remove a focus ring without replacing it. */
