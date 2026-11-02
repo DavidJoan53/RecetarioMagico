@@ -12,6 +12,31 @@ const wrap = (ui: React.ReactNode) =>
   )
 
 describe('RecipeCard', () => {
+  /**
+   * The card used to be drawn on the link, which left the ingredient line --
+   * a sibling of it, and necessarily so -- outside the box. The border moved
+   * to the li; the DOM relationship did not change.
+   */
+  it('draws the card on the row so the ingredient line is inside it', () => {
+    const {container} = wrap(
+      <RecipeCard
+        id="a"
+        name="Arepa"
+        imageUrl={null}
+        ingredients={[
+          {ingredientId: 'i1', name: 'Tomate', quantity: 200, unit: 'g'},
+        ]}
+      />,
+    )
+    const row = container.querySelector('li')
+    expect(row).toHaveClass('border')
+    expect(row?.querySelector('a')).not.toHaveClass('border')
+    /* Inside the card, still outside the link. */
+    const line = screen.getByText(/Tomate/)
+    expect(row?.contains(line)).toBe(true)
+    expect(row?.querySelector('a')?.contains(line)).toBe(false)
+  })
+
   it('links to the recipe by its accessible name', () => {
     wrap(<RecipeCard id="abc" name="Arepa de huevo" imageUrl={null} />)
     expect(screen.getByRole('link', {name: /Arepa de huevo/})).toHaveAttribute(
