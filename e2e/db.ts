@@ -1,7 +1,7 @@
 import {neon} from '@neondatabase/serverless'
 import {inArray} from 'drizzle-orm'
 import {drizzle} from 'drizzle-orm/neon-http'
-import {ingredients, recipeIngredients, recipes} from '@/db/schema'
+import {dinners, ingredients, recipeIngredients, recipes} from '@/db/schema'
 
 /**
  * Built here rather than imported from @/db, which pulls in lib/env and its
@@ -74,7 +74,23 @@ export async function useInNewRecipe(
 export async function removeAll(created: {
   recipeIds: string[]
   ingredientNames: string[]
+  /**
+   * Logged through the UI, so there is no id to keep — the note is what the
+   * test knows, and it is unique per test. dinner_recipes is ON DELETE
+   * CASCADE, so the pairings go with the row.
+   */
+  dinnerNotes?: string[]
 }): Promise<void> {
+  /* Before the recipes. Deleting a recipe cascades the pairing away but
+     leaves the dinner behind, recording nothing and visible to whoever
+     opens the app next. */
+  if (created.dinnerNotes?.length) {
+    await resilient(() =>
+      db
+        .delete(dinners)
+        .where(inArray(dinners.notes, created.dinnerNotes ?? [])),
+    )
+  }
   if (created.recipeIds.length > 0) {
     await resilient(() =>
       db.delete(recipes).where(inArray(recipes.id, created.recipeIds)),
