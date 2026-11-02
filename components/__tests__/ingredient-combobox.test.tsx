@@ -173,6 +173,42 @@ describe('IngredientCombobox', () => {
     )
   })
 
+  /** Opening used to give a two-pixel empty box until the first page landed. */
+  it('says it is loading before the first page arrives', async () => {
+    let release = () => {}
+    vi.stubGlobal('fetch', async () => {
+      await new Promise(resolve => {
+        release = () => resolve(undefined)
+      })
+      return {
+        ok: true,
+        json: async () => ({items: [ingredient('Ajo')], nextCursor: null}),
+      }
+    })
+
+    const {input} = setup()
+    await userEvent.click(input)
+
+    const list = within(await screen.findByRole('listbox'))
+    expect(list.getByText(c.loading)).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent(c.loading)
+    /* Nothing to point at yet, so it points at nothing. */
+    expect(input).not.toHaveAttribute('aria-activedescendant')
+
+    release()
+    await screen.findByRole('option', {name: /Ajo/})
+    expect(list.queryByText(c.loading)).toBeNull()
+  })
+
+  /** Nothing matched is not the same as still looking. */
+  it('does not point at an option when the list is empty', async () => {
+    mockSearch({})
+    const {input} = setup()
+    await userEvent.click(input)
+    await screen.findByText(m.noMatches)
+    expect(input).not.toHaveAttribute('aria-activedescendant')
+  })
+
   it('says when nothing matches', async () => {
     mockSearch({})
     const {input} = setup()

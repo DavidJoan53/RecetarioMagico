@@ -61,7 +61,8 @@ export function IngredientCombobox({value, onChange}: Props) {
   /* One live region, so the two things worth hearing cannot talk over each
      other: that more is coming, then how much there is. */
   const announcement = (() => {
-    if (!open || isPending) return ''
+    if (!open) return ''
+    if (isPending) return common('loading')
     if (isFetchingNextPage) return common('loadingMore')
     return t('resultCount', {count: options.length})
   })()
@@ -153,7 +154,12 @@ export function IngredientCombobox({value, onChange}: Props) {
         aria-expanded={open}
         aria-controls={listId}
         aria-autocomplete="list"
-        aria-activedescendant={open ? optionId(active) : undefined}
+        /* Only when there is one to point at. Open with nothing in the list
+           — loading, or nothing matched — this named an element that does
+           not exist. */
+        aria-activedescendant={
+          open && options[active] ? optionId(active) : undefined
+        }
         placeholder={t('searchPlaceholder')}
         value={text}
         onChange={event => {
@@ -192,6 +198,14 @@ export function IngredientCombobox({value, onChange}: Props) {
           onMouseDown={event => event.preventDefault()}
           className="absolute top-full right-0 left-0 z-10 mt-1 max-h-60 overflow-y-auto rounded-lg border border-secondary-foreground bg-background"
         >
+          {isPending && (
+            /* The first page. Without it the box opens two pixels tall and
+               empty, which reads as "nothing here" rather than "coming". */
+            <div role="presentation" className="px-3 py-2 text-center text-sm">
+              {common('loading')}
+            </div>
+          )}
+
           {options.map((ingredient, index) => (
             <div
               key={ingredient.id}
