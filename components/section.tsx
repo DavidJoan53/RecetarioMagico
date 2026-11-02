@@ -1,11 +1,14 @@
 import Link from 'next/link'
 import {useTranslations} from 'next-intl'
+import {EmptyState} from './empty-state'
 
 type Props = {
   title: string
   seeAllHref: string
   isEmpty: boolean
   emptyText: string
+  /** What to do about it, when there is something to say. */
+  emptyHint?: string
   children: React.ReactNode
 }
 
@@ -14,6 +17,7 @@ export function Section({
   seeAllHref,
   isEmpty,
   emptyText,
+  emptyHint,
   children,
 }: Props) {
   const t = useTranslations('home')
@@ -25,9 +29,7 @@ export function Section({
       </h2>
 
       {isEmpty ? (
-        <p className="rounded-lg border border-light border-dashed p-4 text-center text-secondary-foreground text-sm">
-          {emptyText}
-        </p>
+        <EmptyState title={emptyText} hint={emptyHint} />
       ) : (
         <>
           <ul className="flex flex-col gap-2">{children}</ul>

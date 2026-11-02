@@ -47,14 +47,16 @@
     "newRecipes": "New recipes",
     "seeAll": "See all",
     "noDinners": "No dinners logged yet.",
-    "noRecipes": "No recipes yet. Create the first one."
+    "noDinnersHint": "Whatever you cook this week shows up here.",
+    "noRecipes": "No recipes yet. Create the first one.",
+    "noRecipesHint": "The first one you save shows up here."
   },
   "recipe": {
     "minutes": "{count} min",
     "noTime": "No time set",
     "ingredients": "Ingredients",
     "moreIngredients": "and {count} more",
-    "noIngredients": "This recipe lists no ingredients.",
+    "noIngredients": "This recipe lists no ingredients. Edit it to add some.",
     "instructions": "Instructions",
     "links": "Links",
     "edit": "Edit",
@@ -62,7 +64,6 @@
   },
   "common": {
     "loading": "Loading…",
-    "empty": "Nothing here yet.",
     "loadMore": "Load {count} more",
     "loadingMore": "Loading more…",
     "endOfList": "That's everything.",
@@ -95,7 +96,7 @@
     "ingredientN": "Ingredient {n}",
     "addIngredient": "Add ingredient",
     "removeIngredient": "Remove {name}",
-    "noIngredients": "No ingredients added yet.",
+    "noIngredients": "This recipe has no ingredients yet. Use \"Add ingredient\" to put the first one in.",
     "quantity": "Quantity",
     "quantityOf": "Quantity of {name}",
     "unit": "Unit",
@@ -108,7 +109,8 @@
   },
   "recipes": {
     "newRecipe": "New recipe",
-    "empty": "No recipes yet."
+    "empty": "No recipes yet.",
+    "emptyHint": "Create the first one and it will show up here."
   },
   "ingredients": {
     "addTitle": "Add an ingredient",
@@ -121,6 +123,7 @@
     "duplicate": "You already have an ingredient with that name.",
     "invalid": "Check the name and the photo link.",
     "empty": "No ingredients yet.",
+    "emptyHint": "Use \"Add\" above to create the first one.",
     "listLabel": "Ingredients",
     "edit": "Edit",
     "editLabel": "Edit {name}",
@@ -142,8 +145,9 @@
     "createGroup": "Create group",
     "groupAdded": "Group created",
     "groupDuplicate": "You already have a group with that name.",
-    "groupEmpty": "This group has no labels yet.",
-    "empty": "No groups yet. Create one to start.",
+    "groupEmpty": "This group has no labels yet. Add one with \"Add\".",
+    "empty": "No label groups yet.",
+    "emptyHint": "A group gathers labels that go together, like \"Breakfast\" or \"Quick\".",
     "addTo": "Add a label to {group}",
     "name": "Label",
     "color": "Color",
@@ -186,6 +190,7 @@
     "gone": "That is no longer in the pantry.",
     "invalid": "Say how much you have and in what unit.",
     "empty": "Your pantry is empty.",
+    "emptyHint": "Note what you have at home so you know what you are missing.",
     "goToIngredients": "Go to Ingredients",
     "addTitle": "Add to the pantry",
     "addHint": "Find an ingredient, say how much you have, and add it.",
@@ -214,7 +219,7 @@
     "noMatches": "No recipe by that name.",
     "alreadyAdded": "already added",
     "chosen": "Recipes in this dinner",
-    "noneChosen": "You have not picked a recipe yet.",
+    "noneChosen": "You have not picked a recipe yet. Search above and it will be added here.",
     "removeRecipe": "Remove {name}",
     "recipeAdded": "{name} added",
     "recipeRemoved": "{name} removed",
@@ -225,6 +230,7 @@
     "recipeGone": "One of those recipes no longer exists.",
     "gone": "That dinner no longer exists.",
     "empty": "You have not logged a dinner yet.",
+    "emptyHint": "Note what you cooked and when, and it stays in the list.",
     "listLabel": "Dinners",
     "edit": "Edit",
     "editLabel": "Edit the dinner on {date}",
@@ -240,5 +246,10 @@
   },
   "toast": {
     "dismiss": "Dismiss: {message}"
+  },
+  "settings": {
+    "title": "Settings",
+    "empty": "Nothing to set up yet.",
+    "emptyHint": "Preferences are coming in a later version."
   }
 }

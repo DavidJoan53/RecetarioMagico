@@ -1,4 +1,5 @@
 import {getTranslations} from 'next-intl/server'
+import {EmptyState} from '@/components/empty-state'
 import {FocusCatcher} from '@/components/focus-catcher'
 import {allGroupsWithLabels} from '@/db/label-groups/queries'
 import {GroupHeader} from './group-header'
@@ -10,11 +11,7 @@ export async function GroupList() {
   const groups = await allGroupsWithLabels()
 
   if (groups.length === 0) {
-    return (
-      <p className="rounded-lg border border-light border-dashed p-6 text-center text-secondary-foreground text-sm">
-        {t('empty')}
-      </p>
-    )
+    return <EmptyState title={t('empty')} hint={t('emptyHint')} />
   }
 
   return (

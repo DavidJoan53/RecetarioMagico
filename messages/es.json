@@ -47,14 +47,16 @@
     "newRecipes": "Recetas nuevas",
     "seeAll": "Ver todas",
     "noDinners": "Todavía no has registrado ninguna cena.",
-    "noRecipes": "Todavía no tienes recetas. Crea la primera."
+    "noDinnersHint": "Lo que cocines esta semana aparecerá aquí.",
+    "noRecipes": "Todavía no tienes recetas. Crea la primera.",
+    "noRecipesHint": "La primera que guardes aparecerá aquí."
   },
   "recipe": {
     "minutes": "{count} min",
     "noTime": "Sin tiempo",
     "ingredients": "Ingredientes",
     "moreIngredients": "y {count} más",
-    "noIngredients": "Esta receta no lista ingredientes.",
+    "noIngredients": "Esta receta no lista ingredientes. Edítala para añadirlos.",
     "instructions": "Preparación",
     "links": "Enlaces",
     "edit": "Editar",
@@ -62,7 +64,6 @@
   },
   "common": {
     "loading": "Cargando…",
-    "empty": "Nada por aquí todavía.",
     "loadMore": "Cargar {count} más",
     "loadingMore": "Cargando más…",
     "endOfList": "Ya no hay más.",
@@ -95,7 +96,7 @@
     "ingredientN": "Ingrediente {n}",
     "addIngredient": "Añadir ingrediente",
     "removeIngredient": "Quitar {name}",
-    "noIngredients": "Todavía no has añadido ingredientes.",
+    "noIngredients": "Esta receta todavía no lleva ingredientes. Usa «Añadir ingrediente» para poner el primero.",
     "quantity": "Cantidad",
     "quantityOf": "Cantidad de {name}",
     "unit": "Unidad",
@@ -108,7 +109,8 @@
   },
   "recipes": {
     "newRecipe": "Nueva receta",
-    "empty": "Todavía no tienes recetas."
+    "empty": "Todavía no tienes recetas.",
+    "emptyHint": "Crea la primera y aparecerá aquí."
   },
   "ingredients": {
     "addTitle": "Añadir ingrediente",
@@ -121,6 +123,7 @@
     "duplicate": "Ya tienes un ingrediente con ese nombre.",
     "invalid": "Revisa el nombre y el enlace de la foto.",
     "empty": "Todavía no tienes ingredientes.",
+    "emptyHint": "Usa «Añadir» arriba para crear el primero.",
     "listLabel": "Ingredientes",
     "edit": "Editar",
     "editLabel": "Editar {name}",
@@ -142,8 +145,9 @@
     "createGroup": "Crear grupo",
     "groupAdded": "Grupo creado",
     "groupDuplicate": "Ya tienes un grupo con ese nombre.",
-    "groupEmpty": "Este grupo todavía no tiene etiquetas.",
-    "empty": "Todavía no tienes grupos. Crea uno para empezar.",
+    "groupEmpty": "Este grupo todavía no tiene etiquetas. Añade una con «Añadir».",
+    "empty": "Todavía no tienes grupos de etiquetas.",
+    "emptyHint": "Un grupo reúne etiquetas parecidas, como «Desayuno» o «Rápido».",
     "addTo": "Añadir etiqueta a {group}",
     "name": "Etiqueta",
     "color": "Color",
@@ -186,6 +190,7 @@
     "gone": "Eso ya no está en la despensa.",
     "invalid": "Indica cuánto tienes y en qué unidad.",
     "empty": "Tu despensa está vacía.",
+    "emptyHint": "Apunta lo que tienes en casa para saber qué te falta.",
     "goToIngredients": "Ir a Ingredientes",
     "addTitle": "Añadir a la despensa",
     "addHint": "Busca un ingrediente, dile cuánto tienes y añádelo.",
@@ -214,7 +219,7 @@
     "noMatches": "Ninguna receta con ese nombre.",
     "alreadyAdded": "ya está",
     "chosen": "Recetas de esta cena",
-    "noneChosen": "Todavía no has elegido ninguna receta.",
+    "noneChosen": "Todavía no has elegido ninguna receta. Búscala arriba y se añadirá aquí.",
     "removeRecipe": "Quitar {name}",
     "recipeAdded": "{name} añadida",
     "recipeRemoved": "{name} quitada",
@@ -225,6 +230,7 @@
     "recipeGone": "Una de esas recetas ya no existe.",
     "gone": "Esa cena ya no existe.",
     "empty": "Todavía no has registrado ninguna cena.",
+    "emptyHint": "Apunta qué cocinaste y cuándo, y se quedará en la lista.",
     "listLabel": "Cenas",
     "edit": "Editar",
     "editLabel": "Editar la cena del {date}",
@@ -240,5 +246,10 @@
   },
   "toast": {
     "dismiss": "Descartar: {message}"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "empty": "Todavía no hay nada que ajustar.",
+    "emptyHint": "Las preferencias llegarán en una versión próxima."
   }
 }

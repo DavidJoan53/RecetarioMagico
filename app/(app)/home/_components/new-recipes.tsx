@@ -13,6 +13,7 @@ export async function NewRecipes({limit}: {limit: number}) {
       seeAllHref="/recipes"
       isEmpty={recipes.length === 0}
       emptyText={t('noRecipes')}
+      emptyHint={t('noRecipesHint')}
     >
       {recipes.map(recipe => (
         <RecipeCard

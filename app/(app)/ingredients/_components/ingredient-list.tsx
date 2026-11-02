@@ -1,4 +1,5 @@
 import {getTranslations} from 'next-intl/server'
+import {EmptyState} from '@/components/empty-state'
 import {searchIngredients} from '@/db/ingredients/queries'
 import {PAGE_SIZE} from '@/lib/validation/page'
 import {IngredientPages} from './ingredient-pages'
@@ -14,11 +15,7 @@ export async function IngredientList() {
   })
 
   if (page.items.length === 0) {
-    return (
-      <p className="rounded-lg border border-light border-dashed p-6 text-center text-secondary-foreground text-sm">
-        {t('empty')}
-      </p>
-    )
+    return <EmptyState title={t('empty')} hint={t('emptyHint')} />
   }
 
   return <IngredientPages initialPage={page} />

@@ -1,4 +1,6 @@
+import Link from 'next/link'
 import {getTranslations} from 'next-intl/server'
+import {EmptyState} from '@/components/empty-state'
 import {dinnersPage} from '@/db/dinners/queries'
 import {PAGE_SIZE} from '@/lib/validation/page'
 import {DinnerPages} from './dinner-pages'
@@ -9,9 +11,18 @@ export async function DinnerList() {
 
   if (page.items.length === 0) {
     return (
-      <p className="rounded-lg border border-light border-dashed p-6 text-center text-secondary-foreground text-sm">
-        {t('empty')}
-      </p>
+      <EmptyState
+        title={t('empty')}
+        hint={t('emptyHint')}
+        action={
+          <Link
+            href="/dinners/new"
+            className="font-semibold text-primary-strong text-sm"
+          >
+            {t('addMore')} →
+          </Link>
+        }
+      />
     )
   }
 

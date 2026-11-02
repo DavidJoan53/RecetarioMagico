@@ -1,4 +1,6 @@
+import Link from 'next/link'
 import {getTranslations} from 'next-intl/server'
+import {EmptyState} from '@/components/empty-state'
 import {recipesPage} from '@/db/recipes/queries'
 import {PAGE_SIZE} from '@/lib/validation/page'
 import {RecipePages} from './recipe-pages'
@@ -9,9 +11,18 @@ export async function RecipeList() {
 
   if (page.items.length === 0) {
     return (
-      <p className="rounded-lg border border-light border-dashed p-6 text-center text-secondary-foreground text-sm">
-        {t('empty')}
-      </p>
+      <EmptyState
+        title={t('empty')}
+        hint={t('emptyHint')}
+        action={
+          <Link
+            href="/recipes/new"
+            className="font-semibold text-primary-strong text-sm"
+          >
+            {t('newRecipe')} →
+          </Link>
+        }
+      />
     )
   }
 

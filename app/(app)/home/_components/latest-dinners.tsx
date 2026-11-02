@@ -13,6 +13,7 @@ export async function LatestDinners({limit}: {limit: number}) {
       seeAllHref="/dinners"
       isEmpty={dinners.length === 0}
       emptyText={t('noDinners')}
+      emptyHint={t('noDinnersHint')}
     >
       {dinners.flatMap(dinner =>
         dinner.recipes.map(recipe => (
