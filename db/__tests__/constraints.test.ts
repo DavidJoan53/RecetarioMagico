@@ -1,5 +1,9 @@
 import {describe, expect, it} from 'vitest'
-import {isDuplicate, isStillReferenced} from '../constraints'
+import {
+  isDuplicate,
+  isMissingReference,
+  isStillReferenced,
+} from '../constraints'
 
 /**
  * The shape Drizzle actually throws, measured against Postgres rather than
@@ -35,6 +39,20 @@ describe('constraint errors', () => {
     expect(isDuplicate(thrown('23503'))).toBe(false)
   })
 
+  /**
+   * The same code from the other end: a dinner naming a recipe that has gone
+   * raises it on insert, where a blocked delete raises it on the way out.
+   */
+  it('reads a write pointing at a row that is not there', () => {
+    expect(isMissingReference(thrown('23503'))).toBe(true)
+  })
+
+  /** A restrict violation is a delete being refused, never a missing row. */
+  it('does not call a restrict violation a missing row', () => {
+    expect(isMissingReference(thrown('23001'))).toBe(false)
+    expect(isMissingReference(thrown('23505'))).toBe(false)
+  })
+
   /** A caller rethrows anything unrecognised, so a wrong yes hides a bug. */
   it('says no to anything else', () => {
     for (const value of [
@@ -46,6 +64,7 @@ describe('constraint errors', () => {
     ]) {
       expect(isDuplicate(value)).toBe(false)
       expect(isStillReferenced(value)).toBe(false)
+      expect(isMissingReference(value)).toBe(false)
     }
   })
 
