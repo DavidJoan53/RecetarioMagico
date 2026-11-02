@@ -290,4 +290,28 @@ describe('IngredientCombobox', () => {
     observed?.()
     await waitFor(() => expect(calls).toContain('|Ajo'))
   })
+
+  /** Escape is not the only way out, and not the one anyone reaches for. */
+  it('closes when focus leaves it', async () => {
+    mockSearch({'': [ingredient('Ajo')]})
+    const {input} = setup()
+    await userEvent.click(input)
+    await screen.findByRole('option', {name: /Ajo/})
+
+    await userEvent.tab()
+    expect(screen.queryByRole('listbox')).toBeNull()
+  })
+
+  /** Leaving must not undo a choice already made. */
+  it('keeps what was chosen when focus leaves', async () => {
+    mockSearch({'': [ingredient('Ajo')]})
+    const {input, onChange} = setup()
+    await userEvent.click(input)
+    await screen.findByRole('option', {name: /Ajo/})
+    await userEvent.keyboard('{Enter}')
+
+    await userEvent.tab()
+    expect(input).toHaveValue('Ajo')
+    expect(onChange).toHaveBeenCalledTimes(1)
+  })
 })

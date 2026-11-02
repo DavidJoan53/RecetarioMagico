@@ -166,6 +166,9 @@ export function IngredientCombobox({value, onChange}: Props) {
         /* Focus alone is not enough: after Escape the field still has it, so
            nothing fires and clicking the box appears to do nothing. */
         onClick={() => setOpen(true)}
+        /* Leaving closes it. Clicks inside the list cancel their own mousedown
+           so focus never leaves, which is why this does not eat them. */
+        onBlur={() => setOpen(false)}
         onKeyDown={onKeyDown}
         className="rounded-lg border border-secondary-foreground bg-background px-3 py-2"
       />
@@ -183,6 +186,10 @@ export function IngredientCombobox({value, onChange}: Props) {
           id={listId}
           role="listbox"
           aria-label={t('ingredient')}
+          /* Keeps focus in the input while the list is being used. Without it,
+             dragging the scrollbar blurs the field and closes what is being
+             scrolled. */
+          onMouseDown={event => event.preventDefault()}
           className="absolute top-full right-0 left-0 z-10 mt-1 max-h-60 overflow-y-auto rounded-lg border border-secondary-foreground bg-background"
         >
           {options.map((ingredient, index) => (
