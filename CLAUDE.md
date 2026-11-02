@@ -170,7 +170,7 @@ labelGroups        id · name
 labels             id · name · color · labelGroupId → labelGroups
 recipeLabels       recipeId → recipes · labelId → labels           (composite PK)
 ingredients        id · name · photoUrl?
-recipeIngredients  id · recipeId · ingredientId · unit ENUM · quantity?
+recipeIngredients  id · recipeId · ingredientId · unit ENUM · quantity   (unique recipeId+ingredientId)
 dinners            id · eatenAt timestamptz · notes?
 dinnerRecipes      dinnerId → dinners · recipeId → recipes         (composite PK)
 pantry             ingredientId → ingredients · quantity · unit    (PK ingredientId)
@@ -182,7 +182,9 @@ Conventions:
 - **`unit` enum:** `g · ml · unidad · cucharada · cucharadita · taza · pizca`. Adding a value later is a migration, so the list is deliberately a little generous.
 - **`labels.color` is a free hex**, chosen by the user. Chip text colour is **computed from the colour's luminance**, never stored — black above the threshold, white below. A stored text colour can be wrong for its background; a computed one cannot. This is what keeps a free picker from being able to create a contrast failure at runtime, which would otherwise be the one place a user can break the zero-violations rule.
 - `prepTimeMinutes` is an integer, never a formatted string — the app sorts and filters on it.
-- `quantity` is nullable: "salt, to taste" has no number.
+- **An amount is a quantity and a unit together**, and both are required wherever one is stored — `recipeIngredients` and `pantry`. "200" says nothing without a unit and "g" says nothing without a number, so neither half is worth storing alone.
+- **An ingredient appears in a recipe once.** A unique index on `(recipeId, ingredientId)` says so, because a second row for the same ingredient is a lost edit rather than a second amount.
+- **`recipeIngredients` has no CRUD of its own.** The set belongs to its recipe: it is read with the recipe and rewritten whole when the recipe is saved. There is no route, action or query that edits one row on its own.
 - Many-to-many is always a join table, never an array column — arrays can't be joined or indexed.
 - `recipes.imageUrl` is derived from a YouTube link when one exists and none was set; otherwise pasted manually. There is no general link-scraping.
 
@@ -224,7 +226,7 @@ Short, plain, and about the code — not about how it came to be.
 ```ts
 // Good
 /** Time-ordered, so ORDER BY id is chronological. */
-// Nullable: "sal, al gusto" has no number.
+// Both required: "200" says nothing without a unit, "g" nothing alone.
 
 // Bad
 /**

@@ -3,7 +3,7 @@ import {render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {NextIntlClientProvider} from 'next-intl'
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
-import type {Recipe, RecipePage} from '@/db/recipes/queries'
+import type {RecipePage, RecipeWithIngredients} from '@/db/recipes/queries'
 import {PAGE_SIZE} from '@/lib/validation/page'
 import messages from '@/messages/es.json'
 import {RecipePages} from '../recipe-pages'
@@ -11,7 +11,7 @@ import {RecipePages} from '../recipe-pages'
 const m = messages.common
 const loadMore = `Cargar ${PAGE_SIZE} más`
 
-const recipe = (id: string): Recipe => ({
+const recipe = (id: string): RecipeWithIngredients => ({
   id,
   name: `Receta ${id}`,
   prepTimeMinutes: 10,
@@ -19,6 +19,7 @@ const recipe = (id: string): Recipe => ({
   links: [],
   imageUrl: null,
   createdAt: new Date('2026-01-01'),
+  ingredients: [],
 })
 
 const page = (ids: string[], nextCursor: string | null): RecipePage => ({

@@ -11,9 +11,24 @@ import {Combobox} from './combobox'
 type Props = {
   value: IngredientWithPantry | null
   onChange: (ingredient: IngredientWithPantry | null) => void
+  /**
+   * Already translated. One per row where there are several, so the pickers
+   * are told apart by name rather than all reading "Ingrediente".
+   */
+  label?: string
+  /** The name to start on, when an existing choice is being edited. */
+  initialLabel?: string
+  /**
+   * Chosen already somewhere else in the same form. Marked rather than
+   * removed, for the reason the pantry's note exists: a missing option makes
+   * "no such ingredient" and "you already picked that one" look alike.
+   */
+  usedIds?: readonly string[]
+  /** Already translated, because what counts as "used" is the caller's. */
+  usedNote?: string
 }
 
-async function fetchPage(query: string, after: string | null) {
+export async function fetchIngredientPage(query: string, after: string | null) {
   const params = new URLSearchParams({query})
   if (after) params.set('after', after)
   const response = await fetch(`/api/ingredients?${params}`)
@@ -27,21 +42,34 @@ async function fetchPage(query: string, after: string | null) {
  * hidden — hiding them makes "it is not in the list" and "you already have
  * it" look alike.
  */
-export function IngredientCombobox({value, onChange}: Props) {
+export function IngredientCombobox({
+  value,
+  onChange,
+  label,
+  initialLabel,
+  usedIds,
+  usedNote,
+}: Props) {
   const t = useTranslations('pantry')
 
   return (
     <Combobox
-      label={t('ingredient')}
+      label={label ?? t('ingredient')}
       placeholder={t('searchPlaceholder')}
       emptyMessage={t('noMatches')}
       value={value}
       onChange={onChange}
+      initialLabel={initialLabel}
       queryKey={queryKeys.ingredients}
-      fetchPage={fetchPage}
+      fetchPage={fetchIngredientPage}
       getKey={ingredient => ingredient.id}
       getLabel={ingredient => ingredient.name}
-      renderNote={ingredient => (ingredient.inPantry ? t('alreadyIn') : null)}
+      renderNote={ingredient => {
+        /* Being in the form already is the more pressing of the two: it is
+           the one that stops the choice from being usable. */
+        if (usedNote && usedIds?.includes(ingredient.id)) return usedNote
+        return ingredient.inPantry ? t('alreadyIn') : null
+      }}
     />
   )
 }

@@ -13,6 +13,12 @@ type Props<T> = {
   emptyMessage: string
   value: T | null
   onChange: (item: T | null) => void
+  /**
+   * What the box reads before anything is picked this session — an existing
+   * choice being edited. Only the starting text: typing over it clears the
+   * choice, the same as typing over one just picked.
+   */
+  initialLabel?: string
   /** The search text is appended, so each search caches on its own. */
   queryKey: readonly unknown[]
   fetchPage: (query: string, after: string | null) => Promise<Page<T>>
@@ -49,6 +55,7 @@ export function Combobox<T>({
   emptyMessage,
   value,
   onChange,
+  initialLabel,
   queryKey,
   fetchPage,
   getKey,
@@ -57,7 +64,9 @@ export function Combobox<T>({
   clearOnSelect = false,
 }: Props<T>) {
   const t = useTranslations('common')
-  const [text, setText] = useState('')
+  const [text, setText] = useState(
+    initialLabel ?? (value ? getLabel(value) : ''),
+  )
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(0)
@@ -190,7 +199,10 @@ export function Combobox<T>({
           setText(event.target.value)
           setActive(0)
           setOpen(true)
-          if (value) onChange(null)
+          /* Unconditional: a box opened on an existing choice holds the name
+             without holding the item, and a guard on `value` would leave that
+             choice standing while the text said otherwise. */
+          onChange(null)
         }}
         onFocus={() => setOpen(true)}
         /* Focus alone is not enough: after Escape the field still has it, so

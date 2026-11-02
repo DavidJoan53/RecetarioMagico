@@ -1,11 +1,21 @@
 import {describe, expect, it} from 'vitest'
-import {recipeInput, recipeInputFromForm} from '../validation/recipe'
+import {
+  DUPLICATE_INGREDIENT,
+  recipeErrorFrom,
+  recipeIngredientInput,
+  recipeInput,
+  recipeInputFromForm,
+} from '../validation/recipe'
+
+const TOMATO = '0193f3a0-0000-7000-8000-000000000001'
+const ONION = '0193f3a0-0000-7000-8000-000000000002'
 
 const valid = {
   name: 'Arepa de huevo',
   prepTimeMinutes: 25,
   instructions: ['Amasar', 'Freír'],
   links: ['https://youtu.be/dQw4w9WgXcQ'],
+  ingredients: [{ingredientId: TOMATO, quantity: 200, unit: 'g'}],
 }
 
 describe('recipeInput', () => {
@@ -52,6 +62,95 @@ describe('recipeInput', () => {
     expect(parsed.instructions).toEqual([])
     expect(parsed.links).toEqual([])
   })
+
+  /** A recipe can be written down before its amounts are worked out. */
+  it('accepts a recipe with no ingredients yet', () => {
+    expect(recipeInput.parse({...valid, ingredients: []}).ingredients).toEqual(
+      [],
+    )
+  })
+
+  it('refuses the same ingredient twice', () => {
+    const result = recipeInput.safeParse({
+      ...valid,
+      ingredients: [
+        {ingredientId: TOMATO, quantity: 200, unit: 'g'},
+        {ingredientId: TOMATO, quantity: 1, unit: 'unidad'},
+      ],
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('accepts two different ingredients', () => {
+    const result = recipeInput.safeParse({
+      ...valid,
+      ingredients: [
+        {ingredientId: TOMATO, quantity: 200, unit: 'g'},
+        {ingredientId: ONION, quantity: 1, unit: 'unidad'},
+      ],
+    })
+    expect(result.success).toBe(true)
+  })
+})
+
+describe('recipeIngredientInput', () => {
+  const row = {ingredientId: TOMATO, quantity: 200, unit: 'g'}
+
+  it('accepts a quantity with its unit', () => {
+    expect(recipeIngredientInput.safeParse(row).success).toBe(true)
+  })
+
+  /** Both halves, always: neither says anything on its own. */
+  it('refuses a missing quantity and a missing unit alike', () => {
+    expect(
+      recipeIngredientInput.safeParse({...row, quantity: Number.NaN}).success,
+    ).toBe(false)
+    expect(recipeIngredientInput.safeParse({...row, unit: ''}).success).toBe(
+      false,
+    )
+  })
+
+  it('refuses a quantity that is not a positive number', () => {
+    for (const bad of [0, -1, 100_001]) {
+      expect(
+        recipeIngredientInput.safeParse({...row, quantity: bad}).success,
+        String(bad),
+      ).toBe(false)
+    }
+  })
+
+  it('refuses a unit outside the enum', () => {
+    expect(recipeIngredientInput.safeParse({...row, unit: 'kg'}).success).toBe(
+      false,
+    )
+  })
+
+  it('refuses an ingredient id that is not a uuid', () => {
+    expect(
+      recipeIngredientInput.safeParse({...row, ingredientId: 'tomate'}).success,
+    ).toBe(false)
+  })
+})
+
+describe('recipeErrorFrom', () => {
+  const errorFor = (ingredients: unknown) => {
+    const result = recipeInput.safeParse({...valid, ingredients})
+    if (result.success) throw new Error('expected a failure to inspect')
+    return recipeErrorFrom(result.error)
+  }
+
+  /** The two need different words, so they cannot collapse into one. */
+  it('tells a repeated ingredient apart from a bad field', () => {
+    expect(
+      errorFor([
+        {ingredientId: TOMATO, quantity: 200, unit: 'g'},
+        {ingredientId: TOMATO, quantity: 1, unit: 'unidad'},
+      ]),
+    ).toBe(DUPLICATE_INGREDIENT)
+    expect(errorFor([{ingredientId: TOMATO, quantity: 0, unit: 'g'}])).toBe(
+      'invalid',
+    )
+  })
 })
 
 describe('recipeInputFromForm', () => {
@@ -89,5 +188,67 @@ describe('recipeInputFromForm', () => {
 
   it('fails when the name is missing', () => {
     expect(recipeInputFromForm(form([['name', '']])).success).toBe(false)
+  })
+
+  it('pairs each ingredient with the amount submitted beside it', () => {
+    const result = recipeInputFromForm(
+      form([
+        ['name', 'Arepa'],
+        ['ingredientId', TOMATO],
+        ['ingredientQuantity', '200'],
+        ['ingredientUnit', 'g'],
+        ['ingredientId', ONION],
+        ['ingredientQuantity', '1'],
+        ['ingredientUnit', 'unidad'],
+      ]),
+    )
+    expect(result.data?.ingredients).toEqual([
+      {ingredientId: TOMATO, quantity: 200, unit: 'g'},
+      {ingredientId: ONION, quantity: 1, unit: 'unidad'},
+    ])
+  })
+
+  /** The row the "add" button just made, before anything was typed into it. */
+  it('drops a row with nothing in any of its three fields', () => {
+    const result = recipeInputFromForm(
+      form([
+        ['name', 'Arepa'],
+        ['ingredientId', TOMATO],
+        ['ingredientQuantity', '200'],
+        ['ingredientUnit', 'g'],
+        ['ingredientId', ''],
+        ['ingredientQuantity', ''],
+        ['ingredientUnit', ''],
+      ]),
+    )
+    expect(result.data?.ingredients).toHaveLength(1)
+  })
+
+  /**
+   * Half a row is a mistake, not an empty one. Dropping it would throw away
+   * the amount without saying anything.
+   */
+  it('refuses a row that names an ingredient with no amount', () => {
+    const result = recipeInputFromForm(
+      form([
+        ['name', 'Arepa'],
+        ['ingredientId', TOMATO],
+        ['ingredientQuantity', ''],
+        ['ingredientUnit', 'g'],
+      ]),
+    )
+    expect(result.success).toBe(false)
+  })
+
+  it('refuses an amount with no ingredient to put it against', () => {
+    const result = recipeInputFromForm(
+      form([
+        ['name', 'Arepa'],
+        ['ingredientId', ''],
+        ['ingredientQuantity', '200'],
+        ['ingredientUnit', 'g'],
+      ]),
+    )
+    expect(result.success).toBe(false)
   })
 })

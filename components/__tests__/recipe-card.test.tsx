@@ -52,4 +52,52 @@ describe('RecipeCard', () => {
     )
     expect(screen.getByText('25 min')).toBeInTheDocument()
   })
+
+  describe('its ingredients', () => {
+    const ingredients = [
+      {ingredientId: 'i1', name: 'Tomate', quantity: 200, unit: 'g'} as const,
+      {
+        ingredientId: 'i2',
+        name: 'Cebolla',
+        quantity: 1,
+        unit: 'unidad',
+      } as const,
+    ]
+
+    it('names each one with how much of it there is', () => {
+      wrap(
+        <RecipeCard
+          id="a"
+          name="Arepa"
+          imageUrl={null}
+          ingredients={ingredients}
+        />,
+      )
+      expect(screen.getByText('Tomate 200 g · Cebolla 1 unidad')).toBeVisible()
+    })
+
+    /**
+     * Everything inside a link becomes its accessible name. Put there, a
+     * list of recipes reads as a wall of text to anyone tabbing through it.
+     */
+    it('keeps them out of the link’s accessible name', () => {
+      wrap(
+        <RecipeCard
+          id="a"
+          name="Arepa"
+          imageUrl={null}
+          prepTimeMinutes={25}
+          ingredients={ingredients}
+        />,
+      )
+      const link = screen.getByRole('link')
+      expect(link).toHaveAccessibleName('Arepa 25 min')
+      expect(link).not.toHaveTextContent('Tomate')
+    })
+
+    it('says nothing at all when the recipe lists none', () => {
+      wrap(<RecipeCard id="a" name="Arepa" imageUrl={null} ingredients={[]} />)
+      expect(screen.queryByText(messages.recipe.ingredients)).toBeNull()
+    })
+  })
 })

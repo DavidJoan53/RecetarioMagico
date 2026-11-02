@@ -8,6 +8,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  unique,
   uuid,
 } from 'drizzle-orm/pg-core'
 
@@ -101,10 +102,26 @@ export const recipeIngredients = pgTable(
       .notNull()
       .references(() => ingredients.id, {onDelete: 'restrict'}),
     unit: unitEnum('unit').notNull(),
-    /** Nullable: "sal, al gusto" has no number. */
-    quantity: numeric('quantity', {precision: 10, scale: 2, mode: 'number'}),
+    /** Both required: "200" says nothing without a unit, "g" nothing alone. */
+    quantity: numeric('quantity', {
+      precision: 10,
+      scale: 2,
+      mode: 'number',
+    }).notNull(),
   },
-  t => [index('recipe_ingredients_recipe_idx').on(t.recipeId)],
+  t => [
+    /**
+     * An ingredient appears in a recipe once, carrying one amount. Two rows
+     * for the same one are not "200 g and 100 g" but a lost edit.
+     *
+     * Also the recipe → ingredients index: recipe_id leads it, so the plain
+     * one it replaces had nothing left to answer.
+     */
+    unique('recipe_ingredients_recipe_ingredient_key').on(
+      t.recipeId,
+      t.ingredientId,
+    ),
+  ],
 )
 
 export const dinners = pgTable(
@@ -160,6 +177,7 @@ export type NewRecipe = typeof recipes.$inferInsert
 export type Label = typeof labels.$inferSelect
 export type LabelGroup = typeof labelGroups.$inferSelect
 export type Ingredient = typeof ingredients.$inferSelect
+export type RecipeIngredient = typeof recipeIngredients.$inferSelect
 export type Dinner = typeof dinners.$inferSelect
 export type PantryEntry = typeof pantry.$inferSelect
 export type Message = typeof messages.$inferSelect
