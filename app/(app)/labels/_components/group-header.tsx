@@ -50,7 +50,7 @@ export function GroupHeader({
             nothing — and you would lose sight of which group you are in. */}
         <h2
           id={headingId}
-          className="flex-1 font-mono text-secondary-foreground text-xs uppercase tracking-wider"
+          className="flex-1 font-semibold text-secondary-foreground text-xs uppercase tracking-wider"
         >
           {group.name}
         </h2>
