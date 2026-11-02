@@ -1,3 +1,4 @@
+import {Pencil} from 'lucide-react'
 import Link from 'next/link'
 import {notFound, redirect} from 'next/navigation'
 import {getLocale, getTranslations} from 'next-intl/server'
@@ -25,11 +26,12 @@ export default async function RecipePage({
   if (!recipe) notFound()
 
   const t = await getTranslations('recipe')
+  const form = await getTranslations('recipeForm')
   const locale = await getLocale()
 
   return (
     <main className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-2">
+      <div className="flex items-center justify-between gap-2">
         <div className="flex flex-col gap-1">
           <h1 className="font-bold text-2xl tracking-tight">{recipe.name}</h1>
           <p className="text-secondary-foreground text-sm">
@@ -38,11 +40,14 @@ export default async function RecipePage({
               : t('noTime')}
           </p>
         </div>
+        {/* Named after the recipe rather than just "Editar": a bare pencil
+            beside a title is clear to look at and vague read aloud. */}
         <Link
           href={`/recipes/${recipe.id}/edit`}
-          className="rounded-lg bg-primary-strong px-3 py-2 font-semibold text-sm text-white"
+          aria-label={form('editTitle', {name: recipe.name})}
+          className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-strong text-white"
         >
-          {t('edit')}
+          <Pencil aria-hidden="true" size={16} />
         </Link>
       </div>
 

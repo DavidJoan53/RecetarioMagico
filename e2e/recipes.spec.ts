@@ -81,7 +81,6 @@ test('reading on does not take the list back to the top', async ({page}) => {
  */
 
 const f = es.recipeForm
-const r = es.recipe
 
 /**
  * A server-rendered button is clickable before React attaches to it. Click it
@@ -207,9 +206,16 @@ test('an edited amount replaces the old one rather than adding a row', async ({
   await page.getByRole('textbox', {name: f.name}).fill(recipeName)
   await addIngredientRow(page, 1, tomato, '200', 'g')
   await page.getByRole('button', {name: f.create}).click()
+
+  /* Creating lands on the list, which carries names without amounts, so the
+     recipe has to be opened before there is an amount to read. */
+  await expect(page).toHaveURL(/\/recipes$/)
+  await page.getByRole('link', {name: new RegExp(recipeName)}).click()
   await expect(ingredientRow(page, tomato)).toContainText('200 g')
 
-  await page.getByRole('link', {name: r.edit}).click()
+  await page
+    .getByRole('link', {name: f.editTitle.replace('{name}', recipeName)})
+    .click()
   /* The form opens on what the recipe says, so the row is already there. */
   await expect(
     page.getByRole('combobox', {
