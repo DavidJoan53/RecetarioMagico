@@ -1,3 +1,4 @@
+import {ChevronRight} from 'lucide-react'
 import Link from 'next/link'
 import {redirect} from 'next/navigation'
 import {getTranslations} from 'next-intl/server'
@@ -40,18 +41,20 @@ export default async function HomePage() {
         <NewRecipes limit={PREVIEW_COUNT} />
       </Suspense>
 
-      {/* The pages the tab bar has no room for. */}
-      <div className="grid grid-cols-2 gap-2">
+      {/* The pages the tab bar has no room for. Full width and stacked: three
+          in a two-column grid left the last one half a row on its own. */}
+      <nav aria-label={t('manage')} className="flex flex-col gap-2">
         {MANAGEMENT.map(({href, key}) => (
           <Link
             key={href}
             href={href}
-            className="rounded-lg border border-light bg-background-foreground p-3 font-semibold text-sm"
+            className="flex items-center justify-between gap-2 rounded-lg border border-light bg-background-foreground p-4 font-semibold text-sm"
           >
             {t(key)}
+            <ChevronRight aria-hidden="true" size={18} />
           </Link>
         ))}
-      </div>
+      </nav>
     </main>
   )
 }

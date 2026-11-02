@@ -17,7 +17,9 @@
     "settings": "Settings",
     "labels": "Labels",
     "ingredients": "Ingredients",
-    "pantry": "Pantry"
+    "pantry": "Pantry",
+    "manage": "Manage",
+    "main": "Main navigation"
   },
   "search": {
     "placeholder": "Search..."

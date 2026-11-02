@@ -17,7 +17,9 @@
     "settings": "Ajustes",
     "labels": "Etiquetas",
     "ingredients": "Ingredientes",
-    "pantry": "Despensa"
+    "pantry": "Despensa",
+    "manage": "Gestionar",
+    "main": "Navegación principal"
   },
   "search": {
     "placeholder": "Buscar..."
