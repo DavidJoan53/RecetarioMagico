@@ -1,6 +1,7 @@
 import {redirect} from 'next/navigation'
 import {getTranslations} from 'next-intl/server'
 import {Suspense} from 'react'
+import {PageHeader} from '@/components/page-header'
 import {SectionSkeleton} from '@/components/section-skeleton'
 import {getSession} from '@/lib/session'
 import {IngredientForm} from './_components/ingredient-form'
@@ -17,9 +18,7 @@ export default async function IngredientsPage() {
 
   return (
     <main className="flex flex-col gap-4">
-      <h1 className="font-bold text-2xl tracking-tight">
-        {t('nav.ingredients')}
-      </h1>
+      <PageHeader title={t('nav.ingredients')} />
 
       <IngredientForm action={createIngredientAction} />
 

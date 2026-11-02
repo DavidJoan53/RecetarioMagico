@@ -1,7 +1,9 @@
+import {Plus} from 'lucide-react'
 import Link from 'next/link'
 import {redirect} from 'next/navigation'
 import {getTranslations} from 'next-intl/server'
 import {Suspense} from 'react'
+import {PageHeader} from '@/components/page-header'
 import {SectionSkeleton} from '@/components/section-skeleton'
 import {getSession} from '@/lib/session'
 import {DinnerList} from './_components/dinner-list'
@@ -16,17 +18,18 @@ export default async function DinnersPage() {
 
   return (
     <main className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-2">
-        <h1 className="font-bold text-2xl tracking-tight">
-          {t('nav.dinners')}
-        </h1>
-        <Link
-          href="/dinners/new"
-          className="rounded-lg bg-primary-strong px-3 py-2 font-semibold text-sm text-white"
-        >
-          + {t('dinners.addMore')}
-        </Link>
-      </div>
+      <PageHeader
+        title={t('nav.dinners')}
+        actions={
+          <Link
+            href="/dinners/new"
+            aria-label={t('dinners.addMore')}
+            className="flex size-11 items-center justify-center rounded-lg bg-primary-strong text-white"
+          >
+            <Plus aria-hidden="true" size={20} />
+          </Link>
+        }
+      />
 
       <Suspense fallback={<SectionSkeleton />}>
         <DinnerList />
