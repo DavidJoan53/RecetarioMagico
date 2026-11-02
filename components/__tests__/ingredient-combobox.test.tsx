@@ -103,9 +103,8 @@ describe('IngredientCombobox', () => {
     mockSearch({'': [ingredient('Ajo', true)]})
     const {input} = setup()
     await userEvent.click(input)
-    expect(
-      await screen.findByRole('option', {name: /ya está/}),
-    ).toBeInTheDocument()
+    await screen.findByRole('option', {name: /Ajo/})
+    expect(screen.getByText(m.alreadyIn)).toBeVisible()
   })
 
   /** Glued, these read as "Ajoya está" — and nothing on screen says so. */
@@ -199,15 +198,20 @@ describe('IngredientCombobox', () => {
     const {input} = setup()
     await userEvent.click(input)
 
-    const list = within(await screen.findByRole('listbox'))
-    expect(list.getByText(c.loading)).toBeInTheDocument()
+    /* Beside the list box rather than in it: a listbox holding only a
+       status line holds no options, which is not a listbox. */
+    await screen.findByRole('listbox')
+    const shown = screen
+      .getAllByText(c.loading)
+      .filter(node => node.getAttribute('role') !== 'status')
+    expect(shown).toHaveLength(1)
     expect(screen.getByRole('status')).toHaveTextContent(c.loading)
     /* Nothing to point at yet, so it points at nothing. */
     expect(input).not.toHaveAttribute('aria-activedescendant')
 
     release()
     await screen.findByRole('option', {name: /Ajo/})
-    expect(list.queryByText(c.loading)).toBeNull()
+    expect(screen.queryAllByText(c.loading)).toHaveLength(0)
   })
 
   /** Nothing matched is not the same as still looking. */

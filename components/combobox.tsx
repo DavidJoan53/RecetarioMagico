@@ -204,80 +204,86 @@ export function Combobox<T>({
       {open && (
         /* div, not ul: a list carrying listbox semantics is announced twice,
            once as a list and once as a listbox. */
-        <div
-          ref={listRef}
-          id={listId}
-          role="listbox"
-          aria-label={label}
-          /* Keeps focus in the input while the list is being used. Without it,
-             dragging the scrollbar blurs the field and closes what is being
-             scrolled. */
-          onMouseDown={event => event.preventDefault()}
-          className="absolute top-full right-0 left-0 z-10 mt-1 max-h-60 overflow-y-auto rounded-lg border border-secondary-foreground bg-background"
-        >
+        <div className="absolute top-full right-0 left-0 z-10 mt-1 overflow-hidden rounded-lg border border-secondary-foreground bg-background">
+          {/* Beside the list box, not inside it. A listbox has to contain
+              options, and one holding nothing but a status line contains
+              none — invalid, and announced as a list of nothing. */}
           {isPending && (
             /* The first page. Without it the box opens two pixels tall and
                empty, which reads as "nothing here" rather than "coming". */
-            <div role="presentation" className="px-3 py-2 text-center text-sm">
-              {t('loading')}
-            </div>
-          )}
-
-          {options.map((item, index) => {
-            const note = renderNote?.(item)
-            return (
-              <div
-                key={getKey(item)}
-                id={optionId(index)}
-                role="option"
-                tabIndex={-1}
-                aria-selected={index === active}
-                onMouseDown={event => {
-                  /* Before blur, or the list closes and the click lands on
-                     nothing. */
-                  event.preventDefault()
-                  choose(item)
-                }}
-                className={`flex cursor-pointer items-center justify-between gap-2 px-3 py-2 text-sm ${
-                  index === active ? 'bg-background-foreground' : ''
-                }`}
-              >
-                <span className="truncate">{getLabel(item)}</span>
-                {note && (
-                  /* The space is load-bearing. With no text node between
-                     them the two are read as one word — "Ajoya está" — and
-                     the words on screen stop matching the spoken name. */
-                  <>
-                    {' '}
-                    <span className="shrink-0 text-secondary-foreground text-xs">
-                      {note}
-                    </span>
-                  </>
-                )}
-              </div>
-            )
-          })}
-
-          {hasNextPage && (
-            /* Watched, not read: reaching it asks for the next page. The row
-               below says when that is happening, and a row that said so
-               while idle would be claiming to work when it is not. */
-            <div ref={sentinel} role="presentation" className="h-px" />
-          )}
-
-          {isFetchingNextPage && (
-            /* presentation, not option: it is a loading marker, and counting
-               it would make the list one longer than it is. */
-            <div role="presentation" className="px-3 py-2 text-center text-sm">
-              {t('loadingMore')}
-            </div>
+            <p className="px-3 py-2 text-center text-sm">{t('loading')}</p>
           )}
 
           {options.length === 0 && !isPending && (
-            <div className="px-3 py-2 text-center text-secondary-foreground text-sm">
+            <p className="px-3 py-2 text-center text-secondary-foreground text-sm">
               {emptyMessage}
-            </div>
+            </p>
           )}
+
+          <div
+            ref={listRef}
+            id={listId}
+            role="listbox"
+            aria-label={label}
+            /* Keeps focus in the input when the press lands between options
+               rather than on one. Not the scrollbar: the browser handles
+               that itself and dispatches no mousedown to prevent. */
+            onMouseDown={event => event.preventDefault()}
+            className="max-h-60 overflow-y-auto"
+          >
+            {options.map((item, index) => {
+              const note = renderNote?.(item)
+              return (
+                <div
+                  key={getKey(item)}
+                  id={optionId(index)}
+                  role="option"
+                  tabIndex={-1}
+                  aria-selected={index === active}
+                  onMouseDown={event => {
+                    /* Before blur, or the list closes and the click lands
+                       on nothing. */
+                    event.preventDefault()
+                    choose(item)
+                  }}
+                  className={`flex cursor-pointer items-center justify-between gap-2 px-3 py-2 text-sm ${
+                    index === active ? 'bg-background-foreground' : ''
+                  }`}
+                >
+                  <span className="truncate">{getLabel(item)}</span>
+                  {note && (
+                    /* The space is load-bearing. Without a text node between
+                     them the two are read as one word — "Ajoya está" — and
+                     the visible words stop matching the spoken name. */
+                    <>
+                      {' '}
+                      <span className="shrink-0 text-secondary-foreground text-xs">
+                        {note}
+                      </span>
+                    </>
+                  )}
+                </div>
+              )
+            })}
+
+            {hasNextPage && (
+              /* Watched, not read: reaching it asks for the next page. The row
+               below says when that is happening, and a row that said so
+               while idle would be claiming to work when it is not. */
+              <div ref={sentinel} role="presentation" className="h-px" />
+            )}
+
+            {isFetchingNextPage && (
+              /* presentation, not option: it is a loading marker, and counting
+               it would make the list one longer than it is. */
+              <div
+                role="presentation"
+                className="px-3 py-2 text-center text-sm"
+              >
+                {t('loadingMore')}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
