@@ -19,6 +19,13 @@ export function cursorFrom(params: URLSearchParams) {
   return cursorPage.safeParse({after: params.get('after') || null})
 }
 
+/** What every paged endpoint returns, whatever it is a page of. */
+export type Page<T> = {
+  items: T[]
+  /** The cursor to continue from, or null at the end. */
+  nextCursor: string | null
+}
+
 /**
  * Turns limit + 1 rows into a page. Asking for one more than is shown is what
  * answers "is there another" without a second count query.

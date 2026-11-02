@@ -55,7 +55,8 @@
     "empty": "Nothing here yet.",
     "loadMore": "Load {count} more",
     "loadingMore": "Loading more…",
-    "endOfList": "That's everything."
+    "endOfList": "That's everything.",
+    "resultCount": "{count, plural, =0 {No results} one {# result} other {# results}}"
   },
   "recipeForm": {
     "newTitle": "New recipe",
