@@ -1,0 +1,131 @@
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
+import {render, screen} from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import {NextIntlClientProvider} from 'next-intl'
+import {beforeEach, describe, expect, it, vi} from 'vitest'
+import type {Ingredient} from '@/db/schema'
+import messages from '@/messages/es.json'
+import {IngredientRow} from '../ingredient-row'
+
+const update = vi.fn()
+const remove = vi.fn()
+vi.mock('../../actions', () => ({
+  updateIngredientAction: (...args: unknown[]) => update(...args),
+  deleteIngredientAction: (...args: unknown[]) => remove(...args),
+}))
+
+const m = messages.ingredients
+
+const TOMATE: Ingredient = {
+  id: 'i1',
+  name: 'Tomate',
+  photoUrl: null,
+}
+
+const setup = () =>
+  render(
+    /* These forms ask the cached list to refresh once the action is done, so
+   there has to be one to ask. */
+    <NextIntlClientProvider locale="es" messages={messages}>
+      <QueryClientProvider client={new QueryClient()}>
+        <ul>
+          <IngredientRow ingredient={TOMATE} />
+        </ul>
+      </QueryClientProvider>
+    </NextIntlClientProvider>,
+  )
+
+const editButton = () => screen.getByRole('button', {name: 'Editar Tomate'})
+const deleteButton = () => screen.getByRole('button', {name: 'Eliminar Tomate'})
+
+beforeEach(() => {
+  update.mockReset()
+  remove.mockReset()
+  update.mockResolvedValue({done: true})
+  remove.mockResolvedValue({})
+})
+
+describe('IngredientRow', () => {
+  /** A column of buttons all reading "Editar" says nothing about which row. */
+  it('names the edit control after the ingredient it edits', () => {
+    setup()
+    expect(editButton()).toBeInTheDocument()
+  })
+
+  it('shows the name, and no form, until asked', () => {
+    setup()
+    expect(screen.getByText('Tomate')).toBeInTheDocument()
+    expect(screen.queryByRole('form')).toBeNull()
+  })
+
+  describe('when editing', () => {
+    const open = async () => {
+      setup()
+      await userEvent.click(editButton())
+      return screen.getByRole('textbox', {name: m.name})
+    }
+
+    it('opens a form named after the ingredient', async () => {
+      await open()
+      expect(
+        screen.getByRole('form', {name: 'Editar Tomate'}),
+      ).toBeInTheDocument()
+    })
+
+    /** Otherwise the row changes shape and focus is left behind on nothing. */
+    it('moves focus into the form', async () => {
+      expect(await open()).toHaveFocus()
+    })
+
+    it('starts from the current values rather than empty', async () => {
+      expect(await open()).toHaveValue('Tomate')
+    })
+
+    /* The id this form sends is proven by e2e/ingredients.spec.ts, which
+       renames a real row and reads it back. */
+
+    it('returns focus to the edit button on cancel', async () => {
+      await open()
+      await userEvent.click(screen.getByRole('button', {name: m.cancel}))
+      expect(editButton()).toHaveFocus()
+    })
+
+    it('closes and returns focus once the change is saved', async () => {
+      await open()
+      await userEvent.click(screen.getByRole('button', {name: m.save}))
+      expect(await screen.findByText('Tomate')).toBeInTheDocument()
+      expect(editButton()).toHaveFocus()
+    })
+
+    it('stays open and says why when the name is taken', async () => {
+      update.mockResolvedValue({error: 'duplicateName'})
+      const name = await open()
+      await userEvent.click(screen.getByRole('button', {name: m.save}))
+
+      const alert = await screen.findByRole('alert')
+      expect(alert).toHaveTextContent(m.duplicate)
+      expect(name.getAttribute('aria-describedby')).toBe(alert.id)
+    })
+  })
+
+  describe('when deleting', () => {
+    const open = async () => {
+      setup()
+      await userEvent.click(deleteButton())
+    }
+
+    it('asks before doing it', async () => {
+      await open()
+      expect(screen.getByText('¿Eliminar Tomate?')).toBeInTheDocument()
+      expect(remove).not.toHaveBeenCalled()
+    })
+
+    /** The row has two ways back; each has to return to the one you used. */
+    it('returns focus to the delete button, not the edit one', async () => {
+      await open()
+      await userEvent.click(screen.getByRole('button', {name: m.cancel}))
+      expect(deleteButton()).toHaveFocus()
+      expect(editButton()).not.toHaveFocus()
+    })
+  })
+})

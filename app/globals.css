@@ -7,24 +7,46 @@
  * background and 3.46:1 against white, where 4.5:1 is required. It is fine as
  * an accent, a border, an icon, or large text, where the bar is 3:1.
  *
- * --color-primary-strong is the same hue darkened to 86% so white text on it
- * reaches 4.53:1. Use it for buttons, badges, and anything carrying
- * normal-size text. Reach for --color-primary only when nothing sits on top.
+ * --color-primary-strong is the same hue at 69%, the darkest-needed of three
+ * readings: 5.73:1 on --color-background, 4.59:1 on
+ * --color-background-foreground, and 6.48:1 for white text on it. Cards and
+ * rows sit on the foreground surface, and it is the one that binds. Use it
+ * for anything involving text; --color-primary only where nothing sits on top.
+ *
+ * Checked against both surfaces, not white. See lib/__tests__/palette.
  */
 @theme {
+  /* The fallbacks matter: a build that cannot reach Google Fonts still has a
+     stack to fall back to rather than rendering in a serif. */
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+
   --color-primary: #ff3f4d;
-  --color-primary-strong: #db3642;
+  --color-primary-strong: #b02b35;
   --color-secondary: #1c0708;
   --color-secondary-foreground: #4f4f4f;
   --color-light: #e5e5e5;
   --color-background: #f1f1f1;
   --color-background-foreground: #d9d9d9;
+
+  /* Short enough not to delay the message it carries. Paired everywhere with
+     motion-reduce:animate-none. */
+  --animate-toast-in: toast-in 150ms ease-out;
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 @layer base {
   body {
-    @apply bg-background text-secondary;
-    font-family: system-ui, sans-serif;
+    @apply bg-background font-sans text-secondary;
   }
 
   /* Never remove a focus ring without replacing it. */

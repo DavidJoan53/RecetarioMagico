@@ -1,7 +1,7 @@
 import {getTranslations} from 'next-intl/server'
 import {RecipeCard} from '@/components/recipe-card'
 import {Section} from '@/components/section'
-import {latestDinners} from '@/db/queries/dinners'
+import {latestDinners} from '@/db/dinners/queries'
 
 export async function LatestDinners({limit}: {limit: number}) {
   const t = await getTranslations('home')
@@ -13,6 +13,7 @@ export async function LatestDinners({limit}: {limit: number}) {
       seeAllHref="/dinners"
       isEmpty={dinners.length === 0}
       emptyText={t('noDinners')}
+      emptyHint={t('noDinnersHint')}
     >
       {dinners.flatMap(dinner =>
         dinner.recipes.map(recipe => (

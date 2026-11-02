@@ -96,10 +96,22 @@ Build it in from the first render — retrofitting accessibility costs several t
 **Nothing outside `db/` imports the database client.** Pages, components and route handlers call a named function from `db/queries/` or `db/mutations/` — never `db` itself, and never a Drizzle builder inline.
 
 ```
-db/queries/<entity>.ts     reads   — latestRecipes, recipeById
-db/mutations/<entity>.ts   writes  — createRecipe, logDinner
-lib/<entity>.ts            pure    — shaping, deriving, validating. No db import.
-app/api/<entity>/route.ts  HTTP    — withAuth, parse with Zod, call the above
+db/<table>/queries.ts          every read for that table
+db/<table>/<verb>-<noun>.ts    one write — create-recipe.ts, log-dinner.ts
+lib/<entity>.ts                pure — shaping, deriving, validating. No db import.
+lib/validation/<entity>.ts     the Zod schema for a boundary
+app/api/<entity>/route.ts      HTTP — withAuth, parse with Zod, call the above
+```
+
+**A folder per table holds everything that table does.** Reads live together in
+`queries.ts` — `latestRecipes`, `recipeById`, `recipesPage` are projections of
+the same row, usually added in the same breath and read as a set. Writes get a
+file each: each one carries its own validation, conflict handling and failure
+modes, and they only ever grow.
+
+```ts
+import {latestRecipes} from '@/db/recipes/queries'
+import {createRecipe} from '@/db/recipes/create-recipe'
 ```
 
 Three reasons it is a rule and not a preference: a query used by two screens stays one query, so a fix lands once. A pure function in `lib/` is testable without a connection string, which a query module is not. And an inline builder in a component is invisible to anyone auditing what touches the database.
@@ -117,10 +129,38 @@ Three reasons it is a rule and not a preference: a query used by two screens sta
 
 ### Testing
 
-- New component and helper files ship with tests. Target **80%+ coverage on new files**, enforced in CI.
+Three tiers, and they are not graded the same. The coverage config draws the
+line: `lib/**`, `components/**` and `db/seed-data.ts` are measured per-file at
+80% and fail the build. **Nothing under `app/**` is measured by anything.**
+Writing a route-component test that could have been an end-to-end assertion
+costs real time and moves no number.
+
+**`lib/` and `components/` — the gate.** Every new file here ships with its
+test in the same commit. This is the coverage CI enforces.
+
+**`app/**/_components/` — three things only.** Unmeasured, so test only what
+no other tier can see:
+
+- focus movement after an interaction — axe is a static scan and cannot see
+  where focus lands when a row swaps into a form and back
+- accessible naming, where a row's controls must name their subject ("Editar
+  Tomate", not a column of buttons all reading "Editar")
+- cache invalidation — `revalidatePath` does not touch the TanStack cache, so
+  a deleted row otherwise stays on screen with nothing to say it has gone
+
+Anything else about a route component belongs to end-to-end.
+
+**`e2e/` — routes, writes, and the happy path.** Every route with behaviour
+gets a spec. **A route with no spec has no behavioural coverage**, whatever
+its components' unit tests say — the per-file coverage number cannot tell you
+this, because it never looked at `app/**` in the first place.
+
 - Test behaviour through the accessible interface — query by role and name, not by test id or class. This catches accessibility regressions for free.
 - At least one Playwright end-to-end flow covers the core path: create a recipe → label it → find it by label.
 - **Playwright always builds; it never reuses a running server.** A leftover one serves an older build, so the suite passes against code that is not under test. If `npm run test:e2e` reports the port in use, stop whatever is on 3000 — that error is the protection working.
+- **End-to-end tests get their own database, `E2E_DATABASE_URL`.** They create and delete rows. Pointed at the app's own database they edit the live app, and nothing says so — every test still passes, and the mess is found later by whoever opens the page. The suite refuses to start without it, and refuses if it matches `DATABASE_URL`.
+- **A write is only proven against a real database.** Component tests mock the server action, so they prove the message renders, never that the query ran or that the schema answered the way the code assumes. The catch in `delete-ingredient` looked for the wrong SQLSTATE and its unit test passed, because the test asserted the same wrong belief.
+- **Never assert the payload handed to a mocked server action.** Reaching into `action.mock.calls[0][1]` to check `form.get('id')` proves the component built a `FormData` and nothing else — the mock accepts any shape, so the assertion passes just as happily when the field is one the server never reads. Assert what the user can see instead (the chip is gone, the row is named after its ingredient), and let `e2e/` prove the write landed.
 
 ## Data model
 
@@ -130,7 +170,7 @@ labelGroups        id · name
 labels             id · name · color · labelGroupId → labelGroups
 recipeLabels       recipeId → recipes · labelId → labels           (composite PK)
 ingredients        id · name · photoUrl?
-recipeIngredients  id · recipeId · ingredientId · unit ENUM · quantity?
+recipeIngredients  id · recipeId · ingredientId · unit ENUM · quantity   (unique recipeId+ingredientId)
 dinners            id · eatenAt timestamptz · notes?
 dinnerRecipes      dinnerId → dinners · recipeId → recipes         (composite PK)
 pantry             ingredientId → ingredients · quantity · unit    (PK ingredientId)
@@ -142,7 +182,9 @@ Conventions:
 - **`unit` enum:** `g · ml · unidad · cucharada · cucharadita · taza · pizca`. Adding a value later is a migration, so the list is deliberately a little generous.
 - **`labels.color` is a free hex**, chosen by the user. Chip text colour is **computed from the colour's luminance**, never stored — black above the threshold, white below. A stored text colour can be wrong for its background; a computed one cannot. This is what keeps a free picker from being able to create a contrast failure at runtime, which would otherwise be the one place a user can break the zero-violations rule.
 - `prepTimeMinutes` is an integer, never a formatted string — the app sorts and filters on it.
-- `quantity` is nullable: "salt, to taste" has no number.
+- **An amount is a quantity and a unit together**, and both are required wherever one is stored — `recipeIngredients` and `pantry`. "200" says nothing without a unit and "g" says nothing without a number, so neither half is worth storing alone.
+- **An ingredient appears in a recipe once.** A unique index on `(recipeId, ingredientId)` says so, because a second row for the same ingredient is a lost edit rather than a second amount.
+- **`recipeIngredients` has no CRUD of its own.** The set belongs to its recipe: it is read with the recipe and rewritten whole when the recipe is saved. There is no route, action or query that edits one row on its own.
 - Many-to-many is always a join table, never an array column — arrays can't be joined or indexed.
 - `recipes.imageUrl` is derived from a YouTube link when one exists and none was set; otherwise pasted manually. There is no general link-scraping.
 
@@ -151,8 +193,25 @@ Conventions:
 - **Routing:** App Router. One folder per route segment under `app/`. Routing state lives in the URL — there is no navigation slice (the React Native app had one; it dies with the port).
 - **Server code:** route handlers under `app/api/`. Each one validates its input with Zod, calls a Drizzle query, and returns typed JSON.
 - **Components:** `components/` grouped by feature. Shared primitives come from shadcn/ui and are extended rather than re-implemented.
+- **One component per file**, the filename its name in kebab-case. A helper that starts out private to its parent stops being private the moment a second file wants it, and until then it is invisible to anyone grepping for the name they saw in the DOM. `_components/` and the folder it sits in already say what is private.
 - **Auth:** public `GET`; `POST`/`PATCH`/`DELETE` require a session, enforced in middleware. Single-user — access is an email allowlist, not a role system.
 - **AI routes:** two shapes. A **streaming** route returns tokens as they arrive for open-ended suggestions; a **structured** route asks for a schema-constrained response, parses it with Zod, and returns typed objects. Never render an unparsed model response as data.
+
+## Branches
+
+```
+feature/fix  →  dev  →  main
+                 ↑        ↑
+            everything   production
+            lands here   only
+```
+
+- **Every pull request targets `dev`.** No exceptions by default — `dev` is the default branch, so this is what GitHub does on its own. A PR aimed at `main` is a deliberate act and needs saying out loud.
+- **`main` is only ever updated by an explicit request to deploy.** Not when a feature is finished, not when CI is green, not because `dev` has piled up. Someone decides the live site should change and says so.
+- **`main` is production**, and the only thing Vercel deploys to the live site. It moves when a batch of work is ready, not on every merge.
+- Every push and every pull request runs CI. Each branch also gets its own preview URL, so a change can be seen before it reaches anyone.
+
+The point is that half-finished work can sit in `dev` without the live site changing under someone who is using it.
 
 ## Comments
 
@@ -167,7 +226,7 @@ Short, plain, and about the code — not about how it came to be.
 ```ts
 // Good
 /** Time-ordered, so ORDER BY id is chronological. */
-// Nullable: "sal, al gusto" has no number.
+// Both required: "200" says nothing without a unit, "g" nothing alone.
 
 // Bad
 /**

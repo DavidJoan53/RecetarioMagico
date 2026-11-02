@@ -1,0 +1,99 @@
+'use client'
+
+import {useQueryClient} from '@tanstack/react-query'
+import {useRouter} from 'next/navigation'
+import {useTranslations} from 'next-intl'
+import {useActionState, useEffect, useId, useRef, useState} from 'react'
+import {useToast} from '@/components/toast-provider'
+import {timeZone} from '@/i18n/time-zone'
+import {type DinnerRecipe, toDateTimeLocal} from '@/lib/dinners'
+import {queryKeys} from '@/lib/query-keys'
+import {DinnerFields} from '../../_components/dinner-fields'
+import type {FormState} from '../../actions'
+
+type Props = {
+  action: (state: FormState, form: FormData) => Promise<FormState>
+}
+
+export function DinnerForm({action}: Props) {
+  const t = useTranslations('dinners')
+  const [eatenAt, setEatenAt] = useState('')
+  const [notes, setNotes] = useState('')
+  const [chosen, setChosen] = useState<DinnerRecipe[]>([])
+  const whenRef = useRef<HTMLInputElement>(null)
+  const messageId = useId()
+  const queryClient = useQueryClient()
+  const toast = useToast()
+  const router = useRouter()
+
+  /**
+   * Now, filled after the first paint rather than during it. The server and
+   * the browser do not reach this line at the same instant, and a time
+   * rendered on both has to come out the same or React hydrates over a value
+   * that is already on screen.
+   */
+  useEffect(() => {
+    setEatenAt(current => current || toDateTimeLocal(new Date(), timeZone))
+  }, [timeZone])
+
+  /**
+   * Controlled on purpose. React resets an uncontrolled form after an action
+   * whether it succeeded or not, so a rejected dinner would lose everything
+   * that was picked.
+   */
+  const logThenLeave = async (previous: FormState, form: FormData) => {
+    const result = await action(previous, form)
+    if (result.done) {
+      toast({message: t('added')})
+      /* The list holds its own pages; revalidating the server's copy no
+         longer reaches it, so the new dinner would be missing from the list
+         this is about to arrive on. Awaited for that reason. */
+      await queryClient.invalidateQueries({queryKey: queryKeys.dinners})
+      router.push('/dinners')
+    }
+    /* One of the chosen recipes has gone. Nothing on this form is wrong, so
+       there is no field for it to point at. */
+    if (result.error === 'recipeGone') {
+      toast({message: t('recipeGone'), tone: 'error'})
+    }
+    return result
+  }
+
+  const [state, formAction, pending] = useActionState(logThenLeave, {})
+
+  return (
+    <form
+      action={formAction}
+      aria-label={t('addTitle')}
+      className="flex flex-col gap-3 rounded-lg border border-light bg-background-foreground p-4"
+    >
+      <DinnerFields
+        eatenAt={eatenAt}
+        onEatenAt={setEatenAt}
+        notes={notes}
+        onNotes={setNotes}
+        chosen={chosen}
+        onAdd={recipe => setChosen(current => [...current, recipe])}
+        onRemove={id => setChosen(current => current.filter(r => r.id !== id))}
+        whenRef={whenRef}
+        errorId={state.error === 'invalid' ? messageId : undefined}
+      />
+
+      <button
+        type="submit"
+        disabled={pending}
+        className="w-full rounded-lg bg-primary-strong px-4 py-3 font-semibold text-white disabled:opacity-60"
+      >
+        {t('add')}
+      </button>
+
+      {/* About the fields: a missing date, or no recipe chosen. Bound to the
+          date input, which is where the form resumes. */}
+      {state.error === 'invalid' && (
+        <p role="alert" id={messageId} className="text-primary-strong text-sm">
+          {t('invalid')}
+        </p>
+      )}
+    </form>
+  )
+}
