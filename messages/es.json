@@ -149,7 +149,6 @@
     "name": "Etiqueta",
     "newLabel": "Nueva etiqueta",
     "color": "Color",
-    "add": "Añadir",
     "added": "Etiqueta añadida",
     "duplicate": "Ya existe una etiqueta con ese nombre, en este grupo o en otro.",
     "groupGone": "Ese grupo ya no existe.",

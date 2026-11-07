@@ -149,7 +149,6 @@
     "name": "Label",
     "newLabel": "New label",
     "color": "Color",
-    "add": "Add",
     "added": "Label added",
     "duplicate": "A label with that name already exists, in this group or another.",
     "groupGone": "That group no longer exists.",
