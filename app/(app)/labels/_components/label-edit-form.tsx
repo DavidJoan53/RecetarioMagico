@@ -66,77 +66,86 @@ export function LabelEditForm({label, onDone, onCancel}: Props) {
     <form
       action={formAction}
       aria-label={t('editLabel', {name: label.name})}
-      className="flex flex-wrap items-end gap-2"
+      className="flex flex-col gap-2"
     >
       <input type="hidden" name="id" value={label.id} />
       <input type="hidden" name="labelGroupId" value={label.labelGroupId} />
 
-      <div className="flex min-w-40 flex-1 flex-col gap-1">
-        <label className="font-semibold text-xs" htmlFor={nameId}>
-          {t('name')}
-        </label>
-        <input
-          ref={nameRef}
-          id={nameId}
-          name="name"
-          required
-          maxLength={80}
-          value={name}
-          onChange={e => setName(e.target.value)}
-          aria-describedby={fieldError ? messageId : undefined}
-          aria-invalid={fieldError ? true : undefined}
-          className="rounded-lg border border-secondary-foreground bg-background px-3 py-2 text-sm"
-        />
+      {/* The two fields share a row until the name needs the width. */}
+      <div className="flex flex-wrap items-end gap-2">
+        <div className="flex min-w-40 flex-1 flex-col gap-1">
+          <label className="font-semibold text-xs" htmlFor={nameId}>
+            {t('name')}
+          </label>
+          <input
+            ref={nameRef}
+            id={nameId}
+            name="name"
+            required
+            maxLength={80}
+            value={name}
+            onChange={e => setName(e.target.value)}
+            aria-describedby={fieldError ? messageId : undefined}
+            aria-invalid={fieldError ? true : undefined}
+            className="rounded-lg border border-secondary-foreground bg-background px-3 py-2 text-sm"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="font-semibold text-xs" htmlFor={colorId}>
+            {t('color')}
+          </label>
+          <input
+            id={colorId}
+            name="color"
+            type="color"
+            value={color}
+            onChange={e => setColor(e.target.value)}
+            className="h-10 w-16 rounded-lg border border-secondary-foreground bg-background p-1"
+          />
+        </div>
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label className="font-semibold text-xs" htmlFor={colorId}>
-          {t('color')}
-        </label>
-        <input
-          id={colorId}
-          name="color"
-          type="color"
-          value={color}
-          onChange={e => setColor(e.target.value)}
-          className="h-10 w-16 rounded-lg border border-secondary-foreground bg-background p-1"
-        />
-      </div>
+      {/*
+        A row of their own: wrapped in with the fields, three 32px squares
+        broke across lines at narrow widths and landed wherever the colour
+        swatch left room.
 
-      {/* All three icon only, and all three named after the label: a page of
-          chips in edit mode is otherwise rows of identical glyphs. */}
-      <button
-        type="submit"
-        disabled={pending}
-        aria-label={t('saveLabel', {name: label.name})}
-        className="flex size-8 items-center justify-center rounded-lg bg-primary-strong text-white disabled:opacity-60"
-      >
-        <Plus aria-hidden="true" size={16} />
-      </button>
-      <button
-        type="button"
-        onClick={onCancel}
-        aria-label={t('cancelEdit', {name: label.name})}
-        className="flex size-8 items-center justify-center rounded-lg border border-secondary-foreground"
-      >
-        <X aria-hidden="true" size={16} />
-      </button>
-      <button
-        type="button"
-        onClick={() => setConfirming(true)}
-        aria-label={t('deleteLabel', {name: label.name})}
-        className="flex size-8 items-center justify-center rounded-lg border border-primary-strong text-primary-strong"
-      >
-        <Trash2 aria-hidden="true" size={16} />
-      </button>
+        Destructive first and submit last, so the press that ends the edit
+        is furthest from the one that throws the label away. All three are
+        icon only and named after the label — a page of chips in edit mode
+        is otherwise rows of identical glyphs.
+      */}
+      <div className="flex justify-end gap-2">
+        <button
+          type="button"
+          onClick={() => setConfirming(true)}
+          aria-label={t('deleteLabel', {name: label.name})}
+          className="flex size-8 items-center justify-center rounded-lg border border-primary-strong text-primary-strong"
+        >
+          <Trash2 aria-hidden="true" size={16} />
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          aria-label={t('cancelEdit', {name: label.name})}
+          className="flex size-8 items-center justify-center rounded-lg border border-secondary-foreground"
+        >
+          <X aria-hidden="true" size={16} />
+        </button>
+        <button
+          type="submit"
+          disabled={pending}
+          aria-label={t('saveLabel', {name: label.name})}
+          className="flex size-8 items-center justify-center rounded-lg bg-primary-strong text-white disabled:opacity-60"
+        >
+          <Plus aria-hidden="true" size={16} />
+        </button>
+      </div>
 
       {/* Both about the name field, and bound to it. */}
       {fieldError && (
-        <p
-          role="alert"
-          id={messageId}
-          className="w-full text-primary-strong text-sm"
-        >
+        <p role="alert" id={messageId} className="text-primary-strong text-sm">
           {t(fieldError)}
         </p>
       )}
