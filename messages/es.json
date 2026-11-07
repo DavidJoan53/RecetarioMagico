@@ -142,7 +142,7 @@
     "createGroup": "Crear grupo",
     "groupAdded": "Grupo creado",
     "groupDuplicate": "Ya tienes un grupo con ese nombre.",
-    "groupEmpty": "Este grupo todavía no tiene etiquetas. Añade una con el +.",
+    "groupEmpty": "Este grupo todavía no tiene etiquetas. Usa el botón de añadir para crear la primera.",
     "empty": "Todavía no tienes grupos de etiquetas.",
     "emptyHint": "Un grupo reúne etiquetas parecidas, como «Desayuno» o «Rápido».",
     "addTo": "Añadir etiqueta a {group}",
