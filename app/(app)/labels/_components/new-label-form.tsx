@@ -1,6 +1,6 @@
 'use client'
 
-import {X} from 'lucide-react'
+import {Plus, X} from 'lucide-react'
 import {useTranslations} from 'next-intl'
 import {useActionState, useEffect, useId, useRef, useState} from 'react'
 import {useToast} from '@/components/toast-provider'
@@ -72,7 +72,7 @@ export function NewLabelForm({groupId, groupName, onCancel}: Props) {
 
       <div className="flex min-w-40 flex-1 flex-col gap-1">
         <label className="font-semibold text-xs" htmlFor={nameId}>
-          {t('name')}
+          {t('newLabel')}
         </label>
         <input
           ref={nameRef}
@@ -102,12 +102,15 @@ export function NewLabelForm({groupId, groupName, onCancel}: Props) {
         />
       </div>
 
+      {/* Icon only, so the label carries the word it replaced — named after
+          the group, since every group on the page has one of these. */}
       <button
         type="submit"
         disabled={pending}
-        className="rounded-lg bg-primary-strong px-3 py-2 font-semibold text-sm text-white disabled:opacity-60"
+        aria-label={t('addTo', {group: groupName})}
+        className="flex size-8 items-center justify-center rounded-lg bg-primary-strong text-white disabled:opacity-60"
       >
-        {t('add')}
+        <Plus aria-hidden="true" size={16} />
       </button>
 
       {/* Stays open after each label, so several can be added in a row; this

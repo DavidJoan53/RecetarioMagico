@@ -75,7 +75,7 @@ describe('GroupHeader', () => {
     it('opens the form and puts the cursor in it', async () => {
       setup()
       await userEvent.click(addButton())
-      expect(screen.getByRole('textbox', {name: m.name})).toHaveFocus()
+      expect(screen.getByRole('textbox', {name: m.newLabel})).toHaveFocus()
     })
 
     /** The plus is gone while the form is open, so focus has to come back. */
@@ -84,14 +84,22 @@ describe('GroupHeader', () => {
       await userEvent.click(addButton())
       await userEvent.click(screen.getByRole('button', {name: m.cancel}))
 
-      expect(screen.queryByRole('textbox', {name: m.name})).toBeNull()
+      expect(screen.queryByRole('textbox', {name: m.newLabel})).toBeNull()
       expect(addButton()).toHaveFocus()
     })
 
     /** Closed to begin with: a form per group buries the labels. */
     it('starts closed', () => {
       setup()
-      expect(screen.queryByRole('textbox', {name: m.name})).toBeNull()
+      expect(screen.queryByRole('textbox', {name: m.newLabel})).toBeNull()
+    })
+
+    /* Icon only now, and one group's plus is indistinguishable from the
+       next's unless it says which group it adds to. */
+    it('names the submit after the group', async () => {
+      setup()
+      await userEvent.click(addButton())
+      expect(addButton()).toHaveAttribute('type', 'submit')
     })
   })
 
