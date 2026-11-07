@@ -1,12 +1,17 @@
 'use client'
 
-import {Save} from 'lucide-react'
+import {Save, X} from 'lucide-react'
 import {useTranslations} from 'next-intl'
-import {useActionState, useId, useRef, useState} from 'react'
+import {useActionState, useEffect, useId, useRef, useState} from 'react'
 import {useToast} from '@/components/toast-provider'
 import {createLabelGroupAction, type FormState} from '../actions'
 
-export function NewGroupForm() {
+type Props = {
+  /** Closes the form. It is opened from a plus — see add-group. */
+  onCancel: () => void
+}
+
+export function NewGroupForm({onCancel}: Props) {
   const t = useTranslations('labels')
   const [name, setName] = useState('')
   const nameRef = useRef<HTMLInputElement>(null)
@@ -29,6 +34,11 @@ export function NewGroupForm() {
   }
 
   const [state, formAction, pending] = useActionState(createThenClear, {})
+
+  /** Mounted means opened, so this is where the typing should start. */
+  useEffect(() => {
+    nameRef.current?.focus()
+  }, [])
 
   return (
     <form
@@ -62,6 +72,17 @@ export function NewGroupForm() {
           className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-strong text-white disabled:opacity-60"
         >
           <Save aria-hidden="true" size={16} />
+        </button>
+
+        {/* Stays open after each group, so several can be added in a row;
+            this is the only way back out. */}
+        <button
+          type="button"
+          onClick={onCancel}
+          aria-label={t('cancel')}
+          className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-secondary-foreground"
+        >
+          <X aria-hidden="true" size={16} />
         </button>
       </div>
 
