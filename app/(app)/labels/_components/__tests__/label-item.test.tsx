@@ -34,6 +34,12 @@ const setup = (recipeCount = 0) =>
 
 const chip = () => screen.getByRole('button', {name: 'Editar Cena'})
 
+/* The editor's three controls are icon only, so the name is what finds
+   them — and naming them after the label is what tells one open editor
+   from the next. */
+const save = m.saveLabel.replace('{name}', 'Cena')
+const cancelEdit = m.cancelEdit.replace('{name}', 'Cena')
+
 beforeEach(() => {
   update.mockReset()
   remove.mockReset()
@@ -57,7 +63,7 @@ describe('LabelItem', () => {
   it('sends the id and the group it belongs to', async () => {
     setup()
     await userEvent.click(chip())
-    await userEvent.click(screen.getByRole('button', {name: m.save}))
+    await userEvent.click(screen.getByRole('button', {name: save}))
     const form = update.mock.calls[0]?.[1] as FormData
     expect(form.get('id')).toBe('l1')
     expect(form.get('labelGroupId')).toBe('g1')
@@ -66,7 +72,7 @@ describe('LabelItem', () => {
   it('returns focus to the chip on cancel', async () => {
     setup()
     await userEvent.click(chip())
-    await userEvent.click(screen.getByRole('button', {name: m.cancel}))
+    await userEvent.click(screen.getByRole('button', {name: cancelEdit}))
     expect(chip()).toHaveFocus()
   })
 

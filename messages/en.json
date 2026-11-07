@@ -156,6 +156,8 @@
     "invalid": "Check the name and the color.",
     "save": "Save",
     "cancel": "Cancel",
+    "saveLabel": "Save {name}",
+    "cancelEdit": "Stop editing {name}",
     "deleteLabel": "Delete {name}",
     "groupName": "Group name",
     "editLabel": "Edit {name}",

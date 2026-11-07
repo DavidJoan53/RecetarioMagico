@@ -1,6 +1,6 @@
 'use client'
 
-import {Trash2} from 'lucide-react'
+import {Plus, Trash2, X} from 'lucide-react'
 import {useTranslations} from 'next-intl'
 import {useActionState, useEffect, useId, useRef, useState} from 'react'
 import {useToast} from '@/components/toast-provider'
@@ -103,19 +103,23 @@ export function LabelEditForm({label, onDone, onCancel}: Props) {
         />
       </div>
 
+      {/* All three icon only, and all three named after the label: a page of
+          chips in edit mode is otherwise rows of identical glyphs. */}
       <button
         type="submit"
         disabled={pending}
-        className="rounded-lg bg-primary-strong px-3 py-2 font-semibold text-sm text-white disabled:opacity-60"
+        aria-label={t('saveLabel', {name: label.name})}
+        className="flex size-8 items-center justify-center rounded-lg bg-primary-strong text-white disabled:opacity-60"
       >
-        {t('save')}
+        <Plus aria-hidden="true" size={16} />
       </button>
       <button
         type="button"
         onClick={onCancel}
-        className="rounded-lg border border-secondary-foreground px-3 py-2 font-semibold text-sm"
+        aria-label={t('cancelEdit', {name: label.name})}
+        className="flex size-8 items-center justify-center rounded-lg border border-secondary-foreground"
       >
-        {t('cancel')}
+        <X aria-hidden="true" size={16} />
       </button>
       <button
         type="button"
