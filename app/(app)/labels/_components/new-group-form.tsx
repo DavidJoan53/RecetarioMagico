@@ -1,6 +1,5 @@
 'use client'
 
-import {Save, X} from 'lucide-react'
 import {useTranslations} from 'next-intl'
 import {useActionState, useEffect, useId, useRef, useState} from 'react'
 import {useToast} from '@/components/toast-provider'
@@ -44,12 +43,12 @@ export function NewGroupForm({onCancel}: Props) {
     <form
       action={formAction}
       aria-label={t('newGroup')}
-      className="flex flex-col gap-2 rounded-lg border border-light bg-background-foreground p-4"
+      className="flex flex-col gap-3 rounded-lg border border-light bg-background-foreground p-4"
     >
-      <label className="font-semibold text-sm" htmlFor={nameId}>
-        {t('newGroup')}
-      </label>
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-col gap-1">
+        <label className="font-semibold text-sm" htmlFor={nameId}>
+          {t('newGroup')}
+        </label>
         <input
           ref={nameRef}
           id={nameId}
@@ -61,28 +60,26 @@ export function NewGroupForm({onCancel}: Props) {
           placeholder={t('groupPlaceholder')}
           aria-describedby={state.error ? messageId : undefined}
           aria-invalid={state.error ? true : undefined}
-          className="min-w-40 flex-1 rounded-lg border border-secondary-foreground bg-background px-3 py-2 text-sm"
+          className="rounded-lg border border-secondary-foreground bg-background px-3 py-2"
         />
-        {/* Icon only, so the label carries what the word used to. The same
-            string, so nothing announced changes. */}
+      </div>
+
+      {/* Stays open after each group, so several can be added in a row;
+          cancel is the way back out. */}
+      <div className="flex gap-2">
         <button
           type="submit"
           disabled={pending}
-          aria-label={t('createGroup')}
-          className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-strong text-white disabled:opacity-60"
+          className="flex-1 rounded-lg bg-primary-strong px-4 py-2 font-semibold text-sm text-white disabled:opacity-60"
         >
-          <Save aria-hidden="true" size={16} />
+          {t('createGroup')}
         </button>
-
-        {/* Stays open after each group, so several can be added in a row;
-            this is the only way back out. */}
         <button
           type="button"
           onClick={onCancel}
-          aria-label={t('cancel')}
-          className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-secondary-foreground"
+          className="flex-1 rounded-lg border border-secondary-foreground px-4 py-2 font-semibold text-sm"
         >
-          <X aria-hidden="true" size={16} />
+          {t('cancel')}
         </button>
       </div>
 
