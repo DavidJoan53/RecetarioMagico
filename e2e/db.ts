@@ -1,7 +1,14 @@
 import {neon} from '@neondatabase/serverless'
 import {inArray} from 'drizzle-orm'
 import {drizzle} from 'drizzle-orm/neon-http'
-import {dinners, ingredients, recipeIngredients, recipes} from '@/db/schema'
+import {
+  dinners,
+  ingredients,
+  labelGroups,
+  labels,
+  recipeIngredients,
+  recipes,
+} from '@/db/schema'
 
 /**
  * Built here rather than imported from @/db, which pulls in lib/env and its
@@ -49,6 +56,32 @@ export async function addRecipe(name: string): Promise<string> {
   return row.id
 }
 
+/**
+ * A group with one label in it — the recipe form only lists groups that have
+ * labels, so the two always arrive together.
+ */
+export async function addLabel(
+  groupName: string,
+  labelName: string,
+): Promise<{groupId: string; labelId: string}> {
+  const [group] = await resilient(() =>
+    db
+      .insert(labelGroups)
+      .values({name: groupName})
+      .returning({id: labelGroups.id}),
+  )
+  if (!group) throw new Error(`could not add ${groupName}`)
+
+  const [label] = await resilient(() =>
+    db
+      .insert(labels)
+      .values({name: labelName, color: '#118ab2', labelGroupId: group.id})
+      .returning({id: labels.id}),
+  )
+  if (!label) throw new Error(`could not add ${labelName}`)
+  return {groupId: group.id, labelId: label.id}
+}
+
 /** Puts an ingredient behind the ON DELETE RESTRICT the UI has to report. */
 export async function useInNewRecipe(
   ingredientId: string,
@@ -86,6 +119,8 @@ export async function removeAll(created: {
    * CASCADE, so the pairings go with the row.
    */
   dinnerNotes?: string[]
+  /** The labels go with the group: labels.label_group_id cascades. */
+  labelGroupIds?: string[]
 }): Promise<void> {
   /* Before the recipes. Deleting a recipe cascades the pairing away but
      leaves the dinner behind, recording nothing and visible to whoever
@@ -107,6 +142,13 @@ export async function removeAll(created: {
       db
         .delete(recipes)
         .where(inArray(recipes.name, created.recipeNames ?? [])),
+    )
+  }
+  if (created.labelGroupIds?.length) {
+    await resilient(() =>
+      db
+        .delete(labelGroups)
+        .where(inArray(labelGroups.id, created.labelGroupIds ?? [])),
     )
   }
   if (created.ingredientNames.length > 0) {

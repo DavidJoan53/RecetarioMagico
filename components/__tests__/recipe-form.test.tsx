@@ -4,7 +4,8 @@ import userEvent from '@testing-library/user-event'
 import {NextIntlClientProvider} from 'next-intl'
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
 import type {FormState} from '@/app/(app)/recipes/actions'
-import type {RecipeWithIngredients} from '@/db/recipes/queries'
+import type {RecipeDetail} from '@/db/recipes/queries'
+import type {GroupWithLabels} from '@/lib/labels'
 import messages from '@/messages/es.json'
 import {RecipeForm} from '../recipe-form'
 import {ToastProvider} from '../toast-provider'
@@ -27,9 +28,30 @@ beforeEach(() => {
 })
 afterEach(() => vi.unstubAllGlobals())
 
+/** One group with two labels, so a tick can be told from an untick. */
+const CENA = {
+  id: 'l1',
+  name: 'Cena',
+  color: '#118ab2',
+  labelGroupId: 'g1',
+  recipeCount: 0,
+}
+const DESAYUNO = {
+  id: 'l2',
+  name: 'Desayuno',
+  color: '#ffd166',
+  labelGroupId: 'g1',
+  recipeCount: 0,
+}
+const MOMENT: GroupWithLabels = {
+  id: 'g1',
+  name: 'Momento',
+  labels: [CENA, DESAYUNO],
+}
+
 const setup = (
   state: FormState = {},
-  recipe?: RecipeWithIngredients,
+  recipe?: RecipeDetail,
   /* Off by default: the provider's always-mounted role="alert" region would
      make every inline field-error query below find two alerts. */
   withToasts = false,
@@ -40,6 +62,7 @@ const setup = (
     <RecipeForm
       action={action}
       submitLabel={messages.recipeForm.create}
+      groups={[MOMENT]}
       recipe={recipe}
     />
   )
@@ -203,7 +226,7 @@ describe('RecipeForm', () => {
   })
 
   describe('when an existing recipe is being edited', () => {
-    const recipe: RecipeWithIngredients = {
+    const recipe: RecipeDetail = {
       id: 'r1',
       name: 'Arepa de huevo',
       prepTimeMinutes: 25,
@@ -214,6 +237,7 @@ describe('RecipeForm', () => {
       ingredients: [
         {ingredientId: 'i1', name: 'Tomate', quantity: 200, unit: 'g'},
       ],
+      labels: [CENA],
     }
 
     it('starts on what the recipe already says', () => {

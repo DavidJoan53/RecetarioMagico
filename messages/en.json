@@ -103,6 +103,9 @@
     "chooseUnit": "Choose a unit",
     "alreadyInRecipe": "already in the recipe",
     "duplicateIngredient": "That ingredient is already in the recipe.",
+    "labels": "Labels",
+    "noLabels": "No labels to put on it yet.",
+    "goToLabels": "Create labels",
     "ingredientGone": "One of the ingredients no longer exists.",
     "labelGone": "One of the labels no longer exists.",
     "gone": "That recipe no longer exists."

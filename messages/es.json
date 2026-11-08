@@ -103,6 +103,9 @@
     "chooseUnit": "Elige una unidad",
     "alreadyInRecipe": "ya está en la receta",
     "duplicateIngredient": "Ese ingrediente ya está en la receta.",
+    "labels": "Etiquetas",
+    "noLabels": "Todavía no tienes etiquetas que poner.",
+    "goToLabels": "Crear etiquetas",
     "ingredientGone": "Alguno de los ingredientes ya no existe.",
     "labelGone": "Alguna de las etiquetas ya no existe.",
     "gone": "Esa receta ya no existe."
