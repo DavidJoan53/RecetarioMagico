@@ -1,11 +1,11 @@
 import type {BatchItem} from 'drizzle-orm/batch'
 import {db} from '@/db'
 import {isDuplicate, isMissingReference} from '@/db/constraints'
+import {anyLabelMissing} from '@/db/labels/queries'
 import {recipeIngredients, recipeLabels, recipes} from '@/db/schema'
 import {uuidV7} from '@/lib/uuid'
 import type {RecipeInput} from '@/lib/validation/recipe'
 import {deriveImageUrl} from '@/lib/youtube'
-import {anyLabelMissing} from './missing-label'
 
 export type CreateResult =
   | {ok: true; id: string}
