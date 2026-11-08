@@ -9,6 +9,8 @@ import {
 
 const TOMATO = '0193f3a0-0000-7000-8000-000000000001'
 const ONION = '0193f3a0-0000-7000-8000-000000000002'
+const DINNER = '0193f3a0-0000-7000-8000-000000000003'
+const QUICK = '0193f3a0-0000-7000-8000-000000000004'
 
 const valid = {
   name: 'Arepa de huevo',
@@ -16,6 +18,7 @@ const valid = {
   instructions: ['Amasar', 'Freír'],
   links: ['https://youtu.be/dQw4w9WgXcQ'],
   ingredients: [{ingredientId: TOMATO, quantity: 200, unit: 'g'}],
+  labelIds: [DINNER],
 }
 
 describe('recipeInput', () => {
@@ -79,6 +82,29 @@ describe('recipeInput', () => {
       ],
     })
     expect(result.success).toBe(false)
+  })
+
+  it('accepts a recipe with no labels', () => {
+    expect(recipeInput.parse({...valid, labelIds: []}).labelIds).toEqual([])
+  })
+
+  /**
+   * The checkboxes cannot tick one twice, but recipe_labels is keyed on the
+   * pair, so a hand-built post would be a primary key collision rather than
+   * a validation failure.
+   */
+  it('keeps one of each label however many times it arrives', () => {
+    const parsed = recipeInput.parse({
+      ...valid,
+      labelIds: [DINNER, QUICK, DINNER],
+    })
+    expect(parsed.labelIds).toEqual([DINNER, QUICK])
+  })
+
+  it('refuses a label id that is not a uuid', () => {
+    expect(recipeInput.safeParse({...valid, labelIds: ['cena']}).success).toBe(
+      false,
+    )
   })
 
   it('accepts two different ingredients', () => {
@@ -188,6 +214,24 @@ describe('recipeInputFromForm', () => {
 
   it('fails when the name is missing', () => {
     expect(recipeInputFromForm(form([['name', '']])).success).toBe(false)
+  })
+
+  it('reads every ticked label', () => {
+    const result = recipeInputFromForm(
+      form([
+        ['name', 'Arepa'],
+        ['labelId', DINNER],
+        ['labelId', QUICK],
+      ]),
+    )
+    expect(result.data?.labelIds).toEqual([DINNER, QUICK])
+  })
+
+  /** Unticked boxes submit nothing, which is a recipe with no labels. */
+  it('reads no labels at all as none, not as a failure', () => {
+    const result = recipeInputFromForm(form([['name', 'Arepa']]))
+    expect(result.success).toBe(true)
+    expect(result.data?.labelIds).toEqual([])
   })
 
   it('pairs each ingredient with the amount submitted beside it', () => {

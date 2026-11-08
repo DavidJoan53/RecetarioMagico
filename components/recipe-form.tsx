@@ -9,6 +9,15 @@ import {FieldList} from './field-list'
 import {RecipeIngredientFields} from './recipe-ingredient-fields'
 import {useToast} from './toast-provider'
 
+/**
+ * Something the form held is gone: the recipe itself, or an ingredient or
+ * label deleted elsewhere while this was open. Nothing typed here is wrong,
+ * so there is no field to point at — these go to a toast.
+ */
+const VANISHED = ['gone', 'ingredientGone', 'labelGone']
+
+const aboutAField = (error: string) => !VANISHED.includes(error)
+
 type Props = {
   action: (state: FormState, form: FormData) => Promise<FormState>
   submitLabel: string
@@ -21,11 +30,9 @@ export function RecipeForm({action, submitLabel, recipe}: Props) {
   const toast = useToast()
   const router = useRouter()
 
-  /* Neither is about a field. "gone" means the recipe was deleted while this
-     was open; "ingredientGone" means one of the picked ingredients was. */
   const saveThen = async (previous: FormState, form: FormData) => {
     const result = await action(previous, form)
-    if (result.error === 'gone' || result.error === 'ingredientGone') {
+    if (result.error && !aboutAField(result.error)) {
       toast({message: t(result.error), tone: 'error'})
     }
     if (result.done) {
@@ -51,9 +58,7 @@ export function RecipeForm({action, submitLabel, recipe}: Props) {
   /* What is left for the form to say: the two above, plus an ingredient
      picked twice, which is about the rows rather than the name. */
   const fieldError =
-    state.error && state.error !== 'gone' && state.error !== 'ingredientGone'
-      ? state.error
-      : null
+    state.error && aboutAField(state.error) ? state.error : null
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
