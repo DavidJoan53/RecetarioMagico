@@ -4,28 +4,39 @@ import {useRouter} from 'next/navigation'
 import {useTranslations} from 'next-intl'
 import {useActionState, useId} from 'react'
 import type {FormState} from '@/app/(app)/recipes/actions'
-import type {RecipeWithIngredients} from '@/db/recipes/queries'
+import type {RecipeDetail} from '@/db/recipes/queries'
+import type {GroupWithLabels} from '@/lib/labels'
 import {FieldList} from './field-list'
 import {RecipeIngredientFields} from './recipe-ingredient-fields'
+import {RecipeLabelFields} from './recipe-label-fields'
 import {useToast} from './toast-provider'
+
+/**
+ * Something the form held is gone: the recipe itself, or an ingredient or
+ * label deleted elsewhere while this was open. Nothing typed here is wrong,
+ * so there is no field to point at — these go to a toast.
+ */
+const VANISHED = ['gone', 'ingredientGone', 'labelGone']
+
+const aboutAField = (error: string) => !VANISHED.includes(error)
 
 type Props = {
   action: (state: FormState, form: FormData) => Promise<FormState>
   submitLabel: string
+  /** Every label there is, to tick from. Read on the server by the page. */
+  groups: readonly GroupWithLabels[]
   /** Absent when creating. Present, it is what every field starts as. */
-  recipe?: RecipeWithIngredients
+  recipe?: RecipeDetail
 }
 
-export function RecipeForm({action, submitLabel, recipe}: Props) {
+export function RecipeForm({action, submitLabel, groups, recipe}: Props) {
   const t = useTranslations('recipeForm')
   const toast = useToast()
   const router = useRouter()
 
-  /* Neither is about a field. "gone" means the recipe was deleted while this
-     was open; "ingredientGone" means one of the picked ingredients was. */
   const saveThen = async (previous: FormState, form: FormData) => {
     const result = await action(previous, form)
-    if (result.error === 'gone' || result.error === 'ingredientGone') {
+    if (result.error && !aboutAField(result.error)) {
       toast({message: t(result.error), tone: 'error'})
     }
     if (result.done) {
@@ -51,9 +62,7 @@ export function RecipeForm({action, submitLabel, recipe}: Props) {
   /* What is left for the form to say: the two above, plus an ingredient
      picked twice, which is about the rows rather than the name. */
   const fieldError =
-    state.error && state.error !== 'gone' && state.error !== 'ingredientGone'
-      ? state.error
-      : null
+    state.error && aboutAField(state.error) ? state.error : null
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
@@ -106,6 +115,8 @@ export function RecipeForm({action, submitLabel, recipe}: Props) {
       </div>
 
       <RecipeIngredientFields initial={recipe?.ingredients} />
+
+      <RecipeLabelFields groups={groups} initial={recipe?.labels} />
 
       {/* Numbered: the steps are a sequence, and which one you are editing
           is otherwise impossible to tell from a column of equal inputs. */}

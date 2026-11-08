@@ -4,6 +4,7 @@ import {redirect} from 'next/navigation'
 import {getTranslations} from 'next-intl/server'
 import {PageHeader} from '@/components/page-header'
 import {RecipeForm} from '@/components/recipe-form'
+import {allGroupsWithLabels} from '@/db/label-groups/queries'
 import {getSession} from '@/lib/session'
 import {createRecipeAction} from '../actions'
 
@@ -13,6 +14,7 @@ export default async function NewRecipePage() {
 
   const t = await getTranslations('recipeForm')
   const nav = await getTranslations('recipe')
+  const groups = await allGroupsWithLabels()
 
   return (
     <main className="flex flex-col gap-5">
@@ -30,7 +32,11 @@ export default async function NewRecipePage() {
           </Link>
         }
       />
-      <RecipeForm action={createRecipeAction} submitLabel={t('create')} />
+      <RecipeForm
+        action={createRecipeAction}
+        submitLabel={t('create')}
+        groups={groups}
+      />
     </main>
   )
 }

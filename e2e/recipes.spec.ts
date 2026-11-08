@@ -1,6 +1,6 @@
 import type {Page} from '@playwright/test'
 import es from '@/messages/es.json'
-import {addIngredient, addRecipe, removeAll, uniqueName} from './db'
+import {addIngredient, addLabel, addRecipe, removeAll, uniqueName} from './db'
 import {expect, test} from './signed-in'
 import {toast} from './toast'
 
@@ -17,13 +17,15 @@ const created: {
   recipeIds: string[]
   ingredientNames: string[]
   recipeNames: string[]
-} = {recipeIds: [], ingredientNames: [], recipeNames: []}
+  labelGroupIds: string[]
+} = {recipeIds: [], ingredientNames: [], recipeNames: [], labelGroupIds: []}
 
 test.afterEach(async () => {
   await removeAll(created)
   created.recipeIds = []
   created.ingredientNames = []
   created.recipeNames = []
+  created.labelGroupIds = []
 })
 
 /** Newest first, so recipes made now are the first page whatever else exists. */
@@ -165,6 +167,54 @@ test('a recipe is created with its ingredients and reads them back', async ({
   /* Reloaded: everything above could still be the form's own state. */
   await page.reload()
   await expect(ingredientRow(page, tomato)).toContainText('200 g')
+})
+
+/**
+ * recipe_labels is written inside the same batch as the recipe, and the only
+ * way to see it is to read the row back: a component test mocks the action
+ * and proves the box was ticked, never that a row landed.
+ */
+test('the labels ticked on a recipe survive a round trip', async ({page}) => {
+  const recipeName = uniqueName('e2ereceta')
+  const dinner = uniqueName('e2ecena')
+  const quick = uniqueName('e2erapido')
+  created.recipeNames.push(recipeName)
+
+  const group = await addLabel(uniqueName('e2emomento'), dinner)
+  created.labelGroupIds.push(group.groupId)
+  const other = await addLabel(uniqueName('e2eritmo'), quick)
+  created.labelGroupIds.push(other.groupId)
+
+  await openForm(page, '/recipes/new')
+  await page.getByRole('textbox', {name: f.name}).fill(recipeName)
+  await page.getByRole('checkbox', {name: dinner}).check()
+  await page.getByRole('button', {name: f.create}).click()
+  await expect(page).toHaveURL(/\/recipes$/)
+
+  /* From the link rather than from the URL after a click: reading the URL
+     races the navigation, and `/recipes` itself parses as an id. */
+  const href = await page
+    .getByRole('link', {name: new RegExp(recipeName)})
+    .getAttribute('href')
+  const id = String(href).split('/').pop()
+  expect(id).toMatch(/^[0-9a-f-]{36}$/)
+
+  /* The edit form reads the recipe from the database, so what it starts as
+     is what was written — one ticked, the other not. */
+  await openForm(page, `/recipes/${id}/edit`)
+  await expect(page.getByRole('checkbox', {name: dinner})).toBeChecked()
+  await expect(page.getByRole('checkbox', {name: quick})).not.toBeChecked()
+
+  /* Replaced, not added to: the set is rewritten whole on every save, so
+     unticking has to leave nothing behind. */
+  await page.getByRole('checkbox', {name: dinner}).uncheck()
+  await page.getByRole('checkbox', {name: quick}).check()
+  await page.getByRole('button', {name: f.save}).click()
+  await expect(page).toHaveURL(new RegExp(`/recipes/${id}$`))
+
+  await openForm(page, `/recipes/${id}/edit`)
+  await expect(page.getByRole('checkbox', {name: quick})).toBeChecked()
+  await expect(page.getByRole('checkbox', {name: dinner})).not.toBeChecked()
 })
 
 test('the list shows what a recipe is made of', async ({page}) => {

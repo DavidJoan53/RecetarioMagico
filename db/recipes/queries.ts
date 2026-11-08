@@ -1,7 +1,13 @@
 import {and, asc, desc, eq, ilike, inArray, lt} from 'drizzle-orm'
 import {db} from '@/db'
-import type {Unit} from '@/db/schema'
-import {ingredients, recipeIngredients, recipes} from '@/db/schema'
+import type {Label, Unit} from '@/db/schema'
+import {
+  ingredients,
+  labels,
+  recipeIngredients,
+  recipeLabels,
+  recipes,
+} from '@/db/schema'
 import {pageOf} from '@/lib/validation/page'
 
 /** One ordering, one cursor: the list and the picker read the same rows. */
@@ -39,6 +45,15 @@ export type Recipe = typeof recipes.$inferSelect
 
 export type RecipeWithIngredients = Recipe & {
   ingredients: RecipeIngredient[]
+}
+
+/**
+ * One recipe, whole: what the detail page shows and what the edit form
+ * starts as. The labels stay off the list types — a page of ten would read
+ * them to render nothing, since the cards show a thumbnail and a time.
+ */
+export type RecipeDetail = RecipeWithIngredients & {
+  labels: Label[]
 }
 
 /**
@@ -126,13 +141,36 @@ export async function recipesPage({
   return {...page, items: withIngredients(page.items, byRecipe)}
 }
 
+/**
+ * The labels on one recipe, by name — the order the picker lists them in, so
+ * what is ticked and what is shown read the same way round.
+ */
+function labelsFor(recipeId: string) {
+  return db
+    .select({
+      id: labels.id,
+      name: labels.name,
+      color: labels.color,
+      labelGroupId: labels.labelGroupId,
+    })
+    .from(recipeLabels)
+    .innerJoin(labels, eq(labels.id, recipeLabels.labelId))
+    .where(eq(recipeLabels.recipeId, recipeId))
+    .orderBy(asc(labels.name))
+}
+
 /** Null rather than a throw: a recipe can be deleted while its link is open. */
-export async function recipeById(
-  id: string,
-): Promise<RecipeWithIngredients | null> {
+export async function recipeById(id: string): Promise<RecipeDetail | null> {
   const [recipe] = await db.select().from(recipes).where(eq(recipes.id, id))
   if (!recipe) return null
 
-  const rows = await ingredientRowsFor([id])
-  return {...recipe, ingredients: rows.map(({recipeId: _, ...rest}) => rest)}
+  const [rows, labelRows] = await Promise.all([
+    ingredientRowsFor([id]),
+    labelsFor(id),
+  ])
+  return {
+    ...recipe,
+    ingredients: rows.map(({recipeId: _, ...rest}) => rest),
+    labels: labelRows,
+  }
 }

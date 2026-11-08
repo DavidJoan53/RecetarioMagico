@@ -4,6 +4,7 @@ import {notFound, redirect} from 'next/navigation'
 import {getTranslations} from 'next-intl/server'
 import {PageHeader} from '@/components/page-header'
 import {RecipeForm} from '@/components/recipe-form'
+import {allGroupsWithLabels} from '@/db/label-groups/queries'
 import {recipeById} from '@/db/recipes/queries'
 import {getSession} from '@/lib/session'
 import {recipeIdFrom} from '@/lib/validation/recipe'
@@ -27,6 +28,7 @@ export default async function EditRecipePage({
   if (!recipe) notFound()
 
   const t = await getTranslations('recipeForm')
+  const groups = await allGroupsWithLabels()
 
   return (
     <main className="flex flex-col gap-5">
@@ -45,6 +47,7 @@ export default async function EditRecipePage({
       <RecipeForm
         action={updateRecipeAction}
         submitLabel={t('save')}
+        groups={groups}
         recipe={recipe}
       />
     </main>

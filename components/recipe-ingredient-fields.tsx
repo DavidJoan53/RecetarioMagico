@@ -104,68 +104,75 @@ export function RecipeIngredientFields({
               />
             </div>
 
-            <div className="flex flex-col gap-1">
-              <label className="font-semibold text-sm" htmlFor={quantityId}>
-                {t('quantity')}
-              </label>
-              <input
-                id={quantityId}
-                name="ingredientQuantity"
-                /* The name carries the row's subject, so a column of them is
-                   not all called "Cantidad". It wins over the visible label
-                   outright rather than adding to it — Chrome reads out both
-                   halves of a label it is told to hide half of. The visible
-                   word is still contained in it, so the two agree. */
-                aria-label={t('quantityOf', {name: subject})}
-                type="number"
-                inputMode="decimal"
-                min="0"
-                step="any"
-                required={amountRequired}
-                value={row.quantity}
-                onChange={event =>
-                  update(row.key, {quantity: event.target.value})
-                }
-                className="w-24 rounded-lg border border-secondary-foreground bg-background px-3 py-2"
-              />
-            </div>
+            {/* The amount and the way out, kept together: loose in the wrap
+                they broke apart at narrow widths and the minus landed under
+                a field it had nothing to do with. */}
+            <div className="flex items-end gap-2">
+              <div className="flex flex-col gap-1">
+                <label className="font-semibold text-sm" htmlFor={quantityId}>
+                  {t('quantity')}
+                </label>
+                <input
+                  id={quantityId}
+                  name="ingredientQuantity"
+                  /* The name carries the row's subject, so a column of them is
+                     not all called "Cantidad". It wins over the visible label
+                     outright rather than adding to it — Chrome reads out both
+                     halves of a label it is told to hide half of. The visible
+                     word is still contained in it, so the two agree. */
+                  aria-label={t('quantityOf', {name: subject})}
+                  type="number"
+                  inputMode="decimal"
+                  min="0"
+                  step="any"
+                  required={amountRequired}
+                  value={row.quantity}
+                  onChange={event =>
+                    update(row.key, {quantity: event.target.value})
+                  }
+                  className="w-24 rounded-lg border border-secondary-foreground bg-background px-3 py-2"
+                />
+              </div>
 
-            <div className="flex flex-col gap-1">
-              <label className="font-semibold text-sm" htmlFor={unitId}>
-                {t('unit')}
-              </label>
-              <select
-                id={unitId}
-                name="ingredientUnit"
-                aria-label={t('unitOf', {name: subject})}
-                required={amountRequired}
-                value={row.unit}
-                onChange={event => update(row.key, {unit: event.target.value})}
-                className="rounded-lg border border-secondary-foreground bg-background px-3 py-2"
-              >
-                {/* Empty and disabled: a placeholder, not a choosable answer
-                    — an amount needs both halves to mean anything. */}
-                <option value="" disabled>
-                  {t('chooseUnit')}
-                </option>
-                {unitEnum.enumValues.map(value => (
-                  <option key={value} value={value}>
-                    {value}
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <label className="font-semibold text-sm" htmlFor={unitId}>
+                  {t('unit')}
+                </label>
+                <select
+                  id={unitId}
+                  name="ingredientUnit"
+                  aria-label={t('unitOf', {name: subject})}
+                  required={amountRequired}
+                  value={row.unit}
+                  onChange={event =>
+                    update(row.key, {unit: event.target.value})
+                  }
+                  className="rounded-lg border border-secondary-foreground bg-background px-3 py-2"
+                >
+                  {/* Empty and disabled: a placeholder, not a choosable answer
+                      — an amount needs both halves to mean anything. */}
+                  <option value="" disabled>
+                    {t('chooseUnit')}
                   </option>
-                ))}
-              </select>
-            </div>
+                  {unitEnum.enumValues.map(value => (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <button
-              type="button"
-              aria-label={t('removeIngredient', {name: subject})}
-              onClick={() =>
-                setRows(current => current.filter(r => r.key !== row.key))
-              }
-              className="rounded-lg border border-secondary-foreground px-3 py-2 text-sm"
-            >
-              −
-            </button>
+              <button
+                type="button"
+                aria-label={t('removeIngredient', {name: subject})}
+                onClick={() =>
+                  setRows(current => current.filter(r => r.key !== row.key))
+                }
+                className="rounded-lg border border-secondary-foreground px-3 py-2 text-sm"
+              >
+                −
+              </button>
+            </div>
           </div>
         )
       })}

@@ -41,6 +41,12 @@ export const recipeInput = z.object({
   ingredients: z
     .array(recipeIngredientInput)
     .refine(noRepeats, DUPLICATE_INGREDIENT),
+  /**
+   * A set, so the same label twice is one row rather than a primary key
+   * collision. Nothing in the form can tick a box twice; a hand-built post
+   * can.
+   */
+  labelIds: z.array(z.uuid()).transform(unique),
 })
 
 function dropBlank(values: string[]): string[] {
@@ -49,6 +55,10 @@ function dropBlank(values: string[]): string[] {
 
 function noRepeats(rows: {ingredientId: string}[]): boolean {
   return new Set(rows.map(r => r.ingredientId)).size === rows.length
+}
+
+function unique(values: string[]): string[] {
+  return [...new Set(values)]
 }
 
 export type RecipeInput = z.infer<typeof recipeInput>
@@ -104,5 +114,8 @@ export function recipeInputFromForm(form: FormData) {
     instructions: form.getAll('instructions').map(String),
     links: form.getAll('links').map(String),
     ingredients: ingredientRows(form),
+    /* Checkboxes: only the ticked ones are submitted, so an untouched form
+       sends none and the recipe ends up with none. */
+    labelIds: form.getAll('labelId').map(String),
   })
 }

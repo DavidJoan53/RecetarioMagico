@@ -13,8 +13,17 @@ export type FormState = {
     | 'duplicateName'
     | 'duplicateIngredient'
     | 'ingredientGone'
+    | 'labelGone'
     | 'gone'
   done?: boolean
+}
+
+/** What the write tripped over, in the words the form shows. */
+function messageFor(
+  reason: 'duplicate-name' | 'ingredient-gone' | 'label-gone',
+): 'duplicateName' | 'ingredientGone' | 'labelGone' {
+  if (reason === 'duplicate-name') return 'duplicateName'
+  return reason === 'label-gone' ? 'labelGone' : 'ingredientGone'
 }
 
 /** Every action re-checks: each one is an endpoint of its own. */
@@ -39,12 +48,7 @@ export async function createRecipeAction(
   if (!parsed.success) return {error: recipeErrorFrom(parsed.error)}
 
   const result = await createRecipe(parsed.data)
-  if (!result.ok) {
-    return {
-      error:
-        result.reason === 'duplicate-name' ? 'duplicateName' : 'ingredientGone',
-    }
-  }
+  if (!result.ok) return {error: messageFor(result.reason)}
 
   revalidateRecipes()
   /* Returned rather than redirected. redirect throws to unwind, so the
@@ -68,10 +72,7 @@ export async function updateRecipeAction(
   const result = await updateRecipe(id, parsed.data)
   if (!result.ok) {
     if (result.reason === 'not-found') return {error: 'gone'}
-    return {
-      error:
-        result.reason === 'duplicate-name' ? 'duplicateName' : 'ingredientGone',
-    }
+    return {error: messageFor(result.reason)}
   }
 
   revalidateRecipes(id)
