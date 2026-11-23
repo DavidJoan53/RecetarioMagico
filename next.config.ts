@@ -2,6 +2,7 @@ import type {NextConfig} from 'next'
 import createNextIntlPlugin from 'next-intl/plugin'
 
 const nextConfig: NextConfig = {
+  experimental: {agentUpgrade: 'security'},
   /** Thumbnails are derived from YouTube links; nothing else is remote. */
   images: {
     remotePatterns: [
